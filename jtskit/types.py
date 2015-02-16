@@ -1,4 +1,10 @@
 """JTS type casting. Patterned on okfn/messy-tables"""
+# -*- coding: utf-8 -*-
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
+
 from . import compat
 from dateutil.parser import parse as date_parse
 
