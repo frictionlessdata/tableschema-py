@@ -5,6 +5,11 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import re
+import decimal
+import datetime
+import time
+import json
 from . import compat
 from dateutil.parser import parse as date_parse
 
@@ -94,7 +99,7 @@ class DateType(JTSType):
 
 class TimeType(JTSType):
 
-    py = datetime.time
+    py = time
     format = '%H:%M:%S'
 
     def cast(self, value):
