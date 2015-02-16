@@ -1,5 +1,6 @@
 """JTS type casting. Patterned on okfn/messy-tables"""
 from . import compat
+from dateutil.parser import parse as date_parse
 
 
 class JTSType(object):
@@ -70,16 +71,23 @@ class DateType(JTSType):
     py = datetime.date
     format = '%Y-%m-%d'
 
+    def __init__(self, strict=False):
+        self.strict = strict
+
     def cast(self, value):
         """Return boolean if `value` can be cast as type `self.py`"""
         super(DateType, self).cast(value)
         try:
-            return datetime.datetime.strptime(value, self.format).date()
+            if self.strict:
+                return datetime.datetime.strptime(value, self.format).date()
+            else:
+                return date_parse(value).date()
         except ValueError:
             return False
 
 
 class TimeType(JTSType):
+
     py = datetime.time
     format = '%H:%M:%S'
 
@@ -96,11 +104,17 @@ class DateTimeType(JTSType):
     py = datetime.datetime
     format = '%Y-%m-%dT%H:%M:%SZ'
 
+    def __init__(self, strict=False):
+        self.strict = strict
+
     def cast(self, value):
         """Return boolean if `value` can be cast as type `self.py`"""
         super(DateTimeType, self).cast(value)
         try:
-            return datetime.datetime.strptime(value, self.format)
+            if self.strict:
+                return datetime.datetime.strptime(value, self.format)
+            else:
+                return date_parse(value)
         except ValueError:
             return False
 
