@@ -18,14 +18,11 @@ dependencies = [
     'python-dateutil>=2.4.0'
 ]
 
-with io.open('README.md', mode='r+t', encoding='utf-8') as stream:
-    readme = stream.read()
-
 setup(
     name='jtskit',
     description='A utility library for working with JSON Table Schema in Python',
-    long_description=readme,
-    version='0.1.0',
+    long_description='A utility library for working with JSON Table Schema in Python',
+    version='0.1.1',
     author='Open Knowledge Foundation',
     author_email='info@okfn.org',
     url='http://okfn.org',
