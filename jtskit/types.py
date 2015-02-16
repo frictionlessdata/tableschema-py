@@ -67,7 +67,7 @@ class NumberType(JTSType):
         super(NumberType, self).cast(value)
         if self.strip_seperators:
             value = re.sub('[{0}]'.format(self.seperators), '', value)
-        if self.strip_currency:
+        if self.strip_currencies:
              value = re.sub('[{0}]'.format(self.currencies), '', value)
         if isinstance(value, self.py):
             return True

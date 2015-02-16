@@ -5,11 +5,12 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import collections
 import json
 from . import types
 from . import exceptions
 from . import utilities
-from . import validate
+from .validate import validate
 
 
 class JSONTableSchema(object):
