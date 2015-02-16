@@ -1,0 +1,15 @@
+.Python
+.DS_Store
+.idea
+.projectile
+*.sublime-project
+*.sublime-workspace
+__pycache__/
+*.py[cod]
+/dist/
+/*.egg-info
+.coverage
+shippable/*
+/docs/_build
+/docs/_static
+/docs/_templates
