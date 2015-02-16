@@ -9,6 +9,7 @@ import json
 from . import types
 from . import exceptions
 from . import utilities
+from . import validate
 
 
 class JSONTableSchema(object):
