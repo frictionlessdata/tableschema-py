@@ -43,10 +43,20 @@ class IntegerType(JTSType):
 class NumberType(JTSType):
 
     py = float, decimal.Decimal
+    seperators = ',;'
+    currencies = '$'
+
+    def __init__(self, strip_seperators=False, strip_currencies=False):
+        self.strip_seperators = strip_seperators
+        self.strip_currencies = strip_currencies
 
     def cast(self, value):
         """Return boolean if `value` can be cast as type `self.py`"""
         super(NumberType, self).cast(value)
+        if self.strip_seperators:
+            value = re.sub('[{0}]'.format(self.seperators), '', value)
+        if self.strip_currency:
+             value = re.sub('[{0}]'.format(self.currencies), '', value)
         if isinstance(value, self.py):
             return True
         try:
