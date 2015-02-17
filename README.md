@@ -6,7 +6,7 @@ A utility library for working with JSON Table Schema in Python
 
 * A core set of utilities for working with [JSON Table Schema](http://dataprotocols.org/json-table-schema/)
 * Use in *other* packages that deal with actual validation of data, or other 'higher level' use cases around JSON Table Schema (e.g.: [Tabular Validator](https://github.com/okfn/tabular-validator))
-* Small footprint
+* Be 100% compliant with the the JSON Table Schema specification
 
 ## Utilities
 
