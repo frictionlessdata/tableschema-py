@@ -17,7 +17,7 @@ A utility library for working with JSON Table Schema in Python.
 
 ## Status
 
-* `types` are useful but currently incomplete (they don't deal woth format yet)
+* `types` are useful but currently incomplete (they don't deal with format yet)
 * `models.JSONTableSchema` is close to feature complete
 * `make` is incomplete
 * `validate` is close to feature complete, but needs a good refactor
