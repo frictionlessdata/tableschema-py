@@ -10,7 +10,7 @@ A utility library for working with JSON Table Schema in Python.
 
 ## Utilities
 
-* `types`: a collection of classes to validation type/format of data described by a JSON Table Schema
+* `types`: a collection of classes to validate type/format of data described by a JSON Table Schema
 * `models.JSONTableSchema`: A model around a schema with useful methods to interact with the schema (Provides a model around a schema)
 * `make`: a utility to create a JSON Table Schema based on a data sample
 * `validate`: a utility to validate a **schema** as valid according to the current spec
