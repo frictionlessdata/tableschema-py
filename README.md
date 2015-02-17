@@ -1,6 +1,6 @@
 # JTSKIT
 
-A utility library for working with JSON Table Schema in Python
+A utility library for working with JSON Table Schema in Python.
 
 ## Goals
 
