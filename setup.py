@@ -22,7 +22,7 @@ setup(
     name='jtskit',
     description='A utility library for working with JSON Table Schema in Python',
     long_description='A utility library for working with JSON Table Schema in Python',
-    version='0.1.4',
+    version='0.1.5',
     author='Open Knowledge Foundation',
     author_email='info@okfn.org',
     url='http://okfn.org',

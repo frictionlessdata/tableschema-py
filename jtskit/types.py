@@ -33,8 +33,8 @@ class StringType(JTSType):
         if value is None:
             return False
         if isinstance(value, self.py):
-            return True
-        return compat.str(value)
+            return value
+        return False
 
 
 class IntegerType(JTSType):
@@ -55,18 +55,18 @@ class IntegerType(JTSType):
 class NumberType(JTSType):
 
     py = float, decimal.Decimal
-    seperators = ',;'
+    separators = ',;'
     currencies = '$'
 
-    def __init__(self, strip_seperators=False, strip_currencies=False):
-        self.strip_seperators = strip_seperators
+    def __init__(self, strip_separators=False, strip_currencies=False):
+        self.strip_separators = strip_separators
         self.strip_currencies = strip_currencies
 
     def cast(self, value):
         """Return boolean if `value` can be cast as type `self.py`"""
         super(NumberType, self).cast(value)
-        if self.strip_seperators:
-            value = re.sub('[{0}]'.format(self.seperators), '', value)
+        if self.strip_separators:
+            value = re.sub('[{0}]'.format(self.separators), '', value)
         if self.strip_currencies:
              value = re.sub('[{0}]'.format(self.currencies), '', value)
         if isinstance(value, self.py):
@@ -82,7 +82,7 @@ class DateType(JTSType):
     py = datetime.date
     format = '%Y-%m-%d'
 
-    def __init__(self, strict=False):
+    def __init__(self, strict=True):
         self.strict = strict
 
     def cast(self, value):
@@ -115,7 +115,7 @@ class DateTimeType(JTSType):
     py = datetime.datetime
     format = '%Y-%m-%dT%H:%M:%SZ'
 
-    def __init__(self, strict=False):
+    def __init__(self, strict=True):
         self.strict = strict
 
     def cast(self, value):
@@ -168,7 +168,7 @@ class ArrayType(JTSType):
                 return True
             else:
                 return False
-        except ValueError:
+        except (TypeError, ValueError):
             return False
 
 
@@ -187,7 +187,7 @@ class ObjectType(JTSType):
                 return True
             else:
                 return False
-        except ValueError:
+        except (TypeError, ValueError):
             return False
 
 
