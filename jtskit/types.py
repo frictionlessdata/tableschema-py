@@ -17,6 +17,7 @@ from dateutil.parser import parse as date_parse
 class JTSType(object):
 
     py = None
+    name = ''
 
     def cast(self, value):
         """Return boolean if `value` can be cast as type `self.py`"""
@@ -27,6 +28,7 @@ class JTSType(object):
 class StringType(JTSType):
 
     py = compat.str
+    name = 'string'
 
     def cast(self, value):
         """Return boolean if `value` can be cast as type `self.py`"""
@@ -40,6 +42,7 @@ class StringType(JTSType):
 class IntegerType(JTSType):
 
     py = int
+    name = 'integer'
 
     def cast(self, value):
         """Return boolean if `value` can be cast as type `self.py`"""
@@ -55,6 +58,7 @@ class IntegerType(JTSType):
 class NumberType(JTSType):
 
     py = float, decimal.Decimal
+    name = 'number'
     separators = ',;'
     currencies = '$'
 
@@ -80,6 +84,7 @@ class NumberType(JTSType):
 class DateType(JTSType):
 
     py = datetime.date
+    name = 'date'
     format = '%Y-%m-%d'
 
     def __init__(self, strict=True):
@@ -100,6 +105,7 @@ class DateType(JTSType):
 class TimeType(JTSType):
 
     py = time
+    name = 'time'
     format = '%H:%M:%S'
 
     def cast(self, value):
@@ -113,6 +119,7 @@ class TimeType(JTSType):
 
 class DateTimeType(JTSType):
     py = datetime.datetime
+    name = 'datetime'
     format = '%Y-%m-%dT%H:%M:%SZ'
 
     def __init__(self, strict=True):
@@ -133,6 +140,7 @@ class DateTimeType(JTSType):
 class BooleanType(JTSType):
 
     py = bool
+    name = 'boolean'
     true_values = ('yes', 'y', 'true', '0')
     false_values = ('no', 'n','false', '1')
 
@@ -156,6 +164,7 @@ class BooleanType(JTSType):
 class ArrayType(JTSType):
 
     py = list
+    name = 'array'
 
     def cast(self, value):
         """Return boolean if `value` can be cast as type `self.py`"""
@@ -175,6 +184,7 @@ class ArrayType(JTSType):
 class ObjectType(JTSType):
 
     py = dict
+    name = 'object'
 
     def cast(self, value):
         """Return boolean if `value` can be cast as type `self.py`"""
@@ -192,6 +202,8 @@ class ObjectType(JTSType):
 
 
 class AnyType(JTSType):
+
+    name = 'any'
 
     def cast(self, value):
         return True
