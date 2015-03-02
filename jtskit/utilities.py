@@ -13,6 +13,12 @@ from . import compat
 
 REMOTE_SCHEMES = ('http', 'https', 'ftp', 'ftps')
 
+NULL_VALUES = ['null', 'none', 'nil', 'nan', '-', '']
+
+TRUE_VALUES = ['yes', 'y', 'true', 't', '0']
+
+FALSE_VALUES = ['no', 'n', 'false', 'f', '1']
+
 
 def load_json_source(source):
 

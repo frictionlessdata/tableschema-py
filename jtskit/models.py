@@ -7,13 +7,21 @@ from __future__ import unicode_literals
 
 import collections
 import json
-from . import types
+from . import _types
 from . import exceptions
 from . import utilities
 from .validate import validate
 
 
 class JSONTableSchema(object):
+
+    """Model for a JSON Table Schema."""
+
+    DEFAULTS = {
+        'constraints': {'required': True},
+        'format': 'default',
+        'type': 'string'
+    }
 
     def __init__(self, schema_source):
 
@@ -41,46 +49,76 @@ class JSONTableSchema(object):
     def fields(self):
         return [f for f in self.as_python.get('fields')]
 
-    def _to_python(self):
-        """Return schema as a Python data structure (dict)."""
-        as_python = utilities.load_json_source(self.schema_source)
-        return as_python
-
-    def _type_map(self):
-        return {
-            'string': types.StringType(),
-            'number': types.NumberType(),
-            'integer': types.IntegerType(),
-            'date': types.DateType(),
-            'time': types.TimeType(),
-            'datetime': types.DateTimeType(),
-            'boolean': types.BooleanType(),
-            'binary': types.StringType(),
-            'array': types.ArrayType(),
-            'object': types.ObjectType(),
-            'geopoint': (types.StringType(), types.ArrayType(), types.ObjectType()),
-            'geojson': types.ObjectType(),
-            'any': types.AnyType()
-        }
-
-    def get_field(self, field_name):
-        """Return the `field` object for `field_name`."""
-        return [f for f in self.fields if f['name'] == field_name][0]
-
-    def get_type(self, field_name):
-        """Return the `type` for `field_name`."""
-        return self._type_map()[self.get_field(field_name).get('type', 'string')]
-
-    def get_constraints(self, field_name):
-        """Return the `constraints` object for `field_name`."""
-        return self.get_field(field_name).get('constraints')
-
-    def cast(self, field_name, value):
+    def cast(self, field_name, value, index=0):
         """Return boolean if value can be cast to field_name's type."""
 
-        _type = self.get_type(field_name)
-
-        if isinstance(_type, collections.Iterable):
-            return any([t.cast(value) for t in _type])
+        _type = self.get_type(field_name, index=index)
 
         return _type.cast(value)
+
+    def get_field(self, field_name, index=0):
+        """Return the `field` object for `field_name`.
+
+        `index` allows accessing a field name by position, as JTS allows
+        duplicate field names.
+
+        """
+
+        return [f for f in self.fields if f['name'] == field_name][index]
+
+    def get_type(self, field_name, index=0):
+        """Return the `type` for `field_name`."""
+
+        _field = self.get_field(field_name, index=index)
+        _class = self._type_map()[_field['type']]
+
+        return _class(_field)
+
+    def get_constraints(self, field_name, index=0):
+        """Return the `constraints` object for `field_name`."""
+
+        return self.get_field(field_name, index=index).get('constraints')
+
+    def _to_python(self):
+        """Return schema as a Python data structure (dict)."""
+
+        as_python = utilities.load_json_source(self.schema_source)
+
+        for field in as_python.get('fields'):
+
+            # ensure we have a default type if no type was declared
+            if not field.get('type'):
+                field['type'] = self.DEFAULTS['type']
+
+            # ensure we have a default format if no format was declared
+            if not field.get('format'):
+                field['format'] = self.DEFAULTS['format']
+
+            # ensure we have a minimum constraints declaration
+            if not field.get('constraints'):
+                field['constraints'] = self.DEFAULTS['constraints']
+
+            elif not field['constraints'].get('required'):
+                field['constraints']['required'] = self.DEFAULTS['constraints']['required']
+
+        return as_python
+
+    @staticmethod
+    def _type_map():
+        """Map a JSON Table Schema type to a JTSKit type class."""
+
+        return {
+            'string': _types.StringType,
+            'number': _types.NumberType,
+            'integer': _types.IntegerType,
+            'boolean': _types.BooleanType,
+            'null': _types.NullType,
+            'array': _types.ArrayType,
+            'object': _types.ObjectType,
+            'date': _types.DateType,
+            'time': _types.TimeType,
+            'datetime': _types.DateTimeType,
+            'geopoint': _types.GeoPointType,
+            'geojson': _types.GeoJSONType,
+            'any': _types.AnyType
+        }
