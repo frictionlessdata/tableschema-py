@@ -98,7 +98,7 @@ class JSONTableSchema(object):
             if not field.get('constraints'):
                 field['constraints'] = self.DEFAULTS['constraints']
 
-            elif not field['constraints'].get('required'):
+            elif field['constraints'].get('required') is None:
                 field['constraints']['required'] = self.DEFAULTS['constraints']['required']
 
         return as_python
