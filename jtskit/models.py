@@ -17,9 +17,9 @@ class JSONTableSchema(object):
 
     """Model for a JSON Table Schema."""
 
-    NULL_VALUES = None + utilities.NULL_VALUES
-    TRUE_VALUES = True + utilities.TRUE_VALUES
-    FALSE_VALUES = False + utilities.FALSE_VALUES
+    NULL_VALUES = [None] + utilities.NULL_VALUES
+    TRUE_VALUES = [True] + utilities.TRUE_VALUES
+    FALSE_VALUES = [False] + utilities.FALSE_VALUES
 
     DEFAULTS = {
         'constraints': {'required': True},
