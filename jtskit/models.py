@@ -42,6 +42,11 @@ class JSONTableSchema(object):
         return [f['name'] for f in self.as_python.get('fields')]
 
     @property
+    def required_headers(self):
+        return [f['name'] for f in self.as_python.get('fields')
+                if f['constraints']['required']]
+
+    @property
     def primaryKey(self):
         return self.as_python.get('primaryKey')
 
