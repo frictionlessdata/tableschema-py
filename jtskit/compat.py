@@ -5,6 +5,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import sys
+import csv
 
 
 _ver = sys.version_info
@@ -23,9 +24,20 @@ if is_py2:
     basestring = basestring
     numeric_types = (int, long, float)
 
+    def csv_reader(data, dialect=csv.excel, **kwargs):
+        """Read text stream (unicode on Py2.7) as CSV."""
+
+        def iterenc_utf8(data):
+            for line in data:
+                yield line.encode('utf-8')
+
+        reader = csv.reader(iterenc_utf8(data), dialect=dialect, **kwargs)
+        for row in reader:
+            yield [str(cell, 'utf-8') for cell in row]
 
 elif is_py3:
     from urllib import parse
+    csv_reader = csv.reader
     builtin_str = str
     str = str
     bytes = bytes

@@ -10,7 +10,7 @@ import json
 from . import _types
 from . import exceptions
 from . import utilities
-from .validate import validate
+from .ensure import ensure
 
 
 class JSONTableSchema(object):
@@ -32,7 +32,7 @@ class JSONTableSchema(object):
         self.schema_source = schema_source
         self.as_python = self._to_python()
 
-        if not validate(self.as_python):
+        if not ensure(self.as_python):
             raise exceptions.InvalidSchemaError
 
         self.as_json = json.dumps(self.as_python)

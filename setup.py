@@ -14,6 +14,7 @@ is_py2 = (_ver[0] == 2)
 is_py3 = (_ver[0] == 3)
 
 dependencies = [
+    'click>=3.3',
     'requests>=2.5.1',
     'python-dateutil>=2.4.0'
 ]
@@ -22,7 +23,7 @@ setup(
     name='jtskit',
     description='A utility library for working with JSON Table Schema in Python',
     long_description='A utility library for working with JSON Table Schema in Python',
-    version='0.2.1',
+    version='0.2.2',
     author='Open Knowledge Foundation',
     author_email='info@okfn.org',
     url='http://okfn.org',
@@ -41,5 +42,10 @@ setup(
         'Programming Language :: Python :: 3',
         'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
         'Topic :: Software Development :: Libraries :: Python Modules'
-    ]
+    ],
+    entry_points={
+        'console_scripts': [
+            'jtskit = jtskit.cli:main',
+        ]
+    },
 )

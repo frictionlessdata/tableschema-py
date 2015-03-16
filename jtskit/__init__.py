@@ -9,9 +9,8 @@ from . import _types
 from . import models
 from . import utilities
 from . import compat
-from .make import make
-from .validate import validate
+from .infer import infer
+from .ensure import ensure
 
 
-__all__ = ['exceptions', '_types', 'models', 'utilities', 'compat', 'make',
-           'validate']
+__all__ = ['exceptions', '_types', 'models', 'utilities', 'compat', 'infer', 'ensure']

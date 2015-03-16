@@ -10,6 +10,7 @@ import decimal
 import datetime
 import time
 import json
+import operator
 import base64
 import binascii
 from dateutil.parser import parse as date_parse
@@ -25,12 +26,17 @@ class JTSType(object):
     name = ''
     formats = ('default',)
 
-    def __init__(self, field):
+    def __init__(self, field=None, **kwargs):
         """Setup some variables for easy access. `field` is the field schema."""
 
         self.field = field
-        self.format = self.field['format']
-        self.required = self.field['constraints']['required']
+
+        if self.field:
+            self.format = self.field['format']
+            self.required = self.field['constraints']['required']
+        else:
+            self.format = 'default'
+            self.required = True
 
     def cast(self, value):
         """Return boolean if `value` can be cast as type `self.py`."""
@@ -175,7 +181,7 @@ class BooleanType(JTSType):
         else:
 
             value = value.strip().lower()
-            if value in self.true_values or self.false_values:
+            if value in (self.true_values + self.false_values):
                 return True
 
             return False
@@ -447,3 +453,71 @@ class AnyType(JTSType):
 
     def cast(self, value):
         return True
+
+
+def _available_types():
+    """Return available types."""
+    return (AnyType, StringType, BooleanType, NumberType, IntegerType, NullType,
+            DateType, TimeType, DateTimeType, ArrayType, ObjectType,
+            GeoPointType, GeoJSONType)
+
+
+class TypeGuesser(object):
+
+    """Guess the type for a value.
+
+    Returns:
+        * A tuple  of ('type', 'format')
+
+    """
+
+    def __init__(self, type_options=None):
+        self._types = _available_types()
+        self.type_options = type_options or {}
+
+    def cast(self, value):
+        for _type in reversed(self._types):
+            result = _type(self.type_options.get(_type.name, {})).cast(value)
+            if result:
+                # TODO: do format guessing
+                rv = (_type.name, 'default')
+                break
+
+        return rv
+
+
+class TypeResolver(object):
+
+    """Get the best matching type/format from a list of possible ones."""
+
+    def __init__(self):
+        self._types = _available_types()
+
+    def get(self, results):
+
+        variants = set(results)
+
+        # only one candidate... that's easy.
+        if len(variants) == 1:
+            rv = {
+                'type': results[0][0],
+                'format': results[0][1],
+            }
+
+        else:
+            counts = {}
+            for result in results:
+                if counts.get(result):
+                    counts[result] += 1
+                else:
+                    counts[result] = 1
+
+            # tuple representation of `counts` dict, sorted by values of `counts`
+            sorted_counts = sorted(counts.items(), key=operator.itemgetter(1),
+                                   reverse=True)
+            rv = {
+                'type': sorted_counts[0][0][0],
+                'format': sorted_counts[0][0][1]
+            }
+
+        return rv
