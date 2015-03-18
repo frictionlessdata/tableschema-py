@@ -73,7 +73,15 @@ class JSONTableSchema(object):
 
         """
 
-        return [f for f in self.fields if f['name'] == field_name][index]
+        try:
+            return [f for f in self.fields if f['name'] == field_name][index]
+        except IndexError:
+            return None
+
+    def has_field(self, field_name):
+        """Return boolean if the field exists in the schema."""
+
+        return bool(self.get_field(field_name))
 
     def get_type(self, field_name, index=0):
         """Return the `type` for `field_name`."""
@@ -82,6 +90,11 @@ class JSONTableSchema(object):
         _class = self._type_map()[_field['type']]
 
         return _class(_field)
+
+    def get_fields_by_type(self, type_name):
+        """Return all fields that match the given type."""
+
+        return [f for f in self.fields if f['type'] == type_name]
 
     def get_constraints(self, field_name, index=0):
         """Return the `constraints` object for `field_name`."""
