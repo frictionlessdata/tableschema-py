@@ -11,3 +11,4 @@ __pycache__/
 .coverage
 shippable/*
 /docs/site
+build/

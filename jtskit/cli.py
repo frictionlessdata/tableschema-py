@@ -44,7 +44,7 @@ def infer(data, row_limit, to_file):
 
     if to_file:
         with io.open(to_file, mode='w+t', encoding='utf-8') as dest:
-            dest.write(json.dumps(response, ensure_ascii=False))
+            dest.write(json.dumps(response, ensure_ascii=False, indent=2))
 
     click.echo(response)
 

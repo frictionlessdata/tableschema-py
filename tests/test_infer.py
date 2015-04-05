@@ -58,3 +58,21 @@ class TestInferSchema(base.BaseTestCase):
         schema_model = jtskit.models.JSONTableSchema(schema)
 
         self.assertTrue(schema_model.primaryKey, primary_key)
+
+    def test_infer_explicit_false(self):
+        filepath = os.path.join(self.data_dir, 'data_infer.csv')
+        with io.open(filepath) as stream:
+            headers = stream.readline().rstrip('\n').split(',')
+            values = jtskit.compat.csv_reader(stream)
+            schema = jtskit.infer(headers, values, explicit=False)
+
+        self.assertIsNone(schema['fields'][0].get('constraints'))
+
+    def test_infer_explicit_true(self):
+        filepath = os.path.join(self.data_dir, 'data_infer.csv')
+        with io.open(filepath) as stream:
+            headers = stream.readline().rstrip('\n').split(',')
+            values = jtskit.compat.csv_reader(stream)
+            schema = jtskit.infer(headers, values, explicit=True)
+
+        self.assertTrue(schema['fields'][0].get('constraints'))
