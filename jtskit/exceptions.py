@@ -6,8 +6,11 @@ from __future__ import unicode_literals
 
 
 class InvalidSchemaError(Exception):
-    pass
+    def __init__(self, msg=None):
+        self.msg = msg or 'The obj is not a valid JSON Table Schema.'
+
 
 
 class InvalidJSONError(Exception):
-    pass
+    def __init__(self, msg=None):
+        self.msg = msg or 'The obj cannot be parsed as JSON.'
