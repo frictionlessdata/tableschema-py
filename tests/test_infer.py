@@ -19,7 +19,7 @@ class TestInferSchema(base.BaseTestCase):
             headers = stream.readline().rstrip('\n').split(',')
             values = jtskit.compat.csv_reader(stream)
             schema = jtskit.infer(headers, values)
-        schema_model = jtskit.models.JSONTableSchema(schema)
+        schema_model = jtskit.models.SchemaModel(schema)
 
         self.assertEqual(schema_model.get_field('id')['type'], 'integer')
         self.assertEqual(schema_model.get_field('age')['type'], 'integer')
@@ -31,7 +31,7 @@ class TestInferSchema(base.BaseTestCase):
             headers = stream.readline().rstrip('\n').split(',')
             values = jtskit.compat.csv_reader(stream)
             schema = jtskit.infer(headers, values, row_limit=4)
-        schema_model = jtskit.models.JSONTableSchema(schema)
+        schema_model = jtskit.models.SchemaModel(schema)
 
         self.assertEqual(schema_model.get_field('id')['type'], 'integer')
         self.assertEqual(schema_model.get_field('age')['type'], 'integer')
@@ -44,7 +44,7 @@ class TestInferSchema(base.BaseTestCase):
             headers = stream.readline().rstrip('\n').split(',')
             values = jtskit.compat.csv_reader(stream)
             schema = jtskit.infer(headers, values, primary_key=primary_key)
-        schema_model = jtskit.models.JSONTableSchema(schema)
+        schema_model = jtskit.models.SchemaModel(schema)
 
         self.assertTrue(schema_model.primaryKey, primary_key)
 
@@ -55,7 +55,7 @@ class TestInferSchema(base.BaseTestCase):
             headers = stream.readline().rstrip('\n').split(',')
             values = jtskit.compat.csv_reader(stream)
             schema = jtskit.infer(headers, values, primary_key=primary_key)
-        schema_model = jtskit.models.JSONTableSchema(schema)
+        schema_model = jtskit.models.SchemaModel(schema)
 
         self.assertTrue(schema_model.primaryKey, primary_key)
 

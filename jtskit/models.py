@@ -13,9 +13,24 @@ from . import utilities
 from .ensure import ensure
 
 
-class JSONTableSchema(object):
+class SchemaModel(object):
 
-    """Model for a JSON Table Schema."""
+    """Model for a JSON Table Schema.
+
+    Providers handy helpers for ingesting, validating and outputting 
+    JSON Table Schemas: http://dataprotocols.org/json-table-schema/
+
+    Args:
+        * schema_source (string or dict): A filepath, url or dictionary 
+        that represents a schema
+        * case_insensitive_headers (bool): if True, headers should be 
+        considered case insensitive, and `SchemaModel` forces all 
+        headers to lowercase when they are represented via a model 
+        instance. This setting **does not** mutate the actual strings 
+        that come from the the input schema_source, so out put methods
+        such as as_python and as_json are **not** subject to this flag.
+
+    """
 
     NULL_VALUES = [None] + utilities.NULL_VALUES
     TRUE_VALUES = [True] + utilities.TRUE_VALUES
@@ -27,11 +42,11 @@ class JSONTableSchema(object):
         'type': 'string'
     }
 
-    def __init__(self, schema_source):
+    def __init__(self, schema_source, case_insensitive_headers=False):
 
         self.schema_source = schema_source
+        self.case_insensitive_headers = case_insensitive_headers
         self.as_python = self._to_python()
-
         if not ensure(self.as_python):
             raise exceptions.InvalidSchemaError
 
@@ -39,12 +54,18 @@ class JSONTableSchema(object):
 
     @property
     def headers(self):
-        return [f['name'] for f in self.as_python.get('fields')]
+        _raw = [f['name'] for f in self.as_python.get('fields')]
+        if self.case_insensitive_headers:
+            return [name.lower() for name in _raw]
+        return _raw
 
     @property
     def required_headers(self):
-        return [f['name'] for f in self.as_python.get('fields')
+        _raw = [f['name'] for f in self.as_python.get('fields')
                 if f['constraints']['required']]
+        if self.case_insensitive_headers:
+            return [name.lower() for name in _raw]
+        return _raw
 
     @property
     def primaryKey(self):
