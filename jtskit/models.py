@@ -46,10 +46,15 @@ class SchemaModel(object):
 
         self.schema_source = schema_source
         self.case_insensitive_headers = case_insensitive_headers
-        self.as_python = self._to_python()
-        if not ensure(self.as_python):
+        _as_python = self._to_python()
+
+        if _as_python is None:
+            raise exceptions.InvalidJSONError
+        
+        if not ensure(_as_python)[0]:
             raise exceptions.InvalidSchemaError
 
+        self.as_python = self._expand(_as_python)
         self.as_json = json.dumps(self.as_python)
 
     @property
@@ -125,9 +130,15 @@ class SchemaModel(object):
     def _to_python(self):
         """Return schema as a Python data structure (dict)."""
 
-        as_python = utilities.load_json_source(self.schema_source)
+        try:
+            return utilities.load_json_source(self.schema_source)
+        except Exception:
+            return None
 
-        for field in as_python.get('fields'):
+    def _expand(self, schema):
+        """Expand the schema with additional default properties."""
+
+        for field in schema.get('fields', {}):
 
             # ensure we have a default type if no type was declared
             if not field.get('type'):
@@ -144,7 +155,7 @@ class SchemaModel(object):
             elif field['constraints'].get('required') is None:
                 field['constraints']['required'] = self.DEFAULTS['constraints']['required']
 
-        return as_python
+        return schema
 
     @staticmethod
     def _type_map():

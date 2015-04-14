@@ -4,8 +4,10 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import os
 import copy
 from jtskit import models
+from jtskit import exceptions
 from . import base
 
 
@@ -94,3 +96,15 @@ class TestModels(base.BaseTestCase):
         expected = set(['id', 'height', 'name', 'age', 'occupation'])
         
         self.assertEqual(set(model.headers), expected)
+
+    def test_invalid_json_raises(self):
+        source = os.path.join(self.data_dir, 'data_infer.csv')
+
+        self.assertRaises(exceptions.InvalidJSONError,
+                          models.SchemaModel, source)
+
+    def test_invalid_jts_raises(self):
+        source = os.path.join(self.data_dir, 'schema_invalid_empty.json')
+
+        self.assertRaises(exceptions.InvalidSchemaError,
+                          models.SchemaModel, source)

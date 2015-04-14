@@ -7,3 +7,7 @@ from __future__ import unicode_literals
 
 class InvalidSchemaError(Exception):
     pass
+
+
+class InvalidJSONError(Exception):
+    pass
