@@ -10,7 +10,6 @@ class InvalidSchemaError(Exception):
         self.msg = msg or 'The obj is not a valid JSON Table Schema.'
 
 
-
 class InvalidJSONError(Exception):
     def __init__(self, msg=None):
         self.msg = msg or 'The obj cannot be parsed as JSON.'

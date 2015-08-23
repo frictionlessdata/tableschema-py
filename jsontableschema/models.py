@@ -5,28 +5,27 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import collections
 import json
-from . import _types
+from . import types
 from . import exceptions
 from . import utilities
-from .ensure import ensure
+from .validate import validate
 
 
 class SchemaModel(object):
 
     """Model for a JSON Table Schema.
 
-    Providers handy helpers for ingesting, validating and outputting 
+    Providers handy helpers for ingesting, validating and outputting
     JSON Table Schemas: http://dataprotocols.org/json-table-schema/
 
     Args:
-        * schema_source (string or dict): A filepath, url or dictionary 
+        * schema_source (string or dict): A filepath, url or dictionary
         that represents a schema
-        * case_insensitive_headers (bool): if True, headers should be 
-        considered case insensitive, and `SchemaModel` forces all 
-        headers to lowercase when they are represented via a model 
-        instance. This setting **does not** mutate the actual strings 
+        * case_insensitive_headers (bool): if True, headers should be
+        considered case insensitive, and `SchemaModel` forces all
+        headers to lowercase when they are represented via a model
+        instance. This setting **does not** mutate the actual strings
         that come from the the input schema_source, so out put methods
         such as as_python and as_json are **not** subject to this flag.
 
@@ -50,8 +49,8 @@ class SchemaModel(object):
 
         if _as_python is None:
             raise exceptions.InvalidJSONError
-        
-        if not ensure(_as_python)[0]:
+
+        if not validate(_as_python)[0]:
             raise exceptions.InvalidSchemaError
 
         self.as_python = self._expand(_as_python)
@@ -162,17 +161,17 @@ class SchemaModel(object):
         """Map a JSON Table Schema type to a JTSKit type class."""
 
         return {
-            'string': _types.StringType,
-            'number': _types.NumberType,
-            'integer': _types.IntegerType,
-            'boolean': _types.BooleanType,
-            'null': _types.NullType,
-            'array': _types.ArrayType,
-            'object': _types.ObjectType,
-            'date': _types.DateType,
-            'time': _types.TimeType,
-            'datetime': _types.DateTimeType,
-            'geopoint': _types.GeoPointType,
-            'geojson': _types.GeoJSONType,
-            'any': _types.AnyType
+            'string': types.StringType,
+            'number': types.NumberType,
+            'integer': types.IntegerType,
+            'boolean': types.BooleanType,
+            'null': types.NullType,
+            'array': types.ArrayType,
+            'object': types.ObjectType,
+            'date': types.DateType,
+            'time': types.TimeType,
+            'datetime': types.DateTimeType,
+            'geopoint': types.GeoPointType,
+            'geojson': types.GeoJSONType,
+            'any': types.AnyType
         }

@@ -5,17 +5,31 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import os
-import sys
 import io
 import json
 import csv
 import click
-import jtskit
+import jsontableschema
 
+
+DIR = os.path.abspath(os.path.dirname(__file__))
+ROOT = os.path.dirname(DIR)
+METADATA = 'METADATA'
+LICENSE = 'LICENSE'
+METADATA_PATH = os.path.join(ROOT, METADATA)
+
+with io.open(METADATA_PATH, mode='r+t', encoding='utf-8') as stream:
+    metadata = json.loads(stream.read())
 
 @click.group()
 def main():
     """The entry point into the CLI."""
+
+
+@main.command()
+def info():
+    """Return info on this version of JSON Table Schema"""
+    click.echo(json.dumps(metadata), indent=4)
 
 
 @main.command()
@@ -40,7 +54,7 @@ def infer(data, row_limit, to_file):
     with io.open(data, mode='r+t', encoding='utf-8') as stream:
         headers = stream.readline().rstrip('\n').split(',')
         values = csv.reader(stream)
-        response = jtskit.infer(headers, values, row_limit=row_limit)
+        response = jsontableschema.infer(headers, values, row_limit=row_limit)
 
     if to_file:
         with io.open(to_file, mode='w+t', encoding='utf-8') as dest:
@@ -51,11 +65,11 @@ def infer(data, row_limit, to_file):
 
 @main.command()
 @click.argument('schema')
-def ensure(schema):
+def validate(schema):
 
-    """Ensure a supposed schema is a JSON Table Schema."""
+    """Validate that a supposed schema is in fact a JSON Table Schema."""
 
-    valid, errors = jtskit.ensure(schema)
+    valid, errors = jsontableschema.validate(schema)
 
     click.echo(valid)
     click.echo(errors)

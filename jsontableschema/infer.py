@@ -4,7 +4,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from . import _types
+from . import types
 
 
 def infer(headers, values, row_limit=None, explicit=False, primary_key=None):
@@ -22,8 +22,8 @@ def infer(headers, values, row_limit=None, explicit=False, primary_key=None):
 
     """
 
-    guesser = _types.TypeGuesser()
-    resolver = _types.TypeResolver()
+    guesser = types.TypeGuesser()
+    resolver = types.TypeResolver()
     schema = {'fields': []}
     type_matches = {}
 

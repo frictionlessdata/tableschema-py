@@ -6,8 +6,8 @@ from __future__ import unicode_literals
 
 import os
 import copy
-from jtskit import models
-from jtskit import exceptions
+from jsontableschema import models
+from jsontableschema import exceptions
 from . import base
 
 
@@ -54,6 +54,17 @@ class TestModels(base.BaseTestCase):
         ]
     }
 
+    schema_min = {
+        "fields": [
+            {
+                "name": "id"
+            },
+            {
+                "name": "height"
+            }
+        ]
+    }
+
     def test_headers(self):
 
         model = models.SchemaModel(self.schema)
@@ -78,7 +89,6 @@ class TestModels(base.BaseTestCase):
 
         self.assertFalse(model.has_field('religion'))
 
-
     def test_get_fields_by_type(self):
 
         model = models.SchemaModel(self.schema)
@@ -94,7 +104,7 @@ class TestModels(base.BaseTestCase):
 
         model = models.SchemaModel(_schema, case_insensitive_headers=True)
         expected = set(['id', 'height', 'name', 'age', 'occupation'])
-        
+
         self.assertEqual(set(model.headers), expected)
 
     def test_invalid_json_raises(self):
@@ -108,3 +118,9 @@ class TestModels(base.BaseTestCase):
 
         self.assertRaises(exceptions.InvalidSchemaError,
                           models.SchemaModel, source)
+
+    def test_defaults_are_set(self):
+
+        model = models.SchemaModel(self.schema_min)
+
+        self.assertEqual(len(model.get_fields_by_type('string')), 2)

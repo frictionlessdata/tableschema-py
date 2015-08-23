@@ -6,8 +6,8 @@ from __future__ import unicode_literals
 
 import os
 import io
-from jtskit import utilities
-from jtskit import exceptions
+from jsontableschema import utilities
+from jsontableschema import exceptions
 from . import base
 
 

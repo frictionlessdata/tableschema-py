@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 from . import compat
 
 
-def ensure(schema):
+def validate(schema):
 
     """Validate that `schema` is a valid JSON Table Schema.
 

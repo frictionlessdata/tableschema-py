@@ -4,7 +4,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from jtskit import _types
+from jsontableschema import types
 from . import base
 
 
@@ -23,7 +23,7 @@ class TestTypes(base.BaseTestCase):
 
         value = 'string'
         field = self.BASE_FIELD.copy()
-        _type = _types.StringType(field)
+        _type = types.StringType(field)
 
         self.assertTrue(_type.cast(value))
 
@@ -31,7 +31,7 @@ class TestTypes(base.BaseTestCase):
 
         value = 1
         field = self.BASE_FIELD.copy()
-        _type = _types.StringType(field)
+        _type = types.StringType(field)
 
         self.assertFalse(_type.cast(value))
 
@@ -40,7 +40,7 @@ class TestTypes(base.BaseTestCase):
         value = 1
         field = self.BASE_FIELD.copy()
         field['type'] = 'integer'
-        _type = _types.IntegerType(field)
+        _type = types.IntegerType(field)
 
         self.assertTrue(_type.cast(value))
 
@@ -49,7 +49,7 @@ class TestTypes(base.BaseTestCase):
         value = 'string'
         field = self.BASE_FIELD.copy()
         field['type'] = 'integer'
-        _type = _types.IntegerType(field)
+        _type = types.IntegerType(field)
 
         self.assertFalse(_type.cast(value))
 
@@ -58,7 +58,7 @@ class TestTypes(base.BaseTestCase):
         value = '10.00'
         field = self.BASE_FIELD.copy()
         field['type'] = 'number'
-        _type = _types.NumberType(field)
+        _type = types.NumberType(field)
 
         self.assertTrue(_type.cast(value))
 
@@ -67,7 +67,7 @@ class TestTypes(base.BaseTestCase):
         value = 'string'
         field = self.BASE_FIELD.copy()
         field['type'] = 'number'
-        _type = _types.NumberType(field)
+        _type = types.NumberType(field)
 
         self.assertFalse(_type.cast(value))
 
@@ -79,7 +79,7 @@ class TestTypes(base.BaseTestCase):
         field = self.BASE_FIELD.copy()
         field['type'] = 'number'
         field['format'] = 'currency'
-        _type = _types.NumberType(field)
+        _type = types.NumberType(field)
 
         self.assertTrue(_type.cast(value1))
         self.assertTrue(_type.cast(value2))
@@ -93,7 +93,7 @@ class TestTypes(base.BaseTestCase):
         field = self.BASE_FIELD.copy()
         field['type'] = 'number'
         field['format'] = 'currency'
-        _type = _types.NumberType(field)
+        _type = types.NumberType(field)
 
         self.assertFalse(_type.cast(value1))
         self.assertFalse(_type.cast(value2))
@@ -104,7 +104,7 @@ class TestTypes(base.BaseTestCase):
         value = '2019-01-01'
         field = self.BASE_FIELD.copy()
         field['type'] = 'date'
-        _type = _types.DateType(field)
+        _type = types.DateType(field)
 
         self.assertTrue(_type.cast(value))
 
@@ -114,7 +114,7 @@ class TestTypes(base.BaseTestCase):
         field = self.BASE_FIELD.copy()
         field['type'] = 'date'
         field['format'] = 'any'
-        _type = _types.DateType(field)
+        _type = types.DateType(field)
 
         self.assertTrue(_type.cast(value))
 
@@ -124,7 +124,7 @@ class TestTypes(base.BaseTestCase):
         field = self.BASE_FIELD.copy()
         field['type'] = 'date'
         field['format'] = 'fmt:DD/MM/YYYY'
-        _type = _types.DateType(field)
+        _type = types.DateType(field)
 
         self.assertTrue(_type.cast(value))
 
@@ -133,7 +133,7 @@ class TestTypes(base.BaseTestCase):
         value = '01-01-2019'
         field = self.BASE_FIELD.copy()
         field['type'] = 'date'
-        _type = _types.DateType(field)
+        _type = types.DateType(field)
 
         self.assertFalse(_type.cast(value))
 
@@ -143,7 +143,7 @@ class TestTypes(base.BaseTestCase):
         field = self.BASE_FIELD.copy()
         field['type'] = 'date'
         field['format'] = 'any'
-        _type = _types.DateType(field)
+        _type = types.DateType(field)
 
         self.assertFalse(_type.cast(value))
 
@@ -153,7 +153,7 @@ class TestTypes(base.BaseTestCase):
         field = self.BASE_FIELD.copy()
         field['type'] = 'date'
         field['type'] = 'fmt:DD/MM/YYYY'
-        _type = _types.DateType(field)
+        _type = types.DateType(field)
 
         self.assertFalse(_type.cast(value))
 
@@ -162,7 +162,7 @@ class TestTypes(base.BaseTestCase):
         value = '06:00:00'
         field = self.BASE_FIELD.copy()
         field['type'] = 'time'
-        _type = _types.TimeType(field)
+        _type = types.TimeType(field)
 
         self.assertTrue(_type.cast(value))
 
@@ -171,7 +171,7 @@ class TestTypes(base.BaseTestCase):
         value = '3 am'
         field = self.BASE_FIELD.copy()
         field['type'] = 'time'
-        _type = _types.TimeType(field)
+        _type = types.TimeType(field)
 
         self.assertFalse(_type.cast(value))
 
@@ -180,7 +180,7 @@ class TestTypes(base.BaseTestCase):
         value = '2014-01-01T06:00:00Z'
         field = self.BASE_FIELD.copy()
         field['type'] = 'datetime'
-        _type = _types.DateTimeType(field)
+        _type = types.DateTimeType(field)
 
         self.assertTrue(_type.cast(value))
 
@@ -190,7 +190,7 @@ class TestTypes(base.BaseTestCase):
         field = self.BASE_FIELD.copy()
         field['type'] = 'datetime'
         field['format'] = 'any'
-        _type = _types.DateTimeType(field)
+        _type = types.DateTimeType(field)
 
         self.assertTrue(_type.cast(value))
 
@@ -199,7 +199,7 @@ class TestTypes(base.BaseTestCase):
         value = 'Mon 1st Jan 2014 9 am'
         field = self.BASE_FIELD.copy()
         field['type'] = 'datetime'
-        _type = _types.DateTimeType(field)
+        _type = types.DateTimeType(field)
 
         self.assertFalse(_type.cast(value))
 
@@ -208,7 +208,7 @@ class TestTypes(base.BaseTestCase):
         value = 'y'
         field = self.BASE_FIELD.copy()
         field['type'] = 'boolean'
-        _type = _types.BooleanType(field)
+        _type = types.BooleanType(field)
 
         self.assertTrue(_type.cast(value))
 
@@ -217,7 +217,7 @@ class TestTypes(base.BaseTestCase):
         value = 'n'
         field = self.BASE_FIELD.copy()
         field['type'] = 'boolean'
-        _type = _types.BooleanType(field)
+        _type = types.BooleanType(field)
 
         self.assertTrue(_type.cast(value))
 
@@ -226,7 +226,7 @@ class TestTypes(base.BaseTestCase):
         value = 'null'
         field = self.BASE_FIELD.copy()
         field['type'] = 'null'
-        _type = _types.NullType(field)
+        _type = types.NullType(field)
 
         self.assertTrue(_type.cast(value))
 
@@ -235,7 +235,7 @@ class TestTypes(base.BaseTestCase):
         value = 'isnull'
         field = self.BASE_FIELD.copy()
         field['type'] = 'null'
-        _type = _types.NullType(field)
+        _type = types.NullType(field)
 
         self.assertFalse(_type.cast(value))
 
@@ -244,7 +244,7 @@ class TestTypes(base.BaseTestCase):
         value = ['1', '2']
         field = self.BASE_FIELD.copy()
         field['type'] = 'array'
-        _type = _types.ArrayType(field)
+        _type = types.ArrayType(field)
 
         self.assertTrue(_type.cast(value))
 
@@ -253,7 +253,7 @@ class TestTypes(base.BaseTestCase):
         value = 'string, string'
         field = self.BASE_FIELD.copy()
         field['type'] = 'array'
-        _type = _types.ArrayType(field)
+        _type = types.ArrayType(field)
 
         self.assertFalse(_type.cast(value))
 
@@ -262,7 +262,7 @@ class TestTypes(base.BaseTestCase):
         value = {'key': 'value'}
         field = self.BASE_FIELD.copy()
         field['type'] = 'object'
-        _type = _types.ObjectType(field)
+        _type = types.ObjectType(field)
 
         self.assertTrue(_type.cast(value))
 
@@ -270,7 +270,7 @@ class TestTypes(base.BaseTestCase):
         value = ['boo', 'ya']
         field = self.BASE_FIELD.copy()
         field['type'] = 'object'
-        _type = _types.ObjectType(field)
+        _type = types.ObjectType(field)
 
         self.assertFalse(_type.cast(value))
 
@@ -279,7 +279,7 @@ class TestTypes(base.BaseTestCase):
         value = '10.0, 21.00'
         field = self.BASE_FIELD.copy()
         field['type'] = 'geopoint'
-        _type = _types.GeoPointType(field)
+        _type = types.GeoPointType(field)
 
         self.assertTrue(_type.cast(value))
 
@@ -288,7 +288,7 @@ class TestTypes(base.BaseTestCase):
         value = 'this is not a geopoint'
         field = self.BASE_FIELD.copy()
         field['type'] = 'geopoint'
-        _type = _types.GeoPointType(field)
+        _type = types.GeoPointType(field)
 
         self.assertFalse(_type.cast(value))
 
@@ -297,7 +297,7 @@ class TestTypes(base.BaseTestCase):
         value = {'type': 'Point'}
         field = self.BASE_FIELD.copy()
         field['type'] = 'geojson'
-        _type = _types.GeoJSONType(field)
+        _type = types.GeoJSONType(field)
 
         self.assertTrue(_type.cast(value))
 
@@ -306,7 +306,7 @@ class TestTypes(base.BaseTestCase):
         value = ''
         field = self.BASE_FIELD.copy()
         field['type'] = 'geojson'
-        _type = _types.GeoJSONType(field)
+        _type = types.GeoJSONType(field)
 
         self.assertFalse(_type.cast(value))
 
@@ -314,7 +314,7 @@ class TestTypes(base.BaseTestCase):
 
         value = ''
         field = self.BASE_FIELD.copy()
-        _type = _types.StringType(field)
+        _type = types.StringType(field)
 
         self.assertFalse(_type.cast(value))
 
@@ -324,6 +324,6 @@ class TestTypes(base.BaseTestCase):
         field = self.BASE_FIELD.copy()
         field['type'] = 'string'
         field['constraints']['required'] = False
-        _type = _types.StringType(field)
+        _type = types.StringType(field)
 
         self.assertEqual(_type.cast(value), value)

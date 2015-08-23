@@ -14,4 +14,4 @@ before_script:
   - mkdir -p shippable/codecoverage
 
 script:
-  - PYTHONPATH=. py.test --cov jtskit --cov-config .coveragerc --cov-report xml --junitxml=shippable/testresults/tests.xml
+  - PYTHONPATH=. py.test --cov jsontableschema --cov-config .coveragerc --cov-report xml --junitxml=shippable/testresults/tests.xml

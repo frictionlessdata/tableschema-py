@@ -10,7 +10,7 @@ install:
   - pip install coveralls
 
 script:
-  - py.test --cov jtskit --cov-config .coveragerc --cov-report term-missing
+  - py.test --cov jsontableschema --cov-config .coveragerc --cov-report term-missing
 
 after_success:
   - coveralls

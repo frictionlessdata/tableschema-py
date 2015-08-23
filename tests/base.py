@@ -11,10 +11,10 @@ import unittest
 class BaseTestCase(unittest.TestCase):
 
     """Common stuff for tests."""
-    
+
     data_dir = os.path.abspath(os.path.join(
         os.path.dirname(os.path.dirname(__file__)), 'examples'))
-    remote_dir = 'https://raw.githubusercontent.com/okfn/jtskit-py/master/examples/'
+    remote_dir = 'https://raw.githubusercontent.com/okfn/jsontableschema-py/master/examples/'
 
     def setUp(self):
         self.openfiles = []
