@@ -13,13 +13,12 @@ import jsontableschema
 
 
 DIR = os.path.abspath(os.path.dirname(__file__))
-ROOT = os.path.dirname(DIR)
-METADATA = 'METADATA'
-LICENSE = 'LICENSE'
-METADATA_PATH = os.path.join(ROOT, METADATA)
+INFO = 'info.json'
+INFO_PATH = os.path.join(DIR, INFO)
 
-with io.open(METADATA_PATH, mode='r+t', encoding='utf-8') as stream:
-    metadata = json.loads(stream.read())
+with io.open(INFO_PATH, mode='r+t', encoding='utf-8') as stream:
+    info_data = json.loads(stream.read())
+
 
 @click.group()
 def main():
@@ -29,7 +28,7 @@ def main():
 @main.command()
 def info():
     """Return info on this version of JSON Table Schema"""
-    click.echo(json.dumps(metadata), indent=4)
+    click.echo(json.dumps(info_data, ensure_ascii=False, indent=4))
 
 
 @main.command()
