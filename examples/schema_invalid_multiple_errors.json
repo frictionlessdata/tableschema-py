@@ -1,0 +1,15 @@
+{
+    "fields": [
+        {
+            "name": "id",
+            "title": "Identifier",
+            "type": "magical_unicorn"
+        },
+        {
+            "name": "title",
+            "title": "Title",
+            "type": "string"
+        }
+    ],
+    "primaryKey": "identifier"
+}

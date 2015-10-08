@@ -68,3 +68,12 @@ class TestValidateSchema(base.BaseTestCase):
             schema = json.load(stream)
         valid, errors = jsontableschema.validate(schema)
         self.assertFalse(valid)
+
+    def test_schema_multiple_errors(self):
+        filepath = os.path.join(self.data_dir,
+                                'schema_invalid_multiple_errors.json')
+        with io.open(filepath) as stream:
+            schema = json.load(stream)
+        valid, errors = jsontableschema.validate(schema)
+        self.assertFalse(valid)
+        self.assertEqual(2, len(errors))
