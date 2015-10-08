@@ -4,6 +4,8 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import jsonschema.exceptions
+
 
 class InvalidSchemaError(Exception):
     def __init__(self, msg=None):
@@ -13,3 +15,7 @@ class InvalidSchemaError(Exception):
 class InvalidJSONError(Exception):
     def __init__(self, msg=None):
         self.msg = msg or 'The obj cannot be parsed as JSON.'
+
+
+class ValidationError(jsonschema.exceptions.ValidationError):
+    pass
