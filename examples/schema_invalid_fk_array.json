@@ -3,20 +3,15 @@
         {
             "name": "id",
             "title": "Identifier",
-            "type": "magical_unicorn"
-        },
-        {
-            "name": "title",
-            "title": "Title",
-            "type": "string"
+            "type": "integer"
         }
     ],
-    "primaryKey": "identifier",
     "foreignKeys": [
         {
-            "fields": ["id", "notafield"],
+            "fields": ["id", "title"],
             "reference": {
                 "datapackage": "http://data.okfn.org/data/mydatapackage/",
+                "resource": "the-resource",
                 "fields": "no" 
             }
         }

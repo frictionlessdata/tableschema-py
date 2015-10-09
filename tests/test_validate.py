@@ -73,12 +73,92 @@ class TestValidateSchema(base.BaseTestCase):
                           jsontableschema.validate,
                           schema)
 
-    def test_schema_multiple_errors(self):
+    def test_schema_valid_fk_string(self):
+        filepath = os.path.join(self.data_dir, 'schema_valid_fk_string.json')
+        with io.open(filepath) as stream:
+            schema = json.load(stream)
+        valid = jsontableschema.validate(schema)
+        self.assertTrue(valid)
+
+    def test_schema_valid_fk_string_self_ref(self):
         filepath = os.path.join(self.data_dir,
-                                'schema_invalid_multiple_errors.json')
+                                'schema_valid_fk_string_self_referencing.json')
+        with io.open(filepath) as stream:
+            schema = json.load(stream)
+        valid = jsontableschema.validate(schema)
+        self.assertTrue(valid)
+
+    def test_schema_valid_fk_array(self):
+        filepath = os.path.join(self.data_dir,
+                                'schema_valid_fk_array.json')
+        with io.open(filepath) as stream:
+            schema = json.load(stream)
+        valid = jsontableschema.validate(schema)
+        self.assertTrue(valid)
+
+    def test_schema_invalid_fk_string(self):
+        filepath = os.path.join(self.data_dir, 'schema_invalid_fk_string.json')
         with io.open(filepath) as stream:
             schema = json.load(stream)
         self.assertRaises(exceptions.ValidationError,
                           jsontableschema.validate,
                           schema)
-        # self.assertEqual(2, len(errors))
+
+    def test_schema_invalid_fk_no_reference(self):
+        filepath = os.path.join(self.data_dir,
+                                'schema_invalid_fk_no_reference.json')
+        with io.open(filepath) as stream:
+            schema = json.load(stream)
+        self.assertRaises(exceptions.ValidationError,
+                          jsontableschema.validate,
+                          schema)
+
+    def test_schema_invalid_fk_array(self):
+        filepath = os.path.join(self.data_dir,
+                                'schema_invalid_fk_array.json')
+        with io.open(filepath) as stream:
+            schema = json.load(stream)
+        self.assertRaises(exceptions.ValidationError,
+                          jsontableschema.validate,
+                          schema)
+
+    def test_schema_invalid_fk_ref_is_an_array_fields_is_a_string(self):
+        filepath = os.path.join(self.data_dir,
+                                'schema_invalid_fk_string_array_ref.json')
+        with io.open(filepath) as stream:
+            schema = json.load(stream)
+        self.assertRaises(exceptions.ValidationError,
+                          jsontableschema.validate,
+                          schema)
+
+    def test_schema_invalid_fk_reference_is_a_string_fields_is_an_array(self):
+        filepath = os.path.join(self.data_dir,
+                                'schema_invalid_fk_array_string_ref.json')
+        with io.open(filepath) as stream:
+            schema = json.load(stream)
+        self.assertRaises(exceptions.ValidationError,
+                          jsontableschema.validate,
+                          schema)
+
+    def test_schema_invalid_fk_reference_array_number_mismatch(self):
+        '''the number of foreignKey.fields is not the same as
+
+        'foreignKey.reference.fields'
+        '''
+        filepath = os.path.join(self.data_dir,
+                                'schema_invalid_fk_array_wrong_number.json')
+        with io.open(filepath) as stream:
+            schema = json.load(stream)
+        self.assertRaises(exceptions.ValidationError,
+                          jsontableschema.validate,
+                          schema)
+
+
+class TestValidator(base.BaseTestCase):
+    def test_schema_multiple_errors(self):
+        filepath = os.path.join(self.data_dir,
+                                'schema_invalid_multiple_errors.json')
+        with io.open(filepath) as stream:
+            schema = json.load(stream)
+            errors = [i for i in jsontableschema.validator.iter_errors(schema)]
+        self.assertEquals(5, len(errors))

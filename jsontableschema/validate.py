@@ -50,7 +50,7 @@ class JSONTableSchemaValidator(BaseValidator):
                 if not instance['primaryKey'] in field_names:
                     yield exceptions.ValidationError(
                         'A JSON Table Schema primaryKey value must be found in'
-                        'the schema field names'
+                        ' the schema field names'
                     )
             else:
                 for k in instance['primaryKey']:
@@ -90,9 +90,17 @@ class JSONTableSchemaValidator(BaseValidator):
                             'must match field names.'
                         )
                 else:
+                    if isinstance(fk['reference']['fields'], compat.str):
+                        yield exceptions.ValidationError(
+                            'A JSON Table Schema foreignKey.fields cannot '
+                            'be a string when foreignKey.reference.fields.'
+                            'is a string'
+                        )
                     if not len(fk.get('fields')) == len(fk['reference']['fields']):
                         yield exceptions.ValidationError(
-                            'A JSON Table Schema must have a fields key.'
+                            'A JSON Table Schema foreignKey.fields must '
+                            'contain the same number entries as '
+                            'foreignKey.reference.fields.'
                         )
 
 
