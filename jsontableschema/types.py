@@ -16,8 +16,8 @@ import binascii
 import uuid
 from dateutil.parser import parse as date_parse
 import rfc3987
-from . import compat
-from . import utilities
+import unicodedata
+from . import compat, utilities, exceptions
 
 
 class JTSType(object):
@@ -41,14 +41,10 @@ class JTSType(object):
             self.required = True
 
     def cast(self, value):
-        """Return boolean if `value` can be cast as type `self.py`."""
-
-        # we can check on `constraints.required` before we cast
-        if not self.required and (value in (None, utilities.NULL_VALUES)):
-            return True
-
-        elif self.required and value in (None, ''):
-            return False
+        if self.required and value in (None, ''):
+            raise exceptions.RequiredFieldError(
+                '{0} is a required field'.format(self.field)
+            )
 
         # cast with the appropriate handler, falling back to default if none
 
@@ -64,6 +60,13 @@ class JTSType(object):
 
         return self.cast_default(value)
 
+    def can_cast(self, value):
+        try:
+            self.cast(value)
+            return True
+        except exceptions.InvalidCastError:
+            return False
+
     def cast_default(self, value):
         """Return boolean if the value can be cast to the type/format."""
 
@@ -74,25 +77,16 @@ class JTSType(object):
             if not self.py == compat.str:
                 return self.py(value)
 
-        except (ValueError, TypeError, decimal.InvalidOperation):
-            return False
+        except (ValueError, TypeError, decimal.InvalidOperation), e:
+            raise exceptions.InvalidCastError(e.message)
 
-        return False
+        raise exceptions.InvalidCastError('Could not cast value')
 
     def has_format(self, _format):
-
-        if _format in self.formats:
-            return True
-
-        return False
+        return _format in self.formats
 
     def _type_check(self, value):
-        """Return boolean on type check of value. """
-
-        if isinstance(value, self.py):
-            return True
-
-        return False
+        return isinstance(value, self.py)
 
 
 class StringType(JTSType):
@@ -103,19 +97,18 @@ class StringType(JTSType):
     email_pattern = re.compile(r'[^@]+@[^@]+\.[^@]+')
 
     def cast_email(self, value):
-        """Return `value` if is of type, else return False."""
-
         if not self._type_check(value):
-            return False
+            raise exceptions.InvalidStringType(
+                '{0} is not of type {1}'.format(value, self.py)
+            )
 
         if not re.match(self.email_pattern, value):
-            return False
-
+            raise exceptions.InvalidEmail(
+                '{0} is not a valid email'.format(value)
+            )
         return value
 
     def cast_uri(self, value):
-        """Return `value` if is of type, else return False."""
-
         if not self._type_check(value):
             return False
 
@@ -123,35 +116,33 @@ class StringType(JTSType):
             rfc3987.parse(value, rule="URI")
             return value
         except ValueError:
-            return False
+            raise exceptions.InvalidURI('{0} is not a valid uri'.format(value))
 
     def cast_binary(self, value):
-        """Return `value` if is of type, else return False."""
-
         if not self._type_check(value):
-            return False
+            raise exceptions.InvalidStringType()
 
         try:
             base64.b64decode(value)
         except binascii.Error as e:
-            return False
-
-        return True
+            raise exceptions.InvalidBinary(e.message)
+        return value
 
     def cast_uuid(self, value):
         """Return `value` if is a uuid, else return False."""
 
         if not self._type_check(value):
-            return False
+            raise exceptions.InvalidStringType(
+                '{0} is not of type {1}'.format(value, self.py)
+            )
         try:
             uuid.UUID(value, version=4)
             return value
-        except ValueError:
-            return False
+        except ValueError, e:
+            raise exceptions.InvalidUUID(e.message)
 
 
 class IntegerType(JTSType):
-
     py = int
     name = 'integer'
 
@@ -161,20 +152,20 @@ class NumberType(JTSType):
     py = decimal.Decimal
     name = 'number'
     formats = ('default', 'currency')
-    separators = ',;'
-    currencies = '$'
+    separators = ',; '
+    currencies = u''.join(unichr(i) for i
+                          in range(0xffff)
+                          if unicodedata.category(unichr(i)) == 'Sc')
 
     def cast_currency(self, value):
-        value = re.sub('[{0}{1}]'.format(self.separators, self.currencies), '', value)
-
-        if isinstance(value, self.py):
-            return True
-
+        value = re.sub('[{0}{1}]'.format(self.separators, self.currencies),
+                       '', value)
         try:
             return decimal.Decimal(value)
-
         except decimal.InvalidOperation:
-            return False
+            raise exceptions.InvalidCurrency(
+                '{0} is not a valid currency'.format(value)
+            )
 
 
 class BooleanType(JTSType):
@@ -188,15 +179,21 @@ class BooleanType(JTSType):
         """Return boolean if `value` can be cast as type `self.py`"""
 
         if isinstance(value, self.py):
-            return True
-
+            return value
         else:
+            try:
+                value = value.strip().lower()
+            except AttributeError:
+                pass
 
-            value = value.strip().lower()
-            if value in (self.true_values + self.false_values):
+            if value in (self.true_values):
                 return True
-
-            return False
+            elif value in (self.false_values):
+                return False
+            else:
+                raise exceptions.InvalidBooleanType(
+                    '{0} is not a boolean value'.format(value)
+                )
 
 
 class NullType(JTSType):
@@ -206,18 +203,16 @@ class NullType(JTSType):
     null_values = utilities.NULL_VALUES
 
     def cast_default(self, value):
-        """Return null if `value` can be cast as type `self.py`"""
-
         if isinstance(value, self.py):
-            return True
-
+            return value
         else:
-
             value = value.strip().lower()
             if value in self.null_values:
-                return True
-
-            return False
+                return None
+            else:
+                raise exceptions.InvalidNoneType(
+                    '{0} is not a none type'.format(value)
+                )
 
 
 class ArrayType(JTSType):
@@ -229,19 +224,13 @@ class ArrayType(JTSType):
         """Return boolean if `value` can be cast as type `self.py`"""
 
         if isinstance(value, self.py):
-            return True
-
+            return value
         try:
-            value = json.loads(value)
-
-            if isinstance(value, self.py):
-                return True
-
-            else:
-                return False
-
+            return json.loads(value)
         except (TypeError, ValueError):
-            return False
+            raise exceptions.InvalidArrayType(
+                '{0} is not a array type'.format(value)
+            )
 
 
 class ObjectType(JTSType):
@@ -250,21 +239,12 @@ class ObjectType(JTSType):
     name = 'object'
 
     def cast_default(self, value):
-        """Return boolean if `value` can be cast as type `self.py`"""
-
         if isinstance(value, self.py):
-            return True
-
+            return value
         try:
-            value = json.loads(value)
-            if isinstance(value, self.py):
-                return True
-
-            else:
-                return False
-
-        except (TypeError, ValueError):
-            return False
+            return json.loads(value)
+        except (TypeError, ValueError), e:
+            raise exceptions.InvalidObjectType(e.message)
 
 
 class DateType(JTSType):
@@ -281,32 +261,23 @@ class DateType(JTSType):
     format_map = dict(zip(raw_formats, py_formats))
 
     def cast_default(self, value):
-        """Return boolean if `value` can be cast as type `self.py`"""
-
         try:
             return datetime.datetime.strptime(value, self.ISO8601).date()
-
-        except ValueError:
-            return False
+        except (TypeError, ValueError), e:
+            raise exceptions.InvalidDateType(e.message)
 
     def cast_any(self, value):
-
         try:
             return date_parse(value).date()
-
-        except ValueError:
-            return False
+        except (TypeError, ValueError), e:
+            raise exceptions.InvalidDateType(e.message)
 
     def cast_fmt(self, value):
-
-        _pattern = self.format.strip('fmt:')
-        _format = self.format_map.get(_pattern, self.ISO8601)
-
         try:
-            return datetime.datetime.strptime(value, _format).date()
-
-        except ValueError:
-            return False
+            date_format = self.format.strip('fmt:')
+            return datetime.datetime.strptime(value, date_format).date()
+        except (TypeError, ValueError), e:
+            raise exceptions.InvalidDateType(e.message)
 
 
 class TimeType(JTSType):
@@ -323,32 +294,25 @@ class TimeType(JTSType):
     format_map = dict(zip(raw_formats, py_formats))
 
     def cast_default(self, value):
-        """Return boolean if `value` can be cast as type `self.py`"""
-
         try:
-            return time.strptime(value, self.ISO8601)
-
-        except ValueError:
-            return False
+            struct_time = time.strptime(value, self.ISO8601)
+            return datetime.time(struct_time.tm_hour, struct_time.tm_min,
+                                 struct_time.tm_sec)
+        except (TypeError, ValueError), e:
+            raise exceptions.InvalidTimeType(e.message)
 
     def cast_any(self, value):
-
         try:
             return date_parse(value).time()
-
-        except ValueError:
-            return False
+        except (TypeError, ValueError), e:
+            raise exceptions.InvalidTimeType(e.message)
 
     def cast_fmt(self, value):
-
-        _pattern = self.format.strip('fmt:')
-        _format = self.format_map.get(_pattern, self.ISO8601)
-
+        time_format = self.format.strip('fmt:')
         try:
-            return datetime.datetime.strptime(value, _format).date()
-
-        except ValueError:
-            return False
+            return datetime.datetime.strptime(value, time_format).time()
+        except (TypeError, ValueError), e:
+            raise exceptions.InvalidTimeType(e.message)
 
 
 class DateTimeType(JTSType):
@@ -365,32 +329,23 @@ class DateTimeType(JTSType):
     format_map = dict(zip(raw_formats, py_formats))
 
     def cast_default(self, value):
-        """Return boolean if `value` can be cast as type `self.py`"""
-
         try:
             return datetime.datetime.strptime(value, self.ISO8601)
-
-        except ValueError:
-            return False
+        except (TypeError, ValueError), e:
+            raise exceptions.InvalidDateTimeType(e.message)
 
     def cast_any(self, value):
-
         try:
             return date_parse(value)
-
-        except ValueError:
-            return False
+        except (TypeError, ValueError), e:
+            raise exceptions.InvalidDateTimeType(e.message)
 
     def cast_fmt(self, value):
-
-        _pattern = self.format.strip('fmt:')
-        _format = self.format_map.get(_pattern, self.ISO8601)
-
         try:
-            return datetime.datetime.strptime(value, _format)
-
-        except ValueError:
-            return False
+            format = self.format.strip('fmt:')
+            return datetime.datetime.strptime(value, format)
+        except (TypeError, ValueError), e:
+            raise exceptions.InvalidDateTimeType(e.message)
 
 
 class GeoPointType(JTSType):
@@ -400,24 +355,19 @@ class GeoPointType(JTSType):
     formats = ('default', 'array', 'object')
 
     def cast_default(self, value):
-
-        if self._type_check(value):
-            if len(value.split(',')) == 2:
-                return True
-            return False
-
         try:
-            value = json.loads(value)
-            if isinstance(value, self.py):
-                return True
-
-            else:
-                return False
-
+            if self._type_check(value):
+                points = value.split(',')
+                if len(points) == 2:
+                    return points
+                else:
+                    raise exceptions.InvalidGeoPointType(
+                        '{0}: point is not of length 2'.format(value)
+                    )
         except (TypeError, ValueError):
-            return False
-
-        return False
+            raise exceptions.InvalidGeoPointType(
+                '{0}: point is not of length 2'.format(value)
+            )
 
     def cast_array(self, value):
         raise NotImplementedError
@@ -489,7 +439,7 @@ class TypeGuesser(object):
 
     def cast(self, value):
         for _type in reversed(self._types):
-            result = _type(self.type_options.get(_type.name, {})).cast(value)
+            result = _type(self.type_options.get(_type.name, {})).can_cast(value)
             if result:
                 # TODO: do format guessing
                 rv = (_type.name, 'default')
