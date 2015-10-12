@@ -13,7 +13,9 @@ import json
 import operator
 import base64
 import binascii
+import uuid
 from dateutil.parser import parse as date_parse
+import rfc3987
 from . import compat
 from . import utilities
 
@@ -97,10 +99,8 @@ class StringType(JTSType):
 
     py = compat.str
     name = 'string'
-    formats = ('default', 'email', 'uri', 'binary')
+    formats = ('default', 'email', 'uri', 'binary', 'uuid')
     email_pattern = re.compile(r'[^@]+@[^@]+\.[^@]+')
-    # TODO: this is not a URI pattern
-    uri_pattern = re.compile(r'^http[s]?://')
 
     def cast_email(self, value):
         """Return `value` if is of type, else return False."""
@@ -119,10 +119,11 @@ class StringType(JTSType):
         if not self._type_check(value):
             return False
 
-        if not re.match(self.uri_pattern, value):
+        try:
+            rfc3987.parse(value, rule="URI")
+            return value
+        except ValueError:
             return False
-
-        return value
 
     def cast_binary(self, value):
         """Return `value` if is of type, else return False."""
@@ -136,6 +137,17 @@ class StringType(JTSType):
             return False
 
         return True
+
+    def cast_uuid(self, value):
+        """Return `value` if is a uuid, else return False."""
+
+        if not self._type_check(value):
+            return False
+        try:
+            uuid.UUID(value, version=4)
+            return value
+        except ValueError:
+            return False
 
 
 class IntegerType(JTSType):

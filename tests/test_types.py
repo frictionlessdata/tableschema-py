@@ -327,3 +327,53 @@ class TestTypes(base.BaseTestCase):
         _type = types.StringType(field)
 
         self.assertEqual(_type.cast(value), value)
+
+class TestString(base.BaseTestCase):
+    BASE_FIELD = {
+        'name': 'Name',
+        'type': 'string',
+        'format': 'default',
+        'constraints': {
+            'required': True
+        }
+    }
+
+    def test_uri(self):
+        field = self.BASE_FIELD.copy()
+        field['format'] = 'uri'
+        _type = types.StringType(field)
+
+        value = 'http://test.com'
+        self.assertEqual(_type.cast(value), value)
+
+    def test_uri_failure(self):
+        field = self.BASE_FIELD.copy()
+        field['format'] = 'uri'
+        _type = types.StringType(field)
+
+        value = 'notauri'
+        self.assertFalse(_type.cast(value))
+
+    def test_uuid(self):
+        field = self.BASE_FIELD.copy()
+        field['format'] = 'uuid'
+        _type = types.StringType(field)
+
+        value = '12345678123456781234567812345678'
+        self.assertEqual(_type.cast(value), value)
+        value = 'urn:uuid:12345678-1234-5678-1234-567812345678'
+        self.assertEqual(_type.cast(value), value)
+        value = '123e4567-e89b-12d3-a456-426655440000'
+        self.assertEqual(_type.cast(value), value)
+
+    def test_uuid_failure(self):
+        field = self.BASE_FIELD.copy()
+        field['format'] = 'uuid'
+        _type = types.StringType(field)
+
+        value = '1234567812345678123456781234567?'
+        self.assertFalse(_type.cast(value))
+        value = '1234567812345678123456781234567'
+        self.assertFalse(_type.cast(value))
+        value = 'X23e4567-e89b-12d3-a456-426655440000'
+        self.assertFalse(_type.cast(value))
