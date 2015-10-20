@@ -85,3 +85,7 @@ class InvalidTimeType(InvalidCastError):
 
 class InvalidGeoPointType(InvalidCastError):
     pass
+
+
+class InvalidGeoJSONType(InvalidCastError):
+    pass

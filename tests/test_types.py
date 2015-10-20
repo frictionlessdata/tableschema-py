@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 from datetime import datetime, date, time
 from decimal import Decimal
 from jsontableschema import types
+import pytest
 from . import base, exceptions
 
 
@@ -561,17 +562,44 @@ class TestGeoJson(base.BaseTestCase):
             }
         }
 
-    def test_geojson_type_simple_true(self):
-        value = {'type': 'Point'}
+    @pytest.mark.xfail
+    def test_geojson_type(self):
+        value = {'coordinates': [0, 0, 0], 'type': 'Point'}
         self.field['type'] = 'geojson'
         _type = types.GeoJSONType(self.field)
 
-        #self.assertTrue(_type.cast(value))
+        self.assertRaises(exceptions.InvalidGeoJSONType, _type.cast, value)
+
+    def test_geojson_type_simple_true(self):
+        value = {
+            "properties": {
+                "Ã": "Ã"
+            },
+            "type": "Feature",
+            "geometry": None,
+        }
+
+        self.field['type'] = 'geojson'
+        _type = types.GeoJSONType(self.field)
+
+        self.assertEquals(_type.cast(value), value)
+
+    def test_geojson_type_cast_from_string(self):
+        value = '{"geometry": null, "type": "Feature", "properties": {"\\u00c3": "\\u00c3"}}'
+        self.field['type'] = 'geojson'
+        _type = types.GeoJSONType(self.field)
+
+        self.assertEquals(_type.cast(value), {
+            "properties": {
+                "Ã": "Ã"
+            },
+            "type": "Feature",
+            "geometry": None,
+        })
 
     def test_geojson_type_simple_false(self):
-
         value = ''
         self.field['type'] = 'geojson'
         _type = types.GeoJSONType(self.field)
 
-        #self.assertRaises(exception.InvalidGeoPointType, _type.cast, value)
+        self.assertRaises(exceptions.InvalidGeoJSONType, _type.cast, value)

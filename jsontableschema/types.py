@@ -5,6 +5,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import os
 import re
 import decimal
 import datetime
@@ -17,6 +18,7 @@ import uuid
 from dateutil.parser import parse as date_parse
 import rfc3987
 import unicodedata
+import jsonschema
 from . import compat, utilities, exceptions
 
 
@@ -226,7 +228,12 @@ class ArrayType(JTSType):
         if isinstance(value, self.py):
             return value
         try:
-            return json.loads(value)
+            array_type = json.loads(value)
+            if isinstance(array_type, self.py):
+                return array_type
+            else:
+                raise exceptions.InvalidArrayType('Not an array')
+
         except (TypeError, ValueError):
             raise exceptions.InvalidArrayType(
                 '{0} is not a array type'.format(value)
@@ -242,7 +249,11 @@ class ObjectType(JTSType):
         if isinstance(value, self.py):
             return value
         try:
-            return json.loads(value)
+            json_value = json.loads(value)
+            if isinstance(json_value, self.py):
+                return json_value
+            else:
+                raise exceptions.InvalidObjectType()
         except (TypeError, ValueError), e:
             raise exceptions.InvalidObjectType(e.message)
 
@@ -376,6 +387,16 @@ class GeoPointType(JTSType):
         raise NotImplementedError
 
 
+def load_geojson_schema():
+    filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                            'geojson/geojson.json')
+    with open(filepath) as f:
+        json_table_schema = json.load(f)
+    return json_table_schema
+
+geojson_schema = load_geojson_schema()
+
+
 class GeoJSONType(JTSType):
 
     py = dict
@@ -388,22 +409,21 @@ class GeoJSONType(JTSType):
     }
 
     def cast_default(self, value):
-        """Return boolean if `value` can be cast as type `self.py`"""
-
-        if self._type_check(value):
-            return True
-
-        try:
-            value = json.loads(value)
-            if isinstance(value, self.py):
-                return True
-
-            else:
-                return False
-
-        except (TypeError, ValueError):
-            return False
-
+        if isinstance(value, self.py):
+            try:
+                jsonschema.validate(value, geojson_schema)
+                return value
+            except jsonschema.exceptions.ValidationError, e:
+                raise exceptions.InvalidGeoJSONType(e.message)
+        if isinstance(value, compat.str):
+            try:
+                geojson = json.loads(value)
+                jsonschema.validate(geojson, geojson_schema)
+                return geojson
+            except (TypeError, ValueError), e:
+                raise exceptions.InvalidGeoJSONType(e.message)
+            except jsonschema.exceptions.ValidationError, e:
+                raise exceptions.InvalidGeoJSONType(e.message)
 
     def cast_topojson(self, value):
         raise NotImplementedError
@@ -420,8 +440,8 @@ class AnyType(JTSType):
 def _available_types():
     """Return available types."""
     return (AnyType, StringType, BooleanType, NumberType, IntegerType, NullType,
-            DateType, TimeType, DateTimeType, ArrayType, ObjectType,
-            GeoPointType, GeoJSONType)
+            DateType, TimeType, DateTimeType, ArrayType, ObjectType,)
+            #GeoPointType, GeoJSONType)
 
 
 class TypeGuesser(object):
@@ -481,5 +501,6 @@ class TypeResolver(object):
                 'type': sorted_counts[0][0][0],
                 'format': sorted_counts[0][0][1]
             }
+
 
         return rv
