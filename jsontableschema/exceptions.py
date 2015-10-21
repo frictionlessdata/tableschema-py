@@ -18,3 +18,8 @@ class InvalidJSONError(Exception):
 class ConstraintError(Exception):
     def __init__(self, msg=None):
         self.msg = msg or "The value didn't validate against a constraint."
+
+
+class ConstraintNotSupported(Exception):
+    def __init__(self, msg=None):
+        self.msg = msg or "The field does not support the constraint."

@@ -18,9 +18,10 @@ from dateutil.parser import parse as date_parse
 from . import compat
 from . import utilities
 from . import exceptions
+from . import constraints
 
 
-class JTSType(object):
+class JTSType(constraints.NoConstraintsSupportedMixin):
 
     """Base class for all JSON Table Schema types."""
 
@@ -72,9 +73,20 @@ class JTSType(object):
         _handler = 'cast_{0}'.format(_format)
 
         if self.has_format(_format) and hasattr(self, _handler):
-            return getattr(self, _handler)(value)
+            cast_value = getattr(self, _handler)(value)
+        else:
+            cast_value = self.cast_default(value)
 
-        return self.cast_default(value)
+        # The value is now cast, and we can check it against other
+        # constraints.
+        constraints_to_check = ['minLength', 'maxLength']
+        for c in constraints_to_check:
+            constraint_value = self._get_constraint_value(c)
+            if constraint_value:
+                getattr(self, 'check_{0}'.format(c))(cast_value,
+                                                     constraint_value)
+
+        return cast_value
 
     def cast_default(self, value):
         """Return boolean if the value can be cast to the type/format."""
@@ -107,7 +119,7 @@ class JTSType(object):
         return False
 
 
-class StringType(JTSType):
+class StringType(constraints.LengthConstraintMixin, JTSType):
 
     py = compat.str
     name = 'string'
@@ -222,7 +234,7 @@ class NullType(JTSType):
             return False
 
 
-class ArrayType(JTSType):
+class ArrayType(constraints.LengthConstraintMixin, JTSType):
 
     py = list
     name = 'array'
@@ -246,7 +258,7 @@ class ArrayType(JTSType):
             return False
 
 
-class ObjectType(JTSType):
+class ObjectType(constraints.LengthConstraintMixin, JTSType):
 
     py = dict
     name = 'object'
@@ -395,7 +407,7 @@ class DateTimeType(JTSType):
             return False
 
 
-class GeoPointType(JTSType):
+class GeoPointType(constraints.LengthConstraintMixin, JTSType):
 
     py = compat.str, list, dict
     name = 'geopoint'
@@ -428,7 +440,7 @@ class GeoPointType(JTSType):
         raise NotImplementedError
 
 
-class GeoJSONType(JTSType):
+class GeoJSONType(constraints.LengthConstraintMixin, JTSType):
 
     py = dict
     name = 'geojson'
