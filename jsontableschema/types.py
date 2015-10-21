@@ -57,7 +57,7 @@ class JTSType(constraints.NoConstraintsSupportedMixin):
         required = self._get_constraint_value('required')
         if required is not None:
             if not required and (value in (None, utilities.NULL_VALUES)):
-                return True
+                return None
             elif required and value in (None, ''):
                 raise exceptions.ConstraintError(
                     msg="The field '{0}' requires a value".format(
