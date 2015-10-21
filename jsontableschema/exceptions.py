@@ -13,3 +13,8 @@ class InvalidSchemaError(Exception):
 class InvalidJSONError(Exception):
     def __init__(self, msg=None):
         self.msg = msg or 'The obj cannot be parsed as JSON.'
+
+
+class ConstraintError(Exception):
+    def __init__(self, msg=None):
+        self.msg = msg or "The value didn't validate against a constraint."

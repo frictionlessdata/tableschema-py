@@ -14,8 +14,10 @@ import operator
 import base64
 import binascii
 from dateutil.parser import parse as date_parse
+
 from . import compat
 from . import utilities
+from . import exceptions
 
 
 class JTSType(object):
@@ -27,26 +29,38 @@ class JTSType(object):
     formats = ('default',)
 
     def __init__(self, field=None, **kwargs):
-        """Setup some variables for easy access. `field` is the field schema."""
+        """Setup some variables for easy access. `field` is the field
+        schema."""
 
         self.field = field
+        self.constraints = None
+        self.field_name = None
 
         if self.field:
+            self.field_name = self.field['name']
             self.format = self.field['format']
-            self.required = self.field['constraints']['required']
+            self.constraints = self.field.get('constraints', None)
         else:
             self.format = 'default'
-            self.required = True
+
+    def _get_constraint_value(self, constraint):
+        '''Get the value from self.constraints or return None'''
+        if self.constraints is None:
+            return None
+        return self.constraints.get(constraint, None)
 
     def cast(self, value):
         """Return boolean if `value` can be cast as type `self.py`."""
 
         # we can check on `constraints.required` before we cast
-        if not self.required and (value in (None, utilities.NULL_VALUES)):
-            return True
-
-        elif self.required and value in (None, ''):
-            return False
+        required = self._get_constraint_value('required')
+        if required is not None:
+            if not required and (value in (None, utilities.NULL_VALUES)):
+                return True
+            elif required and value in (None, ''):
+                raise exceptions.ConstraintError(
+                    msg="The field '{0}' requires a value".format(
+                        self.field_name))
 
         # cast with the appropriate handler, falling back to default if none
 
