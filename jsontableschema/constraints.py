@@ -5,45 +5,61 @@ class NoConstraintsSupportedMixin(object):
 
     '''All constraints raise a ConstraintNotSupported exception'''
 
-    def check_minLength(self, value):
-        '''Override in subclass if constraint is supported.'''
+    def _raise_constraint_not_supported(self, field_type, constraint):
         raise exceptions.ConstraintNotSupported(
-            msg="Field type '{0}' does not support the minLength constraint"
-            .format(self.name))
+            msg="Field type '{0}' does not support the {1} constraint"
+            .format(field_type, constraint))
+
+    def check_minLength(self, value):
+        self._raise_constraint_not_supported(self.name, 'minLength')
 
     def check_maxLength(self, value):
-        '''Override in subclass if constraint is supported.'''
-        raise exceptions.ConstraintNotSupported(
-            msg="Field type '{0}' does not support the maxLength constraint"
-            .format(self.name))
+        self._raise_constraint_not_supported(self.name, 'maxLength')
+
+    def check_minimum(self, value):
+        self._raise_constraint_not_supported(self.name, 'minimum')
+
+    def check_maximum(self, value):
+        self._raise_constraint_not_supported(self.name, 'maximum')
 
 
 class LengthConstraintMixin(object):
 
-    def check_minLength(self, value, min_length):
-        '''
-        Check minLength constraint.
+    '''
+    Only applicable to sequences like string and array. Will raise TypeError
+    if applied to other types. None applicable types should override and raise
+    ConstraintNotSupported exception.
+    '''
 
-        Only applicable to sequences like string and array. Will raise
-        TypeError if applied to other types. None applicable types should
-        override and raise ConstraintNotSupported exception.
-        '''
-        if min_length is not None:
-            if len(value) < min_length:
-                raise exceptions.ConstraintError(
-                    msg="The field '{0}' must have a minimum length of {1}"
-                    .format(self.field_name, min_length))
+    def check_minLength(self, value, min_length):
+        if min_length is not None and len(value) < min_length:
+            raise exceptions.ConstraintError(
+                msg="The field '{0}' must have a minimum length of {1}"
+                .format(self.field_name, min_length))
 
     def check_maxLength(self, value, max_length):
-        '''
-        Check maxLength constraint.
+        if max_length is not None and len(value) > max_length:
+            raise exceptions.ConstraintError(
+                msg="The field '{0}' must have a maximum length of {1}"
+                .format(self.field_name, max_length))
 
-        Only applicable to sequences like string and array. Will raise
-        TypeError if applied to other types. None applicable types should
-        override and raise ConstraintNotSupported exception.
-        '''
-        if max_length is not None:
-            if len(value) > max_length:
-                raise exceptions.ConstraintError(
-                    msg="The field '{0}' must have a maximum length of {1}"
-                    .format(self.field_name, max_length))
+
+class MinMaxConstraintMixin(object):
+
+    '''
+    Only applicable to numbers and date/times. Will raise TypeError if applied
+    to other types. None applicable types should override and raise
+    ConstraintNotSupported exception.
+    '''
+
+    def check_minimum(self, value, minimum):
+        if minimum is not None and value < minimum:
+            raise exceptions.ConstraintError(
+                msg="The field '{0}' must not be less than {1}"
+                .format(self.field_name, minimum))
+
+    def check_maximum(self, value, maximum):
+        if maximum is not None and value > maximum:
+            raise exceptions.ConstraintError(
+                msg="The field '{0}' must not be more than {1}"
+                .format(self.field_name, maximum))

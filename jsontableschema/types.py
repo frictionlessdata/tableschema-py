@@ -79,7 +79,7 @@ class JTSType(constraints.NoConstraintsSupportedMixin):
 
         # The value is now cast, and we can check it against other
         # constraints.
-        constraints_to_check = ['minLength', 'maxLength']
+        constraints_to_check = ['minLength', 'maxLength', 'minimum', 'maximum']
         for c in constraints_to_check:
             constraint_value = self._get_constraint_value(c)
             if constraint_value:
@@ -164,13 +164,13 @@ class StringType(constraints.LengthConstraintMixin, JTSType):
         return True
 
 
-class IntegerType(JTSType):
+class IntegerType(constraints.MinMaxConstraintMixin, JTSType):
 
     py = int
     name = 'integer'
 
 
-class NumberType(JTSType):
+class NumberType(constraints.MinMaxConstraintMixin, JTSType):
 
     py = decimal.Decimal
     name = 'number'
@@ -281,7 +281,7 @@ class ObjectType(constraints.LengthConstraintMixin, JTSType):
             return False
 
 
-class DateType(JTSType):
+class DateType(constraints.MinMaxConstraintMixin, JTSType):
 
     py = datetime.date
     name = 'date'
@@ -323,7 +323,7 @@ class DateType(JTSType):
             return False
 
 
-class TimeType(JTSType):
+class TimeType(constraints.MinMaxConstraintMixin, JTSType):
 
     py = time
     name = 'time'
@@ -365,7 +365,7 @@ class TimeType(JTSType):
             return False
 
 
-class DateTimeType(JTSType):
+class DateTimeType(constraints.MinMaxConstraintMixin, JTSType):
 
     py = datetime.datetime
     name = 'datetime'
