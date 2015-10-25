@@ -365,26 +365,96 @@ class GeoPointType(JTSType):
     name = 'geopoint'
     formats = ('default', 'array', 'object')
 
+    def _check_latitude_longtiude_range(self, geopoint):
+        longitude = geopoint[0]
+        latitude = geopoint[1]
+        if longitude >= 180 or longitude <= -180:
+            raise exceptions.InvalidGeoPointType(
+                'longtitude should be between ±180, '
+                'found: {0}'.format(longitude)
+            )
+        elif latitude >= 90 or latitude <= -90:
+            raise exceptions.InvalidGeoPointType(
+                'latitude should be between ±90, '
+                'found: {0}'.format(latitude)
+            )
+
     def cast_default(self, value):
         try:
             if self._type_check(value):
                 points = value.split(',')
                 if len(points) == 2:
-                    return points
+                    try:
+                        geopoints = [decimal.Decimal(points[0].strip()),
+                                     decimal.Decimal(points[1].strip())]
+                        # TODO: check degree minute second formats?
+                        self._check_latitude_longtiude_range(geopoints)
+                        return geopoints
+                    except decimal.DecimalException, e:
+                        raise exceptions.InvalidGeoPointType(
+                            e.message
+                        )
                 else:
                     raise exceptions.InvalidGeoPointType(
                         '{0}: point is not of length 2'.format(value)
                     )
-        except (TypeError, ValueError):
-            raise exceptions.InvalidGeoPointType(
-                '{0}: point is not of length 2'.format(value)
-            )
+        except (TypeError, ValueError), e:
+            raise exceptions.InvalidGeoPointType(e.message)
 
     def cast_array(self, value):
-        raise NotImplementedError
+        try:
+            json_value = json.loads(value)
+            if isinstance(json_value, list) and len(json_value) == 2:
+                try:
+                    longitude = json_value[0].strip()
+                    latitude = json_value[1].strip()
+                except AttributeError:
+                    longitude = json_value[0]
+                    latitude = json_value[1]
+
+                try:
+                    geopoints = [decimal.Decimal(longitude),
+                                 decimal.Decimal(latitude)]
+                    self._check_latitude_longtiude_range(geopoints)
+                    return geopoints
+                except decimal.DecimalException, e:
+                    raise exceptions.InvalidGeoPointType(
+                        e.message
+                    )
+            else:
+                raise exceptions.InvalidGeoPointType(
+                    '{0}: point is not of length 2'.format(value)
+                )
+        except (TypeError, ValueError), e:
+            raise exceptions.InvalidGeoPointType(e.message)
 
     def cast_object(self, value):
-        raise NotImplementedError
+        try:
+            json_value = json.loads(value)
+
+            try:
+                longitude = json_value['longitude'].strip()
+                latitude = json_value['latitude'].strip()
+            except AttributeError:
+                longitude = json_value['longitude']
+                latitude = json_value['latitude']
+            except KeyError, e:
+                raise exceptions.InvalidGeoPointType(
+                    e.message
+                )
+
+            try:
+                geopoints = [decimal.Decimal(longitude),
+                             decimal.Decimal(latitude)]
+                # TODO: check degree minute second formats?
+                self._check_latitude_longtiude_range(geopoints)
+                return geopoints
+            except decimal.DecimalException, e:
+                raise exceptions.InvalidGeoPointType(
+                    e.message
+                )
+        except (TypeError, ValueError), e:
+            raise exceptions.InvalidGeoPointType(e.message)
 
 
 def load_geojson_schema():
@@ -439,9 +509,9 @@ class AnyType(JTSType):
 
 def _available_types():
     """Return available types."""
-    return (AnyType, StringType, BooleanType, NumberType, IntegerType, NullType,
-            DateType, TimeType, DateTimeType, ArrayType, ObjectType,)
-            #GeoPointType, GeoJSONType)
+    return (AnyType, StringType, BooleanType, NumberType, IntegerType,
+            NullType, DateType, TimeType, DateTimeType, ArrayType, ObjectType,
+            GeoPointType, GeoJSONType)
 
 
 class TypeGuesser(object):

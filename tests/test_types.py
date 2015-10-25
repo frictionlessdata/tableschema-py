@@ -534,20 +534,70 @@ class TestGeoPoint(base.BaseTestCase):
         }
 
     def test_geopoint_type_simple_true(self):
-
         value = '10.0, 21.00'
-        self.field['type'] = 'geopoint'
         _type = types.GeoPointType(self.field)
+        self.assertEquals(_type.cast(value), [Decimal(10.0), Decimal(21)])
 
-        #self.assertTrue(_type.cast(value))
+    def test_values_outside_longitude_range(self):
+        value = '310.0, 921.00'
+        _type = types.GeoPointType(self.field)
+        self.assertRaises(exceptions.InvalidGeoPointType, _type.cast, value)
+
+    def test_values_outside_latitude_range(self):
+        value = '10.0, 921.00'
+        _type = types.GeoPointType(self.field)
+        self.assertRaises(exceptions.InvalidGeoPointType, _type.cast, value)
 
     def test_geopoint_type_simple_false(self):
-
         value = 'this is not a geopoint'
-        self.field['type'] = 'geopoint'
         _type = types.GeoPointType(self.field)
-
         self.assertRaises(exceptions.InvalidGeoPointType, _type.cast, value)
+
+    def test_non_decimal_values(self):
+        value = 'blah, blah'
+        _type = types.GeoPointType(self.field)
+        self.assertRaises(exceptions.InvalidGeoPointType, _type.cast, value)
+
+    def test_wrong_length_of_points(self):
+        value = '10.0, 21.00, 1'
+        _type = types.GeoPointType(self.field)
+        self.assertRaises(exceptions.InvalidGeoPointType, _type.cast, value)
+
+    def test_array(self):
+        self.field['format'] = 'array'
+        _type = types.GeoPointType(self.field)
+        self.assertEquals(_type.cast('[10.0, 21.00]'),
+                          [Decimal(10.0), Decimal(21)])
+        self.assertEquals(_type.cast('["10.0", "21.00"]'),
+                          [Decimal(10.0), Decimal(21)])
+
+    def test_array_invalid(self):
+        self.field['format'] = 'array'
+        _type = types.GeoPointType(self.field)
+        self.assertRaises(exceptions.InvalidGeoPointType, _type.cast, ' ')
+        self.assertRaises(exceptions.InvalidGeoPointType, _type.cast,
+                          '["a", "b"]')
+        self.assertRaises(exceptions.InvalidGeoPointType, _type.cast,
+                          '[1, 2, 3]')
+
+    def test_object(self):
+        self.field['format'] = 'object'
+        _type = types.GeoPointType(self.field)
+        self.assertEquals(_type.cast('{"longitude": 10.0, "latitude": 21.00}'),
+                          [Decimal(10.0), Decimal(21)])
+        self.assertEquals(
+            _type.cast('{"longitude": "10.0", "latitude": "21.00"}'),
+            [Decimal(10.0), Decimal(21)]
+        )
+
+    def test_array_object(self):
+        self.field['format'] = 'object'
+        _type = types.GeoPointType(self.field)
+        self.assertRaises(exceptions.InvalidGeoPointType, _type.cast, '[ ')
+        self.assertRaises(exceptions.InvalidGeoPointType, _type.cast,
+                          '{"blah": "10.0", "latitude": "21.00"}')
+        self.assertRaises(exceptions.InvalidGeoPointType, _type.cast,
+                          '{"longitude": "a", "latitude": "21.00"}')
 
 
 class TestGeoJson(base.BaseTestCase):
@@ -562,7 +612,6 @@ class TestGeoJson(base.BaseTestCase):
             }
         }
 
-    @pytest.mark.xfail
     def test_geojson_type(self):
         value = {'coordinates': [0, 0, 0], 'type': 'Point'}
         self.field['type'] = 'geojson'
