@@ -56,10 +56,12 @@ class MinMaxConstraintMixin(object):
 
     def check_minimum(self, value, minimum):
         if minimum is not None:
-            if self.name in ('date', 'datetime'):
+            if self.name in ('date', 'datetime', 'time'):
                 minimum = date_parse(minimum, ignoretz=True)
             if self.name == 'date':
                 minimum = minimum.date()
+            if self.name == 'time':
+                minimum = minimum.time()
             if value < minimum:
                 raise exceptions.ConstraintError(
                     msg="The field '{0}' must not be less than {1}"
@@ -67,10 +69,12 @@ class MinMaxConstraintMixin(object):
 
     def check_maximum(self, value, maximum):
         if maximum is not None:
-            if self.name in ('date', 'datetime'):
+            if self.name in ('date', 'datetime', 'time'):
                 maximum = date_parse(maximum, ignoretz=True)
             if self.name == 'date':
                 maximum = maximum.date()
+            if self.name == 'time':
+                maximum = maximum.time()
             if value > maximum:
                 raise exceptions.ConstraintError(
                     msg="The field '{0}' must not be more than {1}"
