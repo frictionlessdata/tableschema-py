@@ -26,7 +26,7 @@ A utility library for working with [JSON Table Schema](http://dataprotocols.org/
 ### Components
 
 * `types`: a collection of classes to validate type/format of data described by a JSON Table Schema
-* `models.JSONTableSchema`: A model around a schema with useful methods for interaction
+* `model.JSONTableSchema`: A model around a schema with useful methods for interaction
 * `infer`: a utility that creates a JSON Table Schema based on a data sample
 * `validate`: a utility to validate a **schema** as valid according to the current spec
 
@@ -40,10 +40,10 @@ from jsontableschema import types
 
 Type and format checking for data values.
 
-#### Models
+#### Model
 
 ```
-from jsontableschema.models import JSONTableSchema
+from jsontableschema.model import JSONTableSchema
 ```
 
 A model of a schema with helpful methods for working with the data a schema represents.

@@ -23,6 +23,7 @@ if is_py2:
     str = unicode
     basestring = basestring
     numeric_types = (int, long, float)
+    chr = unichr
 
     def csv_reader(data, dialect=csv.excel, **kwargs):
         """Read text stream (unicode on Py2.7) as CSV."""
@@ -43,3 +44,4 @@ elif is_py3:
     bytes = bytes
     basestring = (str, bytes)
     numeric_types = (int, float)
+    chr = chr
