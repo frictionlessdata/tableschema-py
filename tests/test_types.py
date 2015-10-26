@@ -37,20 +37,6 @@ class TestString(base.BaseTestCase):
         value = 1
         self.assertRaises(exceptions.InvalidCastError, _type.cast, value)
 
-    def test_required_constraint(self):
-        '''empty string is considered a missing value'''
-        value = ''
-        _type = types.StringType(self.field)
-
-        self.assertRaises(exceptions.RequiredFieldError, _type.cast, value)
-
-    def test_string_required_false(self):
-        self.field['constraints']['required'] = False
-        _type = types.StringType(self.field)
-
-        value = ''
-        self.assertEqual(_type.cast(value), value)
-
     def test_valid_email(self):
         self.field['format'] = 'email'
         _type = types.StringType(self.field)

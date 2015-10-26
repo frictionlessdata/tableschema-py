@@ -5,6 +5,10 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 
+class JsonTableSchemaException(Exception):
+    pass
+
+
 class InvalidSchemaError(Exception):
     def __init__(self, msg=None):
         self.msg = msg or 'The obj is not a valid JSON Table Schema.'
@@ -15,11 +19,7 @@ class InvalidJSONError(Exception):
         self.msg = msg or 'The obj cannot be parsed as JSON.'
 
 
-class InvalidCastError(Exception):
-    pass
-
-
-class RequiredFieldError(InvalidCastError):
+class InvalidCastError(JsonTableSchemaException):
     pass
 
 
@@ -91,11 +91,11 @@ class InvalidGeoJSONType(InvalidCastError):
     pass
 
 
-class ConstraintError(Exception):
+class ConstraintError(JsonTableSchemaException):
     def __init__(self, msg=None):
         self.msg = msg or "The value didn't validate against a constraint."
 
 
-class ConstraintNotSupported(Exception):
+class ConstraintNotSupported(JsonTableSchemaException):
     def __init__(self, msg=None):
         self.msg = msg or "The field does not support the constraint."
