@@ -76,6 +76,24 @@ class TestString(base.BaseTestCase):
         value = 'notauri'
         self.assertRaises(exceptions.InvalidURI, _type.cast, value)
 
+    def test_uri_type_failure(self):
+        self.field['format'] = 'uri'
+        _type = types.StringType(self.field)
+        self.assertRaises(exceptions.InvalidURI, _type.cast, 1)
+
+    def test_binary(self):
+        self.field['format'] = 'binary'
+        _type = types.StringType(self.field)
+        self.assertEqual(_type.cast('ZGF0YSB0byBiZSBlbmNvZGVk'),
+                         'ZGF0YSB0byBiZSBlbmNvZGVk')
+
+    def test_binary_failure(self):
+        self.field['format'] = 'binary'
+        _type = types.StringType(self.field)
+        self.assertRaises(exceptions.InvalidStringType, _type.cast, 1)
+        self.assertRaises(exceptions.InvalidBinaryString, _type.cast,
+                          'YW55IGNhcm5hbCBwbGVhc3VyZQ')
+
     def test_uuid(self):
         self.field['format'] = 'uuid'
         _type = types.StringType(self.field)
@@ -95,6 +113,8 @@ class TestString(base.BaseTestCase):
         self.assertRaises(exceptions.InvalidUUID, _type.cast, value)
         value = '1234567812345678123456781234567'
         self.assertRaises(exceptions.InvalidUUID, _type.cast, value)
+        value = 1234567812345678123456781234567
+        self.assertRaises(exceptions.InvalidStringType, _type.cast, value)
         value = 'X23e4567-e89b-12d3-a456-426655440000'
         self.assertRaises(exceptions.InvalidUUID, _type.cast, value)
 
@@ -194,12 +214,14 @@ class TestBoolean(base.BaseTestCase):
         _type = types.BooleanType(self.field)
 
         self.assertTrue(_type.cast(value))
+        self.assertTrue(_type.cast(True))
 
     def test_boolean_type_simple_false(self):
         value = 'n'
         _type = types.BooleanType(self.field)
 
         self.assertFalse(_type.cast(value))
+        self.assertFalse(_type.cast(False))
 
     def test_yes_no(self):
         _type = types.BooleanType(self.field)
@@ -289,6 +311,7 @@ class TestNull(base.BaseTestCase):
         _type = types.NullType(self.field)
 
         self.assertRaises(exceptions.InvalidNoneType, _type.cast, value)
+        self.assertRaises(exceptions.InvalidNoneType, _type.cast, 1)
 
 
 class TestObject(base.BaseTestCase):
@@ -398,17 +421,18 @@ class TestDate(base.BaseTestCase):
 
     def test_invalid_fmt(self):
         value = '2014/12/19'
-        self.field['type'] = 'fmt:DD/MM/YYYY'
+        self.field['format'] = 'fmt:DD/MM/YYYY'
         _type = types.DateType(self.field)
 
         self.assertRaises(exceptions.InvalidDateType, _type.cast, value)
 
     def test_valid_fmt_invalid_value(self):
         value = '2014/12/19'
-        self.field['type'] = 'fmt:%m/%d/%y'
+        self.field['format'] = 'fmt:%m/%d/%y'
         _type = types.DateType(self.field)
 
         self.assertRaises(exceptions.InvalidDateType, _type.cast, value)
+        self.assertRaises(exceptions.InvalidDateType, _type.cast, 1)
 
 
 class TestTime(base.BaseTestCase):
@@ -438,6 +462,12 @@ class TestTime(base.BaseTestCase):
         self.field['format'] = 'any'
         _type = types.TimeType(self.field)
         self.assertEquals(_type.cast(value), time(3))
+
+    def test_time_type_parsing_fails(self):
+        value = '3:00 amblah'
+        self.field['format'] = 'any'
+        _type = types.TimeType(self.field)
+        self.assertRaises(exceptions.InvalidTimeType, _type.cast, value)
 
     def test_time_type_format(self):
         value = '3:00'
@@ -549,6 +579,11 @@ class TestGeoPoint(base.BaseTestCase):
         _type = types.GeoPointType(self.field)
         self.assertRaises(exceptions.InvalidGeoPointType, _type.cast, value)
 
+    def test_wrong_type(self):
+        value = 1
+        _type = types.GeoPointType(self.field)
+        self.assertRaises(exceptions.InvalidGeoPointType, _type.cast, value)
+
     def test_array(self):
         self.field['format'] = 'array'
         _type = types.GeoPointType(self.field)
@@ -638,3 +673,22 @@ class TestGeoJson(base.BaseTestCase):
         _type = types.GeoJSONType(self.field)
 
         self.assertRaises(exceptions.InvalidGeoJSONType, _type.cast, value)
+
+
+class TestAnyType(base.BaseTestCase):
+    def setup(self):
+        super(TestAnyType, self).setUp()
+        self.field = {
+            'name': 'Name',
+            'type': 'any',
+            'format': 'default',
+            'constraints': {
+                'required': False
+            }
+        }
+
+    def test_any(self):
+        _type = types.AnyType(self.field)
+        self.assertEquals(_type.cast(1), 1)
+        self.assertEquals(_type.cast(True), True)
+        self.assertEquals(_type.cast('string'), 'string')

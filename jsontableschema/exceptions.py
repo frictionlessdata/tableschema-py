@@ -39,7 +39,7 @@ class InvalidURI(InvalidStringType):
     pass
 
 
-class InvalidBinary(InvalidStringType):
+class InvalidBinaryString(InvalidStringType):
     pass
 
 

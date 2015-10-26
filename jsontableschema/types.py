@@ -144,7 +144,7 @@ class StringType(constraints.LengthConstraintMixin, JTSType):
 
     def cast_uri(self, value):
         if not self._type_check(value):
-            return False
+            raise exceptions.InvalidURI('uri must be a string')
 
         try:
             rfc3987.parse(value, rule="URI")
@@ -158,8 +158,8 @@ class StringType(constraints.LengthConstraintMixin, JTSType):
 
         try:
             base64.b64decode(value)
-        except binascii.Error as e:
-            raise_with_traceback(exceptions.InvalidBinary(e))
+        except (binascii.Error, TypeError) as e:
+            raise_with_traceback(exceptions.InvalidBinaryString(e))
         return value
 
     def cast_uuid(self, value):
@@ -232,13 +232,15 @@ class BooleanType(JTSType):
 
 class NullType(JTSType):
 
-    py = type(None)
+    py = compat.str
     name = 'null'
     null_values = utilities.NULL_VALUES
 
     def cast_default(self, value):
-        if isinstance(value, self.py):
-            return value
+        if not isinstance(value, self.py):
+            raise exceptions.InvalidNoneType(
+                '{0} is not a none type'.format(value)
+            )
         else:
             value = value.strip().lower()
             if value in self.null_values:
@@ -412,24 +414,25 @@ class GeoPointType(constraints.LengthConstraintMixin, JTSType):
             )
 
     def cast_default(self, value):
-        try:
-            if self._type_check(value):
-                points = value.split(',')
-                if len(points) == 2:
-                    try:
-                        geopoints = [decimal.Decimal(points[0].strip()),
-                                     decimal.Decimal(points[1].strip())]
-                        # TODO: check degree minute second formats?
-                        self._check_latitude_longtiude_range(geopoints)
-                        return geopoints
-                    except decimal.DecimalException as e:
-                        raise_with_traceback(exceptions.InvalidGeoPointType(e))
-                else:
-                    raise exceptions.InvalidGeoPointType(
-                        '{0}: point is not of length 2'.format(value)
-                    )
-        except (TypeError, ValueError) as e:
-            raise_with_traceback(exceptions.InvalidGeoPointType(e))
+        if self._type_check(value):
+            points = value.split(',')
+            if len(points) == 2:
+                try:
+                    geopoints = [decimal.Decimal(points[0].strip()),
+                                 decimal.Decimal(points[1].strip())]
+                    # TODO: check degree minute second formats?
+                    self._check_latitude_longtiude_range(geopoints)
+                    return geopoints
+                except decimal.DecimalException as e:
+                    raise_with_traceback(exceptions.InvalidGeoPointType(e))
+            else:
+                raise exceptions.InvalidGeoPointType(
+                    '{0}: point is not of length 2'.format(value)
+                )
+        else:
+            raise exceptions.InvalidGeoPointType(
+                'Geopoint must be a string if format is "default"'
+            )
 
     def cast_array(self, value):
         try:
@@ -528,7 +531,7 @@ class AnyType(JTSType):
     name = 'any'
 
     def cast(self, value):
-        return True
+        return value
 
 
 def _available_types():
