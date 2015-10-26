@@ -5,6 +5,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import os
 import re
 import decimal
 import datetime
@@ -13,7 +14,12 @@ import json
 import operator
 import base64
 import binascii
+import uuid
 from dateutil.parser import parse as date_parse
+import rfc3987
+import unicodedata
+import jsonschema
+from future.utils import raise_from, raise_with_traceback
 
 from . import compat
 from . import utilities
@@ -88,6 +94,13 @@ class JTSType(constraints.NoConstraintsSupportedMixin):
 
         return cast_value
 
+    def can_cast(self, value):
+        try:
+            self.cast(value)
+            return True
+        except exceptions.InvalidCastError:
+            return False
+
     def cast_default(self, value):
         """Return boolean if the value can be cast to the type/format."""
 
@@ -98,70 +111,69 @@ class JTSType(constraints.NoConstraintsSupportedMixin):
             if not self.py == compat.str:
                 return self.py(value)
 
-        except (ValueError, TypeError, decimal.InvalidOperation):
-            return False
+        except (ValueError, TypeError, decimal.InvalidOperation) as e:
+            raise_with_traceback(exceptions.InvalidCastError(e))
 
-        return False
+        raise exceptions.InvalidCastError('Could not cast value')
 
     def has_format(self, _format):
-
-        if _format in self.formats:
-            return True
-
-        return False
+        return _format in self.formats
 
     def _type_check(self, value):
-        """Return boolean on type check of value. """
-
-        if isinstance(value, self.py):
-            return True
-
-        return False
+        return isinstance(value, self.py)
 
 
 class StringType(constraints.LengthConstraintMixin, JTSType):
 
     py = compat.str
     name = 'string'
-    formats = ('default', 'email', 'uri', 'binary')
+    formats = ('default', 'email', 'uri', 'binary', 'uuid')
     email_pattern = re.compile(r'[^@]+@[^@]+\.[^@]+')
-    # TODO: this is not a URI pattern
-    uri_pattern = re.compile(r'^http[s]?://')
 
     def cast_email(self, value):
-        """Return `value` if is of type, else return False."""
-
         if not self._type_check(value):
-            return False
+            raise exceptions.InvalidStringType(
+                '{0} is not of type {1}'.format(value, self.py)
+            )
 
         if not re.match(self.email_pattern, value):
-            return False
-
+            raise exceptions.InvalidEmail(
+                '{0} is not a valid email'.format(value)
+            )
         return value
 
     def cast_uri(self, value):
-        """Return `value` if is of type, else return False."""
-
-        if not self._type_check(value):
-            return False
-
-        if not re.match(self.uri_pattern, value):
-            return False
-
-        return value
-
-    def cast_binary(self, value):
-        """Return `value` if is of type, else return False."""
-
         if not self._type_check(value):
             return False
 
         try:
+            rfc3987.parse(value, rule="URI")
+            return value
+        except ValueError:
+            raise exceptions.InvalidURI('{0} is not a valid uri'.format(value))
+
+    def cast_binary(self, value):
+        if not self._type_check(value):
+            raise exceptions.InvalidStringType()
+
+        try:
             base64.b64decode(value)
         except binascii.Error as e:
-            return False
+            raise_with_traceback(exceptions.InvalidBinary(e))
+        return value
 
-        return True
+    def cast_uuid(self, value):
+        """Return `value` if is a uuid, else return False."""
+
+        if not self._type_check(value):
+            raise exceptions.InvalidStringType(
+                '{0} is not of type {1}'.format(value, self.py)
+            )
+        try:
+            uuid.UUID(value, version=4)
+            return value
+        except ValueError as e:
+            raise_with_traceback(exceptions.InvalidUUID(e))
 
 
 class IntegerType(constraints.MinMaxConstraintMixin, JTSType):
@@ -175,20 +187,20 @@ class NumberType(constraints.MinMaxConstraintMixin, JTSType):
     py = decimal.Decimal
     name = 'number'
     formats = ('default', 'currency')
-    separators = ',;'
-    currencies = '$'
+    separators = ',; '
+    currencies = u''.join(compat.chr(i) for i
+                          in range(0xffff)
+                          if unicodedata.category(compat.chr(i)) == 'Sc')
 
     def cast_currency(self, value):
-        value = re.sub('[{0}{1}]'.format(self.separators, self.currencies), '', value)
-
-        if isinstance(value, self.py):
-            return True
-
+        value = re.sub('[{0}{1}]'.format(self.separators, self.currencies),
+                       '', value)
         try:
             return decimal.Decimal(value)
-
         except decimal.InvalidOperation:
-            return False
+            raise exceptions.InvalidCurrency(
+                '{0} is not a valid currency'.format(value)
+            )
 
 
 class BooleanType(JTSType):
@@ -202,15 +214,21 @@ class BooleanType(JTSType):
         """Return boolean if `value` can be cast as type `self.py`"""
 
         if isinstance(value, self.py):
-            return True
-
+            return value
         else:
+            try:
+                value = value.strip().lower()
+            except AttributeError:
+                pass
 
-            value = value.strip().lower()
-            if value in (self.true_values + self.false_values):
+            if value in (self.true_values):
                 return True
-
-            return False
+            elif value in (self.false_values):
+                return False
+            else:
+                raise exceptions.InvalidBooleanType(
+                    '{0} is not a boolean value'.format(value)
+                )
 
 
 class NullType(JTSType):
@@ -220,18 +238,16 @@ class NullType(JTSType):
     null_values = utilities.NULL_VALUES
 
     def cast_default(self, value):
-        """Return null if `value` can be cast as type `self.py`"""
-
         if isinstance(value, self.py):
-            return True
-
+            return value
         else:
-
             value = value.strip().lower()
             if value in self.null_values:
-                return True
-
-            return False
+                return None
+            else:
+                raise exceptions.InvalidNoneType(
+                    '{0} is not a none type'.format(value)
+                )
 
 
 class ArrayType(constraints.LengthConstraintMixin, JTSType):
@@ -243,19 +259,18 @@ class ArrayType(constraints.LengthConstraintMixin, JTSType):
         """Return boolean if `value` can be cast as type `self.py`"""
 
         if isinstance(value, self.py):
-            return True
-
+            return value
         try:
-            value = json.loads(value)
-
-            if isinstance(value, self.py):
-                return True
-
+            array_type = json.loads(value)
+            if isinstance(array_type, self.py):
+                return array_type
             else:
-                return False
+                raise exceptions.InvalidArrayType('Not an array')
 
         except (TypeError, ValueError):
-            return False
+            raise exceptions.InvalidArrayType(
+                '{0} is not a array type'.format(value)
+            )
 
 
 class ObjectType(constraints.LengthConstraintMixin, JTSType):
@@ -264,21 +279,16 @@ class ObjectType(constraints.LengthConstraintMixin, JTSType):
     name = 'object'
 
     def cast_default(self, value):
-        """Return boolean if `value` can be cast as type `self.py`"""
-
         if isinstance(value, self.py):
-            return True
-
+            return value
         try:
-            value = json.loads(value)
-            if isinstance(value, self.py):
-                return True
-
+            json_value = json.loads(value)
+            if isinstance(json_value, self.py):
+                return json_value
             else:
-                return False
-
-        except (TypeError, ValueError):
-            return False
+                raise exceptions.InvalidObjectType()
+        except (TypeError, ValueError) as e:
+            raise_with_traceback(exceptions.InvalidObjectType(e))
 
 
 class DateType(constraints.MinMaxConstraintMixin, JTSType):
@@ -295,32 +305,23 @@ class DateType(constraints.MinMaxConstraintMixin, JTSType):
     format_map = dict(zip(raw_formats, py_formats))
 
     def cast_default(self, value):
-        """Return boolean if `value` can be cast as type `self.py`"""
-
         try:
             return datetime.datetime.strptime(value, self.ISO8601).date()
-
-        except ValueError:
-            return False
+        except (TypeError, ValueError) as e:
+            raise_with_traceback(exceptions.InvalidDateType(e))
 
     def cast_any(self, value):
-
         try:
             return date_parse(value).date()
-
-        except ValueError:
-            return False
+        except (TypeError, ValueError) as e:
+            raise_with_traceback(exceptions.InvalidDateType(e))
 
     def cast_fmt(self, value):
-
-        _pattern = self.format.strip('fmt:')
-        _format = self.format_map.get(_pattern, self.ISO8601)
-
         try:
-            return datetime.datetime.strptime(value, _format).date()
-
-        except ValueError:
-            return False
+            date_format = self.format.strip('fmt:')
+            return datetime.datetime.strptime(value, date_format).date()
+        except (TypeError, ValueError) as e:
+            raise_with_traceback(exceptions.InvalidDateType(e))
 
 
 class TimeType(constraints.MinMaxConstraintMixin, JTSType):
@@ -337,32 +338,25 @@ class TimeType(constraints.MinMaxConstraintMixin, JTSType):
     format_map = dict(zip(raw_formats, py_formats))
 
     def cast_default(self, value):
-        """Return boolean if `value` can be cast as type `self.py`"""
-
         try:
-            return time.strptime(value, self.ISO8601)
-
-        except ValueError:
-            return False
+            struct_time = time.strptime(value, self.ISO8601)
+            return datetime.time(struct_time.tm_hour, struct_time.tm_min,
+                                 struct_time.tm_sec)
+        except (TypeError, ValueError) as e:
+            raise_with_traceback(exceptions.InvalidTimeType(e))
 
     def cast_any(self, value):
-
         try:
             return date_parse(value).time()
-
-        except ValueError:
-            return False
+        except (TypeError, ValueError) as e:
+            raise_with_traceback(exceptions.InvalidTimeType(e))
 
     def cast_fmt(self, value):
-
-        _pattern = self.format.strip('fmt:')
-        _format = self.format_map.get(_pattern, self.ISO8601)
-
+        time_format = self.format.strip('fmt:')
         try:
-            return datetime.datetime.strptime(value, _format).date()
-
-        except ValueError:
-            return False
+            return datetime.datetime.strptime(value, time_format).time()
+        except (TypeError, ValueError) as e:
+            raise_with_traceback(exceptions.InvalidTimeType(e))
 
 
 class DateTimeType(constraints.MinMaxConstraintMixin, JTSType):
@@ -379,32 +373,23 @@ class DateTimeType(constraints.MinMaxConstraintMixin, JTSType):
     format_map = dict(zip(raw_formats, py_formats))
 
     def cast_default(self, value):
-        """Return boolean if `value` can be cast as type `self.py`"""
-
         try:
             return datetime.datetime.strptime(value, self.ISO8601)
-
-        except ValueError:
-            return False
+        except (TypeError, ValueError) as e:
+            raise_with_traceback(exceptions.InvalidDateTimeType(e))
 
     def cast_any(self, value):
-
         try:
             return date_parse(value)
-
-        except ValueError:
-            return False
+        except (TypeError, ValueError) as e:
+            raise_with_traceback(exceptions.InvalidDateTimeType(e))
 
     def cast_fmt(self, value):
-
-        _pattern = self.format.strip('fmt:')
-        _format = self.format_map.get(_pattern, self.ISO8601)
-
         try:
-            return datetime.datetime.strptime(value, _format)
-
-        except ValueError:
-            return False
+            format = self.format.strip('fmt:')
+            return datetime.datetime.strptime(value, format)
+        except (TypeError, ValueError) as e:
+            raise_with_traceback(exceptions.InvalidDateTimeType(e))
 
 
 class GeoPointType(constraints.LengthConstraintMixin, JTSType):
@@ -413,31 +398,98 @@ class GeoPointType(constraints.LengthConstraintMixin, JTSType):
     name = 'geopoint'
     formats = ('default', 'array', 'object')
 
+    def _check_latitude_longtiude_range(self, geopoint):
+        longitude = geopoint[0]
+        latitude = geopoint[1]
+        if longitude >= 180 or longitude <= -180:
+            raise exceptions.InvalidGeoPointType(
+                'longtitude should be between -180 and 180, '
+                'found: {0}'.format(longitude)
+            )
+        elif latitude >= 90 or latitude <= -90:
+            raise exceptions.InvalidGeoPointType(
+                'latitude should be between -90 and 90, '
+                'found: {0}'.format(latitude)
+            )
+
     def cast_default(self, value):
-
-        if self._type_check(value):
-            if len(value.split(',')) == 2:
-                return True
-            return False
-
         try:
-            value = json.loads(value)
-            if isinstance(value, self.py):
-                return True
-
-            else:
-                return False
-
-        except (TypeError, ValueError):
-            return False
-
-        return False
+            if self._type_check(value):
+                points = value.split(',')
+                if len(points) == 2:
+                    try:
+                        geopoints = [decimal.Decimal(points[0].strip()),
+                                     decimal.Decimal(points[1].strip())]
+                        # TODO: check degree minute second formats?
+                        self._check_latitude_longtiude_range(geopoints)
+                        return geopoints
+                    except decimal.DecimalException as e:
+                        raise_with_traceback(exceptions.InvalidGeoPointType(e))
+                else:
+                    raise exceptions.InvalidGeoPointType(
+                        '{0}: point is not of length 2'.format(value)
+                    )
+        except (TypeError, ValueError) as e:
+            raise_with_traceback(exceptions.InvalidGeoPointType(e))
 
     def cast_array(self, value):
-        raise NotImplementedError
+        try:
+            json_value = json.loads(value)
+            if isinstance(json_value, list) and len(json_value) == 2:
+                try:
+                    longitude = json_value[0].strip()
+                    latitude = json_value[1].strip()
+                except AttributeError:
+                    longitude = json_value[0]
+                    latitude = json_value[1]
+
+                try:
+                    geopoints = [decimal.Decimal(longitude),
+                                 decimal.Decimal(latitude)]
+                    self._check_latitude_longtiude_range(geopoints)
+                    return geopoints
+                except decimal.DecimalException as e:
+                    raise_with_traceback(exceptions.InvalidGeoPointType(e))
+            else:
+                raise exceptions.InvalidGeoPointType(
+                    '{0}: point is not of length 2'.format(value)
+                )
+        except (TypeError, ValueError) as e:
+            raise_with_traceback(exceptions.InvalidGeoPointType(e))
 
     def cast_object(self, value):
-        raise NotImplementedError
+        try:
+            json_value = json.loads(value)
+
+            try:
+                longitude = json_value['longitude'].strip()
+                latitude = json_value['latitude'].strip()
+            except AttributeError:
+                longitude = json_value['longitude']
+                latitude = json_value['latitude']
+            except KeyError as e:
+                raise_with_traceback(exceptions.InvalidGeoPointType(e))
+
+            try:
+                geopoints = [decimal.Decimal(longitude),
+                             decimal.Decimal(latitude)]
+                # TODO: check degree minute second formats?
+                self._check_latitude_longtiude_range(geopoints)
+                return geopoints
+            except decimal.DecimalException as e:
+                raise_with_traceback(exceptions.InvalidGeoPointType(e))
+        except (TypeError, ValueError) as e:
+            raise_with_traceback(exceptions.InvalidGeoPointType(e))
+
+
+def load_geojson_schema():
+    filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)),
+                            'geojson/geojson.json')
+    with open(filepath) as f:
+        json_table_schema = json.load(f)
+    return json_table_schema
+
+geojson_schema = load_geojson_schema()
 
 
 class GeoJSONType(constraints.LengthConstraintMixin, JTSType):
@@ -452,22 +504,21 @@ class GeoJSONType(constraints.LengthConstraintMixin, JTSType):
     }
 
     def cast_default(self, value):
-        """Return boolean if `value` can be cast as type `self.py`"""
-
-        if self._type_check(value):
-            return True
-
-        try:
-            value = json.loads(value)
-            if isinstance(value, self.py):
-                return True
-
-            else:
-                return False
-
-        except (TypeError, ValueError):
-            return False
-
+        if isinstance(value, self.py):
+            try:
+                jsonschema.validate(value, geojson_schema)
+                return value
+            except jsonschema.exceptions.ValidationError as e:
+                raise_with_traceback(exceptions.InvalidGeoJSONType())
+        if isinstance(value, compat.str):
+            try:
+                geojson = json.loads(value)
+                jsonschema.validate(geojson, geojson_schema)
+                return geojson
+            except (TypeError, ValueError) as e:
+                raise_with_traceback(exceptions.InvalidGeoJSONType())
+            except jsonschema.exceptions.ValidationError as e:
+                raise_with_traceback(exceptions.InvalidGeoJSONType())
 
     def cast_topojson(self, value):
         raise NotImplementedError
@@ -483,8 +534,8 @@ class AnyType(JTSType):
 
 def _available_types():
     """Return available types."""
-    return (AnyType, StringType, BooleanType, NumberType, IntegerType, NullType,
-            DateType, TimeType, DateTimeType, ArrayType, ObjectType,
+    return (AnyType, StringType, BooleanType, NumberType, IntegerType,
+            NullType, DateType, TimeType, DateTimeType, ArrayType, ObjectType,
             GeoPointType, GeoJSONType)
 
 
@@ -503,7 +554,7 @@ class TypeGuesser(object):
 
     def cast(self, value):
         for _type in reversed(self._types):
-            result = _type(self.type_options.get(_type.name, {})).cast(value)
+            result = _type(self.type_options.get(_type.name, {})).can_cast(value)
             if result:
                 # TODO: do format guessing
                 rv = (_type.name, 'default')
@@ -545,5 +596,6 @@ class TypeResolver(object):
                 'type': sorted_counts[0][0][0],
                 'format': sorted_counts[0][0][1]
             }
+
 
         return rv

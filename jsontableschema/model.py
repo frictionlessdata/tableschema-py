@@ -1,4 +1,4 @@
-"""useful models for JSON Table Schema."""
+"""useful model for JSON Table Schema."""
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 from __future__ import division
