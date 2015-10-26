@@ -370,12 +370,12 @@ class GeoPointType(JTSType):
         latitude = geopoint[1]
         if longitude >= 180 or longitude <= -180:
             raise exceptions.InvalidGeoPointType(
-                'longtitude should be between ±180, '
+                'longtitude should be between -180 and 180, '
                 'found: {0}'.format(longitude)
             )
         elif latitude >= 90 or latitude <= -90:
             raise exceptions.InvalidGeoPointType(
-                'latitude should be between ±90, '
+                'latitude should be between -90 and 90, '
                 'found: {0}'.format(latitude)
             )
 
