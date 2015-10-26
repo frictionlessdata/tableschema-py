@@ -477,16 +477,16 @@ class GeoJSONType(JTSType):
                 jsonschema.validate(value, geojson_schema)
                 return value
             except jsonschema.exceptions.ValidationError as e:
-                raise_from(exceptions.InvalidGeoJSONType(e), e)
+                raise_from(exceptions.InvalidGeoJSONType(), e)
         if isinstance(value, compat.str):
             try:
                 geojson = json.loads(value)
                 jsonschema.validate(geojson, geojson_schema)
                 return geojson
             except (TypeError, ValueError) as e:
-                raise_from(exceptions.InvalidGeoJSONType(e), e)
+                raise_from(exceptions.InvalidGeoJSONType(), e)
             except jsonschema.exceptions.ValidationError as e:
-                raise_from(exceptions.InvalidGeoJSONType(e), e)
+                raise_from(exceptions.InvalidGeoJSONType(), e)
 
     def cast_topojson(self, value):
         raise NotImplementedError
