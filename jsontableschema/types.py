@@ -155,9 +155,9 @@ class NumberType(JTSType):
     name = 'number'
     formats = ('default', 'currency')
     separators = ',; '
-    currencies = u''.join(unichr(i) for i
+    currencies = u''.join(compat.chr(i) for i
                           in range(0xffff)
-                          if unicodedata.category(unichr(i)) == 'Sc')
+                          if unicodedata.category(compat.chr(i)) == 'Sc')
 
     def cast_currency(self, value):
         value = re.sub('[{0}{1}]'.format(self.separators, self.currencies),
