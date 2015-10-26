@@ -1,3 +1,5 @@
+from dateutil.parser import parse as date_parse
+
 from . import exceptions
 
 
@@ -53,13 +55,23 @@ class MinMaxConstraintMixin(object):
     '''
 
     def check_minimum(self, value, minimum):
-        if minimum is not None and value < minimum:
-            raise exceptions.ConstraintError(
-                msg="The field '{0}' must not be less than {1}"
-                .format(self.field_name, minimum))
+        if minimum is not None:
+            if self.name in ('date', 'datetime'):
+                minimum = date_parse(minimum, ignoretz=True)
+            if self.name == 'date':
+                minimum = minimum.date()
+            if value < minimum:
+                raise exceptions.ConstraintError(
+                    msg="The field '{0}' must not be less than {1}"
+                    .format(self.field_name, minimum))
 
     def check_maximum(self, value, maximum):
-        if maximum is not None and value > maximum:
-            raise exceptions.ConstraintError(
-                msg="The field '{0}' must not be more than {1}"
-                .format(self.field_name, maximum))
+        if maximum is not None:
+            if self.name in ('date', 'datetime'):
+                maximum = date_parse(maximum, ignoretz=True)
+            if self.name == 'date':
+                maximum = maximum.date()
+            if value > maximum:
+                raise exceptions.ConstraintError(
+                    msg="The field '{0}' must not be more than {1}"
+                    .format(self.field_name, maximum))
