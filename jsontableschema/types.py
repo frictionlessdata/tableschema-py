@@ -19,11 +19,15 @@ from dateutil.parser import parse as date_parse
 import rfc3987
 import unicodedata
 import jsonschema
-from . import compat, utilities, exceptions
 from future.utils import raise_from, raise_with_traceback
 
+from . import compat
+from . import utilities
+from . import exceptions
+from . import constraints
 
-class JTSType(object):
+
+class JTSType(constraints.NoConstraintsSupportedMixin):
 
     """Base class for all JSON Table Schema types."""
 
@@ -32,22 +36,38 @@ class JTSType(object):
     formats = ('default',)
 
     def __init__(self, field=None, **kwargs):
-        """Setup some variables for easy access. `field` is the field schema."""
+        """Setup some variables for easy access. `field` is the field
+        schema."""
 
         self.field = field
+        self.constraints = None
+        self.field_name = None
 
         if self.field:
+            self.field_name = self.field['name']
             self.format = self.field['format']
-            self.required = self.field['constraints']['required']
+            self.constraints = self.field.get('constraints', None)
         else:
             self.format = 'default'
-            self.required = True
+
+    def _get_constraint_value(self, constraint):
+        '''Get the value from self.constraints or return None'''
+        if self.constraints is None:
+            return None
+        return self.constraints.get(constraint, None)
 
     def cast(self, value):
-        if self.required and value in (None, ''):
-            raise exceptions.RequiredFieldError(
-                '{0} is a required field'.format(self.field)
-            )
+        """Return boolean if `value` can be cast as type `self.py`."""
+
+        # we can check on `constraints.required` before we cast
+        required = self._get_constraint_value('required')
+        if required is not None:
+            if not required and (value in (None, utilities.NULL_VALUES)):
+                return None
+            elif required and value in (None, ''):
+                raise exceptions.ConstraintError(
+                    msg="The field '{0}' requires a value".format(
+                        self.field_name))
 
         # cast with the appropriate handler, falling back to default if none
 
@@ -59,9 +79,20 @@ class JTSType(object):
         _handler = 'cast_{0}'.format(_format)
 
         if self.has_format(_format) and hasattr(self, _handler):
-            return getattr(self, _handler)(value)
+            cast_value = getattr(self, _handler)(value)
+        else:
+            cast_value = self.cast_default(value)
 
-        return self.cast_default(value)
+        # The value is now cast, and we can check it against other
+        # constraints.
+        constraints_to_check = ['minLength', 'maxLength']
+        for c in constraints_to_check:
+            constraint_value = self._get_constraint_value(c)
+            if constraint_value:
+                getattr(self, 'check_{0}'.format(c))(cast_value,
+                                                     constraint_value)
+
+        return cast_value
 
     def can_cast(self, value):
         try:
@@ -92,7 +123,7 @@ class JTSType(object):
         return isinstance(value, self.py)
 
 
-class StringType(JTSType):
+class StringType(constraints.LengthConstraintMixin, JTSType):
 
     py = compat.str
     name = 'string'
@@ -218,7 +249,7 @@ class NullType(JTSType):
                 )
 
 
-class ArrayType(JTSType):
+class ArrayType(constraints.LengthConstraintMixin, JTSType):
 
     py = list
     name = 'array'
@@ -241,7 +272,7 @@ class ArrayType(JTSType):
             )
 
 
-class ObjectType(JTSType):
+class ObjectType(constraints.LengthConstraintMixin, JTSType):
 
     py = dict
     name = 'object'
@@ -360,7 +391,7 @@ class DateTimeType(JTSType):
             raise_with_traceback(exceptions.InvalidDateTimeType(e))
 
 
-class GeoPointType(JTSType):
+class GeoPointType(constraints.LengthConstraintMixin, JTSType):
 
     py = compat.str, list, dict
     name = 'geopoint'
@@ -460,7 +491,7 @@ def load_geojson_schema():
 geojson_schema = load_geojson_schema()
 
 
-class GeoJSONType(JTSType):
+class GeoJSONType(constraints.LengthConstraintMixin, JTSType):
 
     py = dict
     name = 'geojson'
