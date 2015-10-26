@@ -18,7 +18,7 @@ class TestInferSchema(base.BaseTestCase):
             headers = stream.readline().rstrip('\n').split(',')
             values = jsontableschema.compat.csv_reader(stream)
             schema = jsontableschema.infer(headers, values)
-        schema_model = jsontableschema.models.SchemaModel(schema)
+        schema_model = jsontableschema.model.SchemaModel(schema)
 
         self.assertEqual(schema_model.get_field('id')['type'], 'integer')
         self.assertEqual(schema_model.get_field('age')['type'], 'integer')
@@ -30,7 +30,7 @@ class TestInferSchema(base.BaseTestCase):
             headers = stream.readline().rstrip('\n').split(',')
             values = jsontableschema.compat.csv_reader(stream)
             schema = jsontableschema.infer(headers, values, row_limit=4)
-        schema_model = jsontableschema.models.SchemaModel(schema)
+        schema_model = jsontableschema.model.SchemaModel(schema)
 
         self.assertEqual(schema_model.get_field('id')['type'], 'integer')
         self.assertEqual(schema_model.get_field('age')['type'], 'integer')
@@ -43,7 +43,7 @@ class TestInferSchema(base.BaseTestCase):
             headers = stream.readline().rstrip('\n').split(',')
             values = jsontableschema.compat.csv_reader(stream)
             schema = jsontableschema.infer(headers, values, primary_key=primary_key)
-        schema_model = jsontableschema.models.SchemaModel(schema)
+        schema_model = jsontableschema.model.SchemaModel(schema)
 
         self.assertTrue(schema_model.primaryKey, primary_key)
 
@@ -54,7 +54,7 @@ class TestInferSchema(base.BaseTestCase):
             headers = stream.readline().rstrip('\n').split(',')
             values = jsontableschema.compat.csv_reader(stream)
             schema = jsontableschema.infer(headers, values, primary_key=primary_key)
-        schema_model = jsontableschema.models.SchemaModel(schema)
+        schema_model = jsontableschema.model.SchemaModel(schema)
 
         self.assertTrue(schema_model.primaryKey, primary_key)
 
