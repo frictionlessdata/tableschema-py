@@ -94,8 +94,10 @@ class InvalidGeoJSONType(InvalidCastError):
 class ConstraintError(JsonTableSchemaException):
     def __init__(self, msg=None):
         self.msg = msg or "The value didn't validate against a constraint."
+        super(ConstraintError, self).__init__(msg)
 
 
 class ConstraintNotSupported(JsonTableSchemaException):
     def __init__(self, msg=None):
         self.msg = msg or "The field does not support the constraint."
+        super(ConstraintNotSupported, self).__init__(msg)
