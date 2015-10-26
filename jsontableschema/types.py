@@ -79,7 +79,7 @@ class JTSType(object):
             if not self.py == compat.str:
                 return self.py(value)
 
-        except (ValueError, TypeError, decimal.InvalidOperation), e:
+        except (ValueError, TypeError, decimal.InvalidOperation) as e:
             raise exceptions.InvalidCastError(e.message)
 
         raise exceptions.InvalidCastError('Could not cast value')
