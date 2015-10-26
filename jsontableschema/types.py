@@ -20,7 +20,7 @@ import rfc3987
 import unicodedata
 import jsonschema
 from . import compat, utilities, exceptions
-from future.utils import raise_from
+from future.utils import raise_from, raise_with_traceback
 
 
 class JTSType(object):
@@ -81,7 +81,7 @@ class JTSType(object):
                 return self.py(value)
 
         except (ValueError, TypeError, decimal.InvalidOperation) as e:
-            raise_from(exceptions.InvalidCastError(e), e)
+            raise_with_traceback(exceptions.InvalidCastError(e))
 
         raise exceptions.InvalidCastError('Could not cast value')
 
@@ -128,7 +128,7 @@ class StringType(JTSType):
         try:
             base64.b64decode(value)
         except binascii.Error as e:
-            raise_from(exceptions.InvalidBinary(e), e)
+            raise_with_traceback(exceptions.InvalidBinary(e))
         return value
 
     def cast_uuid(self, value):
@@ -142,7 +142,7 @@ class StringType(JTSType):
             uuid.UUID(value, version=4)
             return value
         except ValueError as e:
-            raise_from(exceptions.InvalidUUID(e), e)
+            raise_with_traceback(exceptions.InvalidUUID(e))
 
 
 class IntegerType(JTSType):
@@ -256,7 +256,7 @@ class ObjectType(JTSType):
             else:
                 raise exceptions.InvalidObjectType()
         except (TypeError, ValueError) as e:
-            raise_from(exceptions.InvalidObjectType(e), e)
+            raise_with_traceback(exceptions.InvalidObjectType(e))
 
 
 class DateType(JTSType):
@@ -276,20 +276,20 @@ class DateType(JTSType):
         try:
             return datetime.datetime.strptime(value, self.ISO8601).date()
         except (TypeError, ValueError) as e:
-            raise_from(exceptions.InvalidDateType(e), e)
+            raise_with_traceback(exceptions.InvalidDateType(e))
 
     def cast_any(self, value):
         try:
             return date_parse(value).date()
         except (TypeError, ValueError) as e:
-            raise_from(exceptions.InvalidDateType(e), e)
+            raise_with_traceback(exceptions.InvalidDateType(e))
 
     def cast_fmt(self, value):
         try:
             date_format = self.format.strip('fmt:')
             return datetime.datetime.strptime(value, date_format).date()
         except (TypeError, ValueError) as e:
-            raise_from(exceptions.InvalidDateType(e), e)
+            raise_with_traceback(exceptions.InvalidDateType(e))
 
 
 class TimeType(JTSType):
@@ -311,20 +311,20 @@ class TimeType(JTSType):
             return datetime.time(struct_time.tm_hour, struct_time.tm_min,
                                  struct_time.tm_sec)
         except (TypeError, ValueError) as e:
-            raise_from(exceptions.InvalidTimeType(e), e)
+            raise_with_traceback(exceptions.InvalidTimeType(e))
 
     def cast_any(self, value):
         try:
             return date_parse(value).time()
         except (TypeError, ValueError) as e:
-            raise_from(exceptions.InvalidTimeType(e), e)
+            raise_with_traceback(exceptions.InvalidTimeType(e))
 
     def cast_fmt(self, value):
         time_format = self.format.strip('fmt:')
         try:
             return datetime.datetime.strptime(value, time_format).time()
         except (TypeError, ValueError) as e:
-            raise_from(exceptions.InvalidTimeType(e), e)
+            raise_with_traceback(exceptions.InvalidTimeType(e))
 
 
 class DateTimeType(JTSType):
@@ -344,20 +344,20 @@ class DateTimeType(JTSType):
         try:
             return datetime.datetime.strptime(value, self.ISO8601)
         except (TypeError, ValueError) as e:
-            raise_from(exceptions.InvalidDateTimeType(e), e)
+            raise_with_traceback(exceptions.InvalidDateTimeType(e))
 
     def cast_any(self, value):
         try:
             return date_parse(value)
         except (TypeError, ValueError) as e:
-            raise_from(exceptions.InvalidDateTimeType(e), e)
+            raise_with_traceback(exceptions.InvalidDateTimeType(e))
 
     def cast_fmt(self, value):
         try:
             format = self.format.strip('fmt:')
             return datetime.datetime.strptime(value, format)
         except (TypeError, ValueError) as e:
-            raise_from(exceptions.InvalidDateTimeType(e), e)
+            raise_with_traceback(exceptions.InvalidDateTimeType(e))
 
 
 class GeoPointType(JTSType):
@@ -392,13 +392,13 @@ class GeoPointType(JTSType):
                         self._check_latitude_longtiude_range(geopoints)
                         return geopoints
                     except decimal.DecimalException as e:
-                        raise_from(exceptions.InvalidGeoPointType(e), e)
+                        raise_with_traceback(exceptions.InvalidGeoPointType(e))
                 else:
                     raise exceptions.InvalidGeoPointType(
                         '{0}: point is not of length 2'.format(value)
                     )
         except (TypeError, ValueError) as e:
-            raise_from(exceptions.InvalidGeoPointType(e), e)
+            raise_with_traceback(exceptions.InvalidGeoPointType(e))
 
     def cast_array(self, value):
         try:
@@ -417,13 +417,13 @@ class GeoPointType(JTSType):
                     self._check_latitude_longtiude_range(geopoints)
                     return geopoints
                 except decimal.DecimalException as e:
-                    raise_from(exceptions.InvalidGeoPointType(e), e)
+                    raise_with_traceback(exceptions.InvalidGeoPointType(e))
             else:
                 raise exceptions.InvalidGeoPointType(
                     '{0}: point is not of length 2'.format(value)
                 )
         except (TypeError, ValueError) as e:
-            raise_from(exceptions.InvalidGeoPointType(e), e)
+            raise_with_traceback(exceptions.InvalidGeoPointType(e))
 
     def cast_object(self, value):
         try:
@@ -436,7 +436,7 @@ class GeoPointType(JTSType):
                 longitude = json_value['longitude']
                 latitude = json_value['latitude']
             except KeyError as e:
-                raise_from(exceptions.InvalidGeoPointType(e), e)
+                raise_with_traceback(exceptions.InvalidGeoPointType(e))
 
             try:
                 geopoints = [decimal.Decimal(longitude),
@@ -445,9 +445,9 @@ class GeoPointType(JTSType):
                 self._check_latitude_longtiude_range(geopoints)
                 return geopoints
             except decimal.DecimalException as e:
-                raise_from(exceptions.InvalidGeoPointType(e), e)
+                raise_with_traceback(exceptions.InvalidGeoPointType(e))
         except (TypeError, ValueError) as e:
-            raise_from(exceptions.InvalidGeoPointType(e), e)
+            raise_with_traceback(exceptions.InvalidGeoPointType(e))
 
 
 def load_geojson_schema():
@@ -477,16 +477,16 @@ class GeoJSONType(JTSType):
                 jsonschema.validate(value, geojson_schema)
                 return value
             except jsonschema.exceptions.ValidationError as e:
-                raise_from(exceptions.InvalidGeoJSONType(), e)
+                raise_with_traceback(exceptions.InvalidGeoJSONType())
         if isinstance(value, compat.str):
             try:
                 geojson = json.loads(value)
                 jsonschema.validate(geojson, geojson_schema)
                 return geojson
             except (TypeError, ValueError) as e:
-                raise_from(exceptions.InvalidGeoJSONType(), e)
+                raise_with_traceback(exceptions.InvalidGeoJSONType())
             except jsonschema.exceptions.ValidationError as e:
-                raise_from(exceptions.InvalidGeoJSONType(), e)
+                raise_with_traceback(exceptions.InvalidGeoJSONType())
 
     def cast_topojson(self, value):
         raise NotImplementedError
