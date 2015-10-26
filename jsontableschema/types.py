@@ -140,7 +140,7 @@ class StringType(JTSType):
         try:
             uuid.UUID(value, version=4)
             return value
-        except ValueError, e:
+        except ValueError as e:
             raise exceptions.InvalidUUID(e.message)
 
 
@@ -254,7 +254,7 @@ class ObjectType(JTSType):
                 return json_value
             else:
                 raise exceptions.InvalidObjectType()
-        except (TypeError, ValueError), e:
+        except (TypeError, ValueError) as e:
             raise exceptions.InvalidObjectType(e.message)
 
 
@@ -274,20 +274,20 @@ class DateType(JTSType):
     def cast_default(self, value):
         try:
             return datetime.datetime.strptime(value, self.ISO8601).date()
-        except (TypeError, ValueError), e:
+        except (TypeError, ValueError) as e:
             raise exceptions.InvalidDateType(e.message)
 
     def cast_any(self, value):
         try:
             return date_parse(value).date()
-        except (TypeError, ValueError), e:
+        except (TypeError, ValueError) as e:
             raise exceptions.InvalidDateType(e.message)
 
     def cast_fmt(self, value):
         try:
             date_format = self.format.strip('fmt:')
             return datetime.datetime.strptime(value, date_format).date()
-        except (TypeError, ValueError), e:
+        except (TypeError, ValueError) as e:
             raise exceptions.InvalidDateType(e.message)
 
 
@@ -309,20 +309,20 @@ class TimeType(JTSType):
             struct_time = time.strptime(value, self.ISO8601)
             return datetime.time(struct_time.tm_hour, struct_time.tm_min,
                                  struct_time.tm_sec)
-        except (TypeError, ValueError), e:
+        except (TypeError, ValueError) as e:
             raise exceptions.InvalidTimeType(e.message)
 
     def cast_any(self, value):
         try:
             return date_parse(value).time()
-        except (TypeError, ValueError), e:
+        except (TypeError, ValueError) as e:
             raise exceptions.InvalidTimeType(e.message)
 
     def cast_fmt(self, value):
         time_format = self.format.strip('fmt:')
         try:
             return datetime.datetime.strptime(value, time_format).time()
-        except (TypeError, ValueError), e:
+        except (TypeError, ValueError) as e:
             raise exceptions.InvalidTimeType(e.message)
 
 
@@ -342,20 +342,20 @@ class DateTimeType(JTSType):
     def cast_default(self, value):
         try:
             return datetime.datetime.strptime(value, self.ISO8601)
-        except (TypeError, ValueError), e:
+        except (TypeError, ValueError) as e:
             raise exceptions.InvalidDateTimeType(e.message)
 
     def cast_any(self, value):
         try:
             return date_parse(value)
-        except (TypeError, ValueError), e:
+        except (TypeError, ValueError) as e:
             raise exceptions.InvalidDateTimeType(e.message)
 
     def cast_fmt(self, value):
         try:
             format = self.format.strip('fmt:')
             return datetime.datetime.strptime(value, format)
-        except (TypeError, ValueError), e:
+        except (TypeError, ValueError) as e:
             raise exceptions.InvalidDateTimeType(e.message)
 
 
@@ -390,7 +390,7 @@ class GeoPointType(JTSType):
                         # TODO: check degree minute second formats?
                         self._check_latitude_longtiude_range(geopoints)
                         return geopoints
-                    except decimal.DecimalException, e:
+                    except decimal.DecimalException as e:
                         raise exceptions.InvalidGeoPointType(
                             e.message
                         )
@@ -398,7 +398,7 @@ class GeoPointType(JTSType):
                     raise exceptions.InvalidGeoPointType(
                         '{0}: point is not of length 2'.format(value)
                     )
-        except (TypeError, ValueError), e:
+        except (TypeError, ValueError) as e:
             raise exceptions.InvalidGeoPointType(e.message)
 
     def cast_array(self, value):
@@ -417,7 +417,7 @@ class GeoPointType(JTSType):
                                  decimal.Decimal(latitude)]
                     self._check_latitude_longtiude_range(geopoints)
                     return geopoints
-                except decimal.DecimalException, e:
+                except decimal.DecimalException as e:
                     raise exceptions.InvalidGeoPointType(
                         e.message
                     )
@@ -425,7 +425,7 @@ class GeoPointType(JTSType):
                 raise exceptions.InvalidGeoPointType(
                     '{0}: point is not of length 2'.format(value)
                 )
-        except (TypeError, ValueError), e:
+        except (TypeError, ValueError) as e:
             raise exceptions.InvalidGeoPointType(e.message)
 
     def cast_object(self, value):
@@ -438,7 +438,7 @@ class GeoPointType(JTSType):
             except AttributeError:
                 longitude = json_value['longitude']
                 latitude = json_value['latitude']
-            except KeyError, e:
+            except KeyError as e:
                 raise exceptions.InvalidGeoPointType(
                     e.message
                 )
@@ -449,11 +449,11 @@ class GeoPointType(JTSType):
                 # TODO: check degree minute second formats?
                 self._check_latitude_longtiude_range(geopoints)
                 return geopoints
-            except decimal.DecimalException, e:
+            except decimal.DecimalException as e:
                 raise exceptions.InvalidGeoPointType(
                     e.message
                 )
-        except (TypeError, ValueError), e:
+        except (TypeError, ValueError) as e:
             raise exceptions.InvalidGeoPointType(e.message)
 
 
@@ -483,16 +483,16 @@ class GeoJSONType(JTSType):
             try:
                 jsonschema.validate(value, geojson_schema)
                 return value
-            except jsonschema.exceptions.ValidationError, e:
+            except jsonschema.exceptions.ValidationError as e:
                 raise exceptions.InvalidGeoJSONType(e.message)
         if isinstance(value, compat.str):
             try:
                 geojson = json.loads(value)
                 jsonschema.validate(geojson, geojson_schema)
                 return geojson
-            except (TypeError, ValueError), e:
+            except (TypeError, ValueError) as e:
                 raise exceptions.InvalidGeoJSONType(e.message)
-            except jsonschema.exceptions.ValidationError, e:
+            except jsonschema.exceptions.ValidationError as e:
                 raise exceptions.InvalidGeoJSONType(e.message)
 
     def cast_topojson(self, value):
