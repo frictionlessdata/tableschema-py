@@ -12,17 +12,20 @@ class NoConstraintsSupportedMixin(object):
             msg="Field type '{0}' does not support the {1} constraint"
             .format(field_type, constraint))
 
-    def check_minLength(self, value):
+    def check_minLength(self, value, min_length):
         self._raise_constraint_not_supported(self.name, 'minLength')
 
-    def check_maxLength(self, value):
+    def check_maxLength(self, value, max_length):
         self._raise_constraint_not_supported(self.name, 'maxLength')
 
-    def check_minimum(self, value):
+    def check_minimum(self, value, minimum):
         self._raise_constraint_not_supported(self.name, 'minimum')
 
-    def check_maximum(self, value):
+    def check_maximum(self, value, maximum):
         self._raise_constraint_not_supported(self.name, 'maximum')
+
+    def check_enum(self, value, enum):
+        self._raise_constraint_not_supported(self.name, 'enum')
 
 
 class LengthConstraintMixin(object):
@@ -79,3 +82,20 @@ class MinMaxConstraintMixin(object):
                 raise exceptions.ConstraintError(
                     msg="The field '{0}' must not be more than {1}"
                     .format(self.field_name, maximum))
+
+
+class EnumConstraintMixin(object):
+
+    def _cast_enum(self, enum):
+        '''
+        Cast each member of the enum array as the same type and format of
+        self. This ensures we're comparing like for like. Don't apply the
+        type's constraints for this cast.
+        '''
+        return [self.cast(m, skip_constraints=True) for m in enum]
+
+    def check_enum(self, value, enum):
+        if value not in self._cast_enum(enum):
+            raise exceptions.ConstraintError(
+                msg="The value for field '{0}' must be in the enum array"
+                .format(self.field_name))

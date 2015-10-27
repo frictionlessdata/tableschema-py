@@ -5,6 +5,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import time
+import decimal
 import datetime
 
 import pytest
@@ -441,3 +442,273 @@ class TestTimeTypeConstraints_Maximum(ConstraintsBase):
             _type.cast(value)
         self.assertEqual(
             e.value.msg, "The field 'Name' must not be more than 11:30:20")
+
+
+class TestStringTypeConstraints_Enum(ConstraintsBase):
+
+    '''Test `enum` constraint for StringType'''
+
+    def test_constraints_enum_valid_value(self):
+        '''value is in enum array'''
+        value = "bob"
+        field = self._make_default_field(
+            type='string', constraints={'enum': ['alice', 'bob', 'chuck']})
+
+        _type = types.StringType(field)
+
+        self.assertEqual(_type.cast(value), value)
+
+    def test_constraints_enum_invalid_value(self):
+        '''value is not in enum array'''
+        value = "fred"
+        field = self._make_default_field(
+            type='string', constraints={'enum': ['alice', 'bob', 'chuck']})
+
+        _type = types.StringType(field)
+
+        with pytest.raises(exceptions.ConstraintError) as e:
+            _type.cast(value)
+        self.assertEqual(
+            e.value.msg, "The value for field 'Name' "
+                         "must be in the enum array")
+
+    def test_constraints_enum_invalid_value_case_sensitive(self):
+        '''value comparison is case sensitive'''
+        value = "Bob"
+        field = self._make_default_field(
+            type='string', constraints={'enum': ['alice', 'bob', 'chuck']})
+
+        _type = types.StringType(field)
+
+        with pytest.raises(exceptions.ConstraintError) as e:
+            _type.cast(value)
+        self.assertEqual(
+            e.value.msg, "The value for field 'Name' "
+                         "must be in the enum array")
+
+
+class TestIntegerTypeConstraints_Enum(ConstraintsBase):
+
+    '''Test `enum` constraint for IntegerType'''
+
+    def test_constraints_enum_valid_value(self):
+        '''value is in enum array'''
+        value = 5
+        field = self._make_default_field(
+            type='integer', constraints={'enum': [1, 3, 5]})
+
+        _type = types.IntegerType(field)
+
+        self.assertEqual(_type.cast(value), value)
+
+    def test_constraints_enum_invalid_value(self):
+        '''value is not in enum array'''
+        value = 2
+        field = self._make_default_field(
+            type='integer', constraints={'enum': [1, 3, 5]})
+
+        _type = types.IntegerType(field)
+
+        with pytest.raises(exceptions.ConstraintError) as e:
+            _type.cast(value)
+        self.assertEqual(
+            e.value.msg, "The value for field 'Name' "
+                         "must be in the enum array")
+
+
+class TestNumberTypeConstraints_Enum(ConstraintsBase):
+
+    '''Test `enum` constraint for NumberType'''
+
+    def test_constraints_enum_valid_value(self):
+        '''value is in enum array'''
+        value = 5
+        field = self._make_default_field(
+            type='number', constraints={'enum': ["1.0", "3.0", "5.0"]})
+
+        _type = types.NumberType(field)
+
+        self.assertEqual(_type.cast(value), value)
+
+    def test_constraints_enum_invalid_value(self):
+        '''value is not in enum array'''
+        value = 2
+        field = self._make_default_field(
+            type='number', constraints={'enum': ["1.0", "3.0", "5.0"]})
+
+        _type = types.NumberType(field)
+
+        with pytest.raises(exceptions.ConstraintError) as e:
+            _type.cast(value)
+        self.assertEqual(
+            e.value.msg, "The value for field 'Name' "
+                         "must be in the enum array")
+
+
+class TestBooleanTypeConstraints_Enum(ConstraintsBase):
+
+    '''Test `enum` constraint for BooleanType'''
+
+    def test_constraints_enum_valid_value(self):
+        '''value is in enum array'''
+        value = 'true'
+        field = self._make_default_field(
+            type='boolean', constraints={'enum': [True, ]})
+
+        _type = types.BooleanType(field)
+
+        self.assertEqual(_type.cast(value), True)
+
+    def test_constraints_enum_invalid_value(self):
+        '''value is not in enum array'''
+        value = 'true'
+        field = self._make_default_field(
+            type='boolean', constraints={'enum': [False, ]})
+
+        _type = types.BooleanType(field)
+
+        with pytest.raises(exceptions.ConstraintError) as e:
+            _type.cast(value)
+        self.assertEqual(
+            e.value.msg, "The value for field 'Name' "
+                         "must be in the enum array")
+
+    def test_constraints_enum_valid_value_alternate_truths(self):
+        '''value is equivalent to possible values in enum array'''
+        value = 'true'
+        field = self._make_default_field(
+            type='boolean', constraints={'enum': ['yes', 'y',
+                                                  't', '1', 1]})
+
+        _type = types.BooleanType(field)
+
+        self.assertEqual(_type.cast(value), True)
+
+
+class TestArrayTypeConstraints_Enum(ConstraintsBase):
+
+    '''Test `enum` constraint for ArrayType'''
+
+    def test_constraints_enum_valid_value(self):
+        '''value is in enum array'''
+        value = ['first', 'second', 'third']
+        field = self._make_default_field(
+            type='array', constraints={'enum': [["first",
+                                                 "second",
+                                                 "third"],
+                                                ["fred",
+                                                 "alice",
+                                                 "bob"], ]})
+
+        _type = types.ArrayType(field)
+
+        self.assertEqual(_type.cast(value), value)
+
+    def test_constraints_enum_invalid_value(self):
+        '''value is not in enum array'''
+        value = ['first', 'second', 'third']
+        field = self._make_default_field(
+            type='array', constraints={'enum': [["fred",
+                                                 "alice",
+                                                 "bob"], ]})
+
+        _type = types.ArrayType(field)
+
+        with pytest.raises(exceptions.ConstraintError) as e:
+            _type.cast(value)
+        self.assertEqual(
+            e.value.msg, "The value for field 'Name' "
+                         "must be in the enum array")
+
+    def test_constraints_enum_invalid_value_different_order(self):
+        '''value is not in enum array. Same members in each array, but
+        different order.'''
+        value = ['first', 'second', 'third']
+        field = self._make_default_field(
+            type='array', constraints={'enum': [["first",
+                                                 "third",
+                                                 "second"], ]})
+
+        _type = types.ArrayType(field)
+
+        with pytest.raises(exceptions.ConstraintError) as e:
+            _type.cast(value)
+        self.assertEqual(
+            e.value.msg, "The value for field 'Name' "
+                         "must be in the enum array")
+
+
+class TestObjectTypeConstraints_Enum(ConstraintsBase):
+
+    '''Test `enum` constraint for ObjectType'''
+
+    def test_constraints_enum_valid_value(self):
+        '''value is in enum array'''
+        value = {'a': 'first', 'b': 'second', 'c': 'third'}
+        field = self._make_default_field(
+            type='object', constraints={'enum': [{'a': 'first',
+                                                  'b': 'second',
+                                                  'c': 'third'}]})
+
+        _type = types.ObjectType(field)
+
+        self.assertEqual(_type.cast(value), value)
+
+    def test_constraints_enum_invalid_value(self):
+        '''value is not in enum array'''
+        value = {'a': 'first', 'b': 'second', 'c': 'third'}
+        field = self._make_default_field(
+            type='object', constraints={'enum': [{'a': 'fred',
+                                                  'b': 'alice',
+                                                  'c': 'bob'}]})
+
+        _type = types.ObjectType(field)
+
+        with pytest.raises(exceptions.ConstraintError) as e:
+            _type.cast(value)
+        self.assertEqual(
+            e.value.msg, "The value for field 'Name' "
+                         "must be in the enum array")
+
+    def test_constraints_enum_valid_value_different_order(self):
+        '''value is in enum array. Same members in each array, but different
+        order.'''
+        value = {'a': 'first', 'b': 'second', 'c': 'third'}
+        field = self._make_default_field(
+            type='object', constraints={'enum': [{'a': 'first',
+                                                  'c': 'third',
+                                                  'b': 'second'}], })
+
+        _type = types.ObjectType(field)
+
+        self.assertEqual(_type.cast(value), value)
+
+
+class TestDateTypeConstraints_Enum(ConstraintsBase):
+
+    '''Test `enum` constraint for DateType'''
+
+    def test_constraints_enum_valid_value(self):
+        '''value is in enum array'''
+        value = "2015-10-22"
+        field = self._make_default_field(
+            type='date', constraints={'enum': ["2015-10-22"]})
+
+        _type = types.DateType(field)
+
+        self.assertEqual(_type.cast(value),
+                         datetime.datetime.strptime(value, '%Y-%m-%d').date())
+
+    def test_constraints_enum_invalid_value(self):
+        '''value is not in enum array'''
+        value = "2015-10-22"
+        field = self._make_default_field(
+            type='date', constraints={'enum': ["2015-10-23"]})
+
+        _type = types.DateType(field)
+
+        with pytest.raises(exceptions.ConstraintError) as e:
+            _type.cast(value)
+        self.assertEqual(
+            e.value.msg, "The value for field 'Name' "
+                         "must be in the enum array")

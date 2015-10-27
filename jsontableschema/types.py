@@ -27,7 +27,8 @@ from . import exceptions
 from . import constraints
 
 
-class JTSType(constraints.NoConstraintsSupportedMixin):
+class JTSType(constraints.EnumConstraintMixin,
+              constraints.NoConstraintsSupportedMixin):
 
     """Base class for all JSON Table Schema types."""
 
@@ -56,21 +57,21 @@ class JTSType(constraints.NoConstraintsSupportedMixin):
             return None
         return self.constraints.get(constraint, None)
 
-    def cast(self, value):
+    def cast(self, value, skip_constraints=False):
         """Return boolean if `value` can be cast as type `self.py`."""
 
         # we can check on `constraints.required` before we cast
-        required = self._get_constraint_value('required')
-        if required is not None:
-            if not required and (value in (None, utilities.NULL_VALUES)):
-                return None
-            elif required and value in (None, ''):
-                raise exceptions.ConstraintError(
-                    msg="The field '{0}' requires a value".format(
-                        self.field_name))
+        if not skip_constraints:
+            required = self._get_constraint_value('required')
+            if required is not None:
+                if not required and (value in (None, utilities.NULL_VALUES)):
+                    return None
+                elif required and value in (None, ''):
+                    raise exceptions.ConstraintError(
+                        msg="The field '{0}' requires a value".format(
+                            self.field_name))
 
         # cast with the appropriate handler, falling back to default if none
-
         if self.format.startswith('fmt'):
             _format = 'fmt'
         else:
@@ -85,12 +86,14 @@ class JTSType(constraints.NoConstraintsSupportedMixin):
 
         # The value is now cast, and we can check it against other
         # constraints.
-        constraints_to_check = ['minLength', 'maxLength', 'minimum', 'maximum']
-        for c in constraints_to_check:
-            constraint_value = self._get_constraint_value(c)
-            if constraint_value:
-                getattr(self, 'check_{0}'.format(c))(cast_value,
-                                                     constraint_value)
+        if not skip_constraints:
+            constraints_to_check = ['minLength', 'maxLength',
+                                    'minimum', 'maximum', 'enum']
+            for c in constraints_to_check:
+                constraint_value = self._get_constraint_value(c)
+                if constraint_value:
+                    getattr(self, 'check_{0}'.format(c))(cast_value,
+                                                         constraint_value)
 
         return cast_value
 
