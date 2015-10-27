@@ -1,3 +1,6 @@
 click>=3.3
 requests>=2.5.1
 python-dateutil>=2.4.0
+rfc3987
+jsonschema
+future
