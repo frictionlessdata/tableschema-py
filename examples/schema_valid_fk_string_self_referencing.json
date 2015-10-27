@@ -1,0 +1,20 @@
+{
+    "fields": [
+    {
+        "name": "parent"
+    },
+    {
+        "name": "id"
+    }
+    ],
+    "foreignKeys": [
+    {
+        "fields": "parent",
+        "reference": {
+            "datapackage": "",
+            "resource": "self",
+            "fields": "id"
+        }
+    }
+    ]
+}
