@@ -676,7 +676,7 @@ class TestGeoJson(base.BaseTestCase):
 
 
 class TestAnyType(base.BaseTestCase):
-    def setup(self):
+    def setUp(self):
         super(TestAnyType, self).setUp()
         self.field = {
             'name': 'Name',
