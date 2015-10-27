@@ -4,6 +4,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import json
 import time
 import decimal
 import datetime
@@ -712,3 +713,196 @@ class TestDateTypeConstraints_Enum(ConstraintsBase):
         self.assertEqual(
             e.value.msg, "The value for field 'Name' "
                          "must be in the enum array")
+
+
+class TestStringTypeConstraints_Pattern(ConstraintsBase):
+
+    '''Test `pattern` constraint for StringType. Values must match XML Schema
+    style Reg Exp.'''
+
+    def test_constraints_pattern_valid_value(self):
+        '''value is valid for pattern'''
+        value = "078-05-1120"
+        field = self._make_default_field(
+            type='string',
+            constraints={"pattern": "[0-9]{3}-[0-9]{2}-[0-9]{4}"})
+
+        _type = types.StringType(field)
+
+        self.assertEqual(_type.cast(value), value)
+
+    def test_constraints_pattern_invalid_value(self):
+        '''value is invalid for pattern'''
+        value = "078-05-112A"
+        field = self._make_default_field(
+            type='string',
+            constraints={"pattern": "[0-9]{3}-[0-9]{2}-[0-9]{4}"})
+
+        _type = types.StringType(field)
+
+        with pytest.raises(exceptions.ConstraintError) as e:
+            _type.cast(value)
+        self.assertEqual(
+            e.value.msg, "The value for field 'Name' "
+                         "must match the pattern")
+
+
+class TestIntegerTypeConstraints_Pattern(ConstraintsBase):
+
+    '''Test `pattern` constraint for IntegerType. Values must match XML Schema
+    style Reg Exp.'''
+
+    def test_constraints_pattern_valid_value(self):
+        '''value is valid for pattern'''
+        value = 789
+        field = self._make_default_field(
+            type='integer',
+            constraints={"pattern": "[7-9]{3}"})
+
+        _type = types.IntegerType(field)
+
+        self.assertEqual(_type.cast(value), value)
+
+    def test_constraints_pattern_invalid_value(self):
+        '''value is invalid for pattern'''
+        value = 678
+        field = self._make_default_field(
+            type='integer',
+            constraints={"pattern": "[7-9]{3}"})
+
+        _type = types.IntegerType(field)
+
+        with pytest.raises(exceptions.ConstraintError) as e:
+            _type.cast(value)
+        self.assertEqual(
+            e.value.msg, "The value for field 'Name' "
+                         "must match the pattern")
+
+
+class TestNumberTypeConstraints_Pattern(ConstraintsBase):
+
+    '''Test `pattern` constraint for NumberType. Values must match XML Schema
+    style Reg Exp.'''
+
+    def test_constraints_pattern_valid_value(self):
+        '''value is valid for pattern'''
+        value = '7.123'
+        field = self._make_default_field(
+            type='number',
+            constraints={"pattern": "7.[0-9]{3}"})
+
+        _type = types.NumberType(field)
+
+        self.assertEqual(_type.cast(value), decimal.Decimal(value))
+
+    def test_constraints_pattern_invalid_value(self):
+        '''value is invalid for pattern'''
+        value = '7.12'
+        field = self._make_default_field(
+            type='number',
+            constraints={"pattern": "7.[0-9]{3}"})
+
+        _type = types.NumberType(field)
+
+        with pytest.raises(exceptions.ConstraintError) as e:
+            _type.cast(value)
+        self.assertEqual(
+            e.value.msg, "The value for field 'Name' "
+                         "must match the pattern")
+
+
+class TestArrayTypeConstraints_Pattern(ConstraintsBase):
+
+    '''Test `pattern` constraint for ArrayType. Values must match XML Schema
+    style Reg Exp.'''
+
+    def test_constraints_pattern_valid_value(self):
+        '''value is valid for pattern'''
+        value = '["a", "b", "c"]'
+        field = self._make_default_field(
+            type='array',
+            constraints={"pattern": '\[("[a-c]",?\s?)*\]'})
+
+        _type = types.ArrayType(field)
+
+        self.assertEqual(_type.cast(value), json.loads(value))
+
+    def test_constraints_pattern_invalid_value(self):
+        '''value is invalid for pattern'''
+        value = '["a", "b", "c", "d"]'
+        field = self._make_default_field(
+            type='array',
+            constraints={"pattern": '\[("[a-c]",?\s?)*\]'})
+
+        _type = types.ArrayType(field)
+
+        with pytest.raises(exceptions.ConstraintError) as e:
+            _type.cast(value)
+        self.assertEqual(
+            e.value.msg, "The value for field 'Name' "
+                         "must match the pattern")
+
+
+class TestObjectTypeConstraints_Pattern(ConstraintsBase):
+
+    '''Test `pattern` constraint for ObjectType. Values must match XML Schema
+    style Reg Exp.'''
+
+    def test_constraints_pattern_valid_value(self):
+        '''value is valid for pattern'''
+        value = '{"a":1, "b":2, "c":3}'
+        field = self._make_default_field(
+            type='object',
+            constraints={"pattern": '\{("[a-z]":[0-9],?\s?)*\}'})
+
+        _type = types.ObjectType(field)
+
+        self.assertEqual(_type.cast(value), json.loads(value))
+
+    def test_constraints_pattern_invalid_value(self):
+        '''value is invalid for pattern'''
+        value = '{"a":"fred", "b":2, "c":3}'
+        field = self._make_default_field(
+            type='object',
+            constraints={"pattern": '\{("[a-z]":[0-9],?\s?)*\}'})
+
+        _type = types.ObjectType(field)
+
+        with pytest.raises(exceptions.ConstraintError) as e:
+            _type.cast(value)
+        self.assertEqual(
+            e.value.msg, "The value for field 'Name' "
+                         "must match the pattern")
+
+
+class TestDateTypeConstraints_Pattern(ConstraintsBase):
+
+    '''Test `pattern` constraint for DateType. Values must match XML Schema
+    style Reg Exp.'''
+
+    def test_constraints_pattern_valid_value(self):
+        '''value is valid for pattern'''
+        value = '2015-01-23'
+        field = self._make_default_field(
+            type='date',
+            constraints={"pattern": "2015-[0-9]{2}-[0-9]{2}"})
+
+        _type = types.DateType(field)
+
+        self.assertEqual(_type.cast(value),
+                         datetime.datetime.strptime(value, '%Y-%m-%d').date())
+
+    def test_constraints_pattern_invalid_value(self):
+        '''value is invalid for pattern'''
+        value = '2013-01-23'
+        field = self._make_default_field(
+            type='date',
+            constraints={"pattern": "2015-[0-9]{2}-[0-9]{2}"})
+
+        _type = types.DateType(field)
+
+        with pytest.raises(exceptions.ConstraintError) as e:
+            _type.cast(value)
+        self.assertEqual(
+            e.value.msg, "The value for field 'Name' "
+                         "must match the pattern")

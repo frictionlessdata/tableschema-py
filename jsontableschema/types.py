@@ -19,16 +19,20 @@ from dateutil.parser import parse as date_parse
 import rfc3987
 import unicodedata
 import jsonschema
-from future.utils import raise_from, raise_with_traceback
+from future.utils import raise_with_traceback
 
 from . import compat
 from . import utilities
 from . import exceptions
-from . import constraints
+from .constraints import (EnumConstraintMixin,
+                          NoConstraintsSupportedMixin,
+                          PatternConstraintMixin,
+                          LengthConstraintMixin,
+                          MinMaxConstraintMixin)
 
 
-class JTSType(constraints.EnumConstraintMixin,
-              constraints.NoConstraintsSupportedMixin):
+class JTSType(PatternConstraintMixin, EnumConstraintMixin,
+              NoConstraintsSupportedMixin):
 
     """Base class for all JSON Table Schema types."""
 
@@ -57,10 +61,19 @@ class JTSType(constraints.EnumConstraintMixin,
             return None
         return self.constraints.get(constraint, None)
 
+    def _check_constraint_list(self, value, constraint_list):
+        '''Check a `value` against each contraint in the `constraint_list`.
+        Will raise an exception if contraint not passed.'''
+        for c in constraint_list:
+            constraint_value = self._get_constraint_value(c)
+            if constraint_value:
+                getattr(self, 'check_{0}'.format(c))(value,
+                                                     constraint_value)
+
     def cast(self, value, skip_constraints=False):
         """Return boolean if `value` can be cast as type `self.py`."""
 
-        # we can check on `constraints.required` before we cast
+        # We check on `constraints.required` before we cast
         if not skip_constraints:
             required = self._get_constraint_value('required')
             if required is not None:
@@ -71,7 +84,12 @@ class JTSType(constraints.EnumConstraintMixin,
                         msg="The field '{0}' requires a value".format(
                             self.field_name))
 
-        # cast with the appropriate handler, falling back to default if none
+        # We can check against other pre-cast constraints here too.
+        if not skip_constraints:
+            constraints_to_check = ['pattern']
+            self._check_constraint_list(value, constraints_to_check)
+
+        # Cast with the appropriate handler, falling back to default if none
         if self.format.startswith('fmt'):
             _format = 'fmt'
         else:
@@ -84,16 +102,11 @@ class JTSType(constraints.EnumConstraintMixin,
         else:
             cast_value = self.cast_default(value)
 
-        # The value is now cast, and we can check it against other
-        # constraints.
+        # The value is cast, and we can check against post-cast constraints.
         if not skip_constraints:
             constraints_to_check = ['minLength', 'maxLength',
                                     'minimum', 'maximum', 'enum']
-            for c in constraints_to_check:
-                constraint_value = self._get_constraint_value(c)
-                if constraint_value:
-                    getattr(self, 'check_{0}'.format(c))(cast_value,
-                                                         constraint_value)
+            self._check_constraint_list(cast_value, constraints_to_check)
 
         return cast_value
 
@@ -126,7 +139,7 @@ class JTSType(constraints.EnumConstraintMixin,
         return isinstance(value, self.py)
 
 
-class StringType(constraints.LengthConstraintMixin, JTSType):
+class StringType(LengthConstraintMixin, JTSType):
 
     py = compat.str
     name = 'string'
@@ -179,13 +192,13 @@ class StringType(constraints.LengthConstraintMixin, JTSType):
             raise_with_traceback(exceptions.InvalidUUID(e))
 
 
-class IntegerType(constraints.MinMaxConstraintMixin, JTSType):
+class IntegerType(MinMaxConstraintMixin, JTSType):
 
     py = int
     name = 'integer'
 
 
-class NumberType(constraints.MinMaxConstraintMixin, JTSType):
+class NumberType(MinMaxConstraintMixin, JTSType):
 
     py = decimal.Decimal
     name = 'number'
@@ -253,7 +266,7 @@ class NullType(JTSType):
                 )
 
 
-class ArrayType(constraints.LengthConstraintMixin, JTSType):
+class ArrayType(LengthConstraintMixin, JTSType):
 
     py = list
     name = 'array'
@@ -276,7 +289,7 @@ class ArrayType(constraints.LengthConstraintMixin, JTSType):
             )
 
 
-class ObjectType(constraints.LengthConstraintMixin, JTSType):
+class ObjectType(LengthConstraintMixin, JTSType):
 
     py = dict
     name = 'object'
@@ -294,7 +307,7 @@ class ObjectType(constraints.LengthConstraintMixin, JTSType):
             raise_with_traceback(exceptions.InvalidObjectType(e))
 
 
-class DateType(constraints.MinMaxConstraintMixin, JTSType):
+class DateType(MinMaxConstraintMixin, JTSType):
 
     py = datetime.date
     name = 'date'
@@ -327,7 +340,7 @@ class DateType(constraints.MinMaxConstraintMixin, JTSType):
             raise_with_traceback(exceptions.InvalidDateType(e))
 
 
-class TimeType(constraints.MinMaxConstraintMixin, JTSType):
+class TimeType(MinMaxConstraintMixin, JTSType):
 
     py = time
     name = 'time'
@@ -362,7 +375,7 @@ class TimeType(constraints.MinMaxConstraintMixin, JTSType):
             raise_with_traceback(exceptions.InvalidTimeType(e))
 
 
-class DateTimeType(constraints.MinMaxConstraintMixin, JTSType):
+class DateTimeType(MinMaxConstraintMixin, JTSType):
 
     py = datetime.datetime
     name = 'datetime'
@@ -395,7 +408,7 @@ class DateTimeType(constraints.MinMaxConstraintMixin, JTSType):
             raise_with_traceback(exceptions.InvalidDateTimeType(e))
 
 
-class GeoPointType(constraints.LengthConstraintMixin, JTSType):
+class GeoPointType(LengthConstraintMixin, JTSType):
 
     py = compat.str, list, dict
     name = 'geopoint'
@@ -495,7 +508,7 @@ def load_geojson_schema():
 geojson_schema = load_geojson_schema()
 
 
-class GeoJSONType(constraints.LengthConstraintMixin, JTSType):
+class GeoJSONType(LengthConstraintMixin, JTSType):
 
     py = dict
     name = 'geojson'

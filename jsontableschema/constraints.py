@@ -1,5 +1,8 @@
+import re
+
 from dateutil.parser import parse as date_parse
 
+from . import compat
 from . import exceptions
 
 
@@ -26,6 +29,9 @@ class NoConstraintsSupportedMixin(object):
 
     def check_enum(self, value, enum):
         self._raise_constraint_not_supported(self.name, 'enum')
+
+    def check_pattern(self, value, enum):
+        self._raise_constraint_not_supported(self.name, 'pattern')
 
 
 class LengthConstraintMixin(object):
@@ -98,4 +104,22 @@ class EnumConstraintMixin(object):
         if value not in self._cast_enum(enum):
             raise exceptions.ConstraintError(
                 msg="The value for field '{0}' must be in the enum array"
+                .format(self.field_name))
+
+
+class PatternConstraintMixin(object):
+
+    def check_pattern(self, value, pattern):
+        '''`value` is treated as a string and must match the XML Schema Reg
+        Exp `pattern`.'''
+
+        # convert to str if necessary
+        if not isinstance(value, compat.str):
+            value = compat.str(value)
+
+        p = re.compile('^{0}$'.format(pattern))
+        p_match = p.match(value)
+        if not p_match:
+            raise exceptions.ConstraintError(
+                msg="The value for field '{0}' must match the pattern"
                 .format(self.field_name))
