@@ -6,12 +6,12 @@ from __future__ import unicode_literals
 
 import os
 import copy
-from jsontableschema import models
+from jsontableschema import model
 from jsontableschema import exceptions
 from . import base
 
 
-class TestModels(base.BaseTestCase):
+class TestModel(base.BaseTestCase):
 
     schema = {
         "fields": [
@@ -66,61 +66,51 @@ class TestModels(base.BaseTestCase):
     }
 
     def test_headers(self):
-
-        model = models.SchemaModel(self.schema)
-
-        self.assertEqual(len(model.headers), 5)
+        m = model.SchemaModel(self.schema)
+        self.assertEqual(len(m.headers), 5)
 
     def test_required_headers(self):
-
-        model = models.SchemaModel(self.schema)
-
-        self.assertEqual(len(model.required_headers), 2)
+        m = model.SchemaModel(self.schema)
+        self.assertEqual(len(m.required_headers), 2)
 
     def test_has_field_true(self):
-
-        model = models.SchemaModel(self.schema)
-
-        self.assertTrue(model.has_field('name'))
+        m = model.SchemaModel(self.schema)
+        self.assertTrue(m.has_field('name'))
 
     def test_has_field_false(self):
-
-        model = models.SchemaModel(self.schema)
-
-        self.assertFalse(model.has_field('religion'))
+        m = model.SchemaModel(self.schema)
+        self.assertFalse(m.has_field('religion'))
 
     def test_get_fields_by_type(self):
 
-        model = models.SchemaModel(self.schema)
+        m = model.SchemaModel(self.schema)
 
-        self.assertEqual(len(model.get_fields_by_type('string')), 3)
-        self.assertEqual(len(model.get_fields_by_type('number')), 1)
-        self.assertEqual(len(model.get_fields_by_type('integer')), 1)
+        self.assertEqual(len(m.get_fields_by_type('string')), 3)
+        self.assertEqual(len(m.get_fields_by_type('number')), 1)
+        self.assertEqual(len(m.get_fields_by_type('integer')), 1)
 
     def test_case_insensitive_headers(self):
         _schema = copy.deepcopy(self.schema)
         for field in _schema['fields']:
             field['name'] = field['name'].title()
 
-        model = models.SchemaModel(_schema, case_insensitive_headers=True)
+        m = model.SchemaModel(_schema, case_insensitive_headers=True)
         expected = set(['id', 'height', 'name', 'age', 'occupation'])
 
-        self.assertEqual(set(model.headers), expected)
+        self.assertEqual(set(m.headers), expected)
 
     def test_invalid_json_raises(self):
         source = os.path.join(self.data_dir, 'data_infer.csv')
 
         self.assertRaises(exceptions.InvalidJSONError,
-                          models.SchemaModel, source)
+                          model.SchemaModel, source)
 
     def test_invalid_jts_raises(self):
         source = os.path.join(self.data_dir, 'schema_invalid_empty.json')
 
         self.assertRaises(exceptions.InvalidSchemaError,
-                          models.SchemaModel, source)
+                          model.SchemaModel, source)
 
     def test_defaults_are_set(self):
-
-        model = models.SchemaModel(self.schema_min)
-
-        self.assertEqual(len(model.get_fields_by_type('string')), 2)
+        m = model.SchemaModel(self.schema_min)
+        self.assertEqual(len(m.get_fields_by_type('string')), 2)
