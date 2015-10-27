@@ -17,5 +17,5 @@ class InvalidJSONError(Exception):
         self.msg = msg or 'The obj cannot be parsed as JSON.'
 
 
-class ValidationError(jsonschema.exceptions.ValidationError):
+class SchemaValidationError(jsonschema.exceptions.ValidationError):
     pass

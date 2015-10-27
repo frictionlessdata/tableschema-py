@@ -52,7 +52,7 @@ class SchemaModel(object):
 
         try:
             validate(_as_python)
-        except exceptions.ValidationError:
+        except exceptions.SchemaValidationError:
             raise exceptions.InvalidSchemaError
 
         self.as_python = self._expand(_as_python)
