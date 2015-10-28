@@ -11,7 +11,7 @@ import datetime
 
 import pytest
 
-from jsontableschema import types, exceptions
+from . import types, exceptions
 from . import base
 
 
@@ -27,9 +27,9 @@ class ConstraintsBase(base.BaseTestCase):
         }
 
 
-class TestJTSTypeConstraints_Required(ConstraintsBase):
+class TestStringTypeConstraints_Required(ConstraintsBase):
 
-    '''Test basic `required` constraints for JTSType'''
+    '''Test basic `required` constraints for StringType'''
 
     def test_constraints_empty_with_value(self):
         '''Empty constraints object, with value'''
@@ -86,7 +86,7 @@ class TestJTSTypeConstraints_Required(ConstraintsBase):
         self.assertEqual(_type.cast(value), value)
 
 
-class TestJTSTypeConstraints_MinLength(ConstraintsBase):
+class TestStringTypeConstraints_MinLength(ConstraintsBase):
 
     '''Test `minLength` constraint for StringType'''
 
@@ -121,7 +121,7 @@ class TestJTSTypeConstraints_MinLength(ConstraintsBase):
             e.value.msg, "The field 'Name' must have a minimum length of 10")
 
 
-class TestJTSTypeConstraints_MaxLength(ConstraintsBase):
+class TestStringTypeConstraints_MaxLength(ConstraintsBase):
 
     '''Test `maxLength` constraint for StringType'''
 
