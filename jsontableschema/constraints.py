@@ -109,6 +109,9 @@ class EnumConstraintMixin(object):
 
 class PatternConstraintMixin(object):
 
+    '''Pattern constraint should be checked as a string value before the value
+    is cast'''
+
     def check_pattern(self, value, pattern):
         '''`value` is treated as a string and must match the XML Schema Reg
         Exp `pattern`.'''
