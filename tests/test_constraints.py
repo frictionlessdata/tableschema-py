@@ -121,6 +121,76 @@ class TestStringTypeConstraints_MinLength(ConstraintsBase):
             e.value.msg, "The field 'Name' must have a minimum length of 10")
 
 
+class TestArrayTypeConstraints_MinLength(ConstraintsBase):
+
+    '''Test `minLength` constraint for ArrayType'''
+
+    def test_constraints_minlength_valid_value(self):
+        '''minLength with valid value'''
+        value = ['a', 'b', 'c']
+        field = self._make_default_field(type='array',
+                                         constraints={'minLength': 2})
+        _type = types.ArrayType(field)
+
+        self.assertEqual(_type.cast(value), value)
+
+    def test_constraints_minlength_valid_value_equals(self):
+        '''minLength with valid value equal to each other.'''
+        value = ['a', 'b', 'c']
+        field = self._make_default_field(type='array',
+                                         constraints={'minLength': 3})
+        _type = types.ArrayType(field)
+
+        self.assertEqual(_type.cast(value), value)
+
+    def test_constraints_minlength_invalid_value(self):
+        '''minLength with invalid value'''
+        value = ['a', 'b', 'c']
+        field = self._make_default_field(type='array',
+                                         constraints={'minLength': 4})
+        _type = types.ArrayType(field)
+
+        with pytest.raises(exceptions.ConstraintError) as e:
+            _type.cast(value)
+        self.assertEqual(
+            e.value.msg, "The field 'Name' must have a minimum length of 4")
+
+
+class TestObjectTypeConstraints_MinLength(ConstraintsBase):
+
+    '''Test `minLength` constraint for ObjectType'''
+
+    def test_constraints_minlength_valid_value(self):
+        '''minLength with valid value'''
+        value = {'a': 1, 'b': 2, 'c': 3}
+        field = self._make_default_field(type='object',
+                                         constraints={'minLength': 2})
+        _type = types.ObjectType(field)
+
+        self.assertEqual(_type.cast(value), value)
+
+    def test_constraints_minlength_valid_value_equals(self):
+        '''minLength with valid value equal to each other.'''
+        value = {'a': 1, 'b': 2, 'c': 3}
+        field = self._make_default_field(type='object',
+                                         constraints={'minLength': 3})
+        _type = types.ObjectType(field)
+
+        self.assertEqual(_type.cast(value), value)
+
+    def test_constraints_minlength_invalid_value(self):
+        '''minLength with invalid value'''
+        value = {'a': 1, 'b': 2, 'c': 3}
+        field = self._make_default_field(type='object',
+                                         constraints={'minLength': 4})
+        _type = types.ObjectType(field)
+
+        with pytest.raises(exceptions.ConstraintError) as e:
+            _type.cast(value)
+        self.assertEqual(
+            e.value.msg, "The field 'Name' must have a minimum length of 4")
+
+
 class TestStringTypeConstraints_MaxLength(ConstraintsBase):
 
     '''Test `maxLength` constraint for StringType'''
@@ -154,6 +224,76 @@ class TestStringTypeConstraints_MaxLength(ConstraintsBase):
             _type.cast(value)
         self.assertEqual(
             e.value.msg, "The field 'Name' must have a maximum length of 5")
+
+
+class TestArrayTypeConstraints_MaxLength(ConstraintsBase):
+
+    '''Test `maxLength` constraint for ArrayType'''
+
+    def test_constraints_maxlength_valid_value(self):
+        '''maxLength with valid value'''
+        value = ['a', 'b', 'c']
+        field = self._make_default_field(type='array',
+                                         constraints={'maxLength': 4})
+        _type = types.ArrayType(field)
+
+        self.assertEqual(_type.cast(value), value)
+
+    def test_constraints_maxlength_valid_value_equals(self):
+        '''maxLength with valid value equal to each other'''
+        value = ['a', 'b', 'c']
+        field = self._make_default_field(type='array',
+                                         constraints={'maxLength': 3})
+        _type = types.ArrayType(field)
+
+        self.assertEqual(_type.cast(value), value)
+
+    def test_constraints_maxlength_invalid_value(self):
+        '''maxLength with invalid value'''
+        value = ['a', 'b', 'c']
+        field = self._make_default_field(type='array',
+                                         constraints={'maxLength': 2})
+        _type = types.ArrayType(field)
+
+        with pytest.raises(exceptions.ConstraintError) as e:
+            _type.cast(value)
+        self.assertEqual(
+            e.value.msg, "The field 'Name' must have a maximum length of 2")
+
+
+class TestObjectTypeConstraints_MaxLength(ConstraintsBase):
+
+    '''Test `maxLength` constraint for ObjectType'''
+
+    def test_constraints_maxlength_valid_value(self):
+        '''maxLength with valid value'''
+        value = {'a': 1, 'b': 2, 'c': 3}
+        field = self._make_default_field(type='object',
+                                         constraints={'maxLength': 4})
+        _type = types.ObjectType(field)
+
+        self.assertEqual(_type.cast(value), value)
+
+    def test_constraints_maxlength_valid_value_equals(self):
+        '''maxLength with valid value equal to each other'''
+        value = {'a': 1, 'b': 2, 'c': 3}
+        field = self._make_default_field(type='object',
+                                         constraints={'maxLength': 3})
+        _type = types.ObjectType(field)
+
+        self.assertEqual(_type.cast(value), value)
+
+    def test_constraints_maxlength_invalid_value(self):
+        '''maxLength with invalid value'''
+        value = {'a': 1, 'b': 2, 'c': 3}
+        field = self._make_default_field(type='object',
+                                         constraints={'maxLength': 2})
+        _type = types.ObjectType(field)
+
+        with pytest.raises(exceptions.ConstraintError) as e:
+            _type.cast(value)
+        self.assertEqual(
+            e.value.msg, "The field 'Name' must have a maximum length of 2")
 
 
 class TestIntegerTypeConstraints_Minimum(ConstraintsBase):
