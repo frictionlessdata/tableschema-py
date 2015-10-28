@@ -24,6 +24,18 @@ class TestInferSchema(base.BaseTestCase):
         self.assertEqual(schema_model.get_field('age')['type'], 'integer')
         self.assertEqual(schema_model.get_field('name')['type'], 'string')
 
+    def test_infer_schema_utf8(self):
+        filepath = os.path.join(self.data_dir, 'data_infer_utf8.csv')
+        with io.open(filepath) as stream:
+            headers = stream.readline().rstrip('\n').split(',')
+            values = jsontableschema.compat.csv_reader(stream)
+            schema = jsontableschema.infer(headers, values)
+        schema_model = jsontableschema.model.SchemaModel(schema)
+
+        self.assertEqual(schema_model.get_field('id')['type'], 'integer')
+        self.assertEqual(schema_model.get_field('age')['type'], 'integer')
+        self.assertEqual(schema_model.get_field('name')['type'], 'string')
+
     def test_infer_schema_row_limit(self):
         filepath = os.path.join(self.data_dir, 'data_infer_row_limit.csv')
         with io.open(filepath) as stream:

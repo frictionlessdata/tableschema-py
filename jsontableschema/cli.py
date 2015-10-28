@@ -2,13 +2,13 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-from __future__ import unicode_literals
 
 import os
 import io
 import json
-import csv
+
 import click
+
 import jsontableschema
 
 
@@ -52,7 +52,7 @@ def infer(data, row_limit, to_file):
 
     with io.open(data, mode='r+t', encoding='utf-8') as stream:
         headers = stream.readline().rstrip('\n').split(',')
-        values = csv.reader(stream)
+        values = jsontableschema.compat.csv_reader(stream)
         response = jsontableschema.infer(headers, values, row_limit=row_limit)
 
     if to_file:
