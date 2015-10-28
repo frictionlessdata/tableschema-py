@@ -6,9 +6,10 @@ from . import compat
 from . import exceptions
 
 
-class NoConstraintsSupportedMixin(object):
+class ConstraintsNotSupportedMixin(object):
 
-    '''All constraints raise a ConstraintNotSupported exception'''
+    '''Unsupported constraints raise a ConstraintNotSupported exception. Use
+    for types that don't naturally support a constraint.'''
 
     def _raise_constraint_not_supported(self, field_type, constraint):
         raise exceptions.ConstraintNotSupported(
@@ -26,12 +27,6 @@ class NoConstraintsSupportedMixin(object):
 
     def check_maximum(self, value, maximum):
         self._raise_constraint_not_supported(self.name, 'maximum')
-
-    def check_enum(self, value, enum):
-        self._raise_constraint_not_supported(self.name, 'enum')
-
-    def check_pattern(self, value, enum):
-        self._raise_constraint_not_supported(self.name, 'pattern')
 
 
 class LengthConstraintMixin(object):

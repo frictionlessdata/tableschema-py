@@ -25,14 +25,14 @@ from . import compat
 from . import utilities
 from . import exceptions
 from .constraints import (EnumConstraintMixin,
-                          NoConstraintsSupportedMixin,
+                          ConstraintsNotSupportedMixin,
                           PatternConstraintMixin,
                           LengthConstraintMixin,
                           MinMaxConstraintMixin)
 
 
 class JTSType(PatternConstraintMixin, EnumConstraintMixin,
-              NoConstraintsSupportedMixin):
+              ConstraintsNotSupportedMixin):
 
     """Base class for all JSON Table Schema types."""
 

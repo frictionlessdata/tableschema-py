@@ -191,6 +191,24 @@ class TestObjectTypeConstraints_MinLength(ConstraintsBase):
             e.value.msg, "The field 'Name' must have a minimum length of 4")
 
 
+class TestUnsupportedTypeConstraints_MinLength(ConstraintsBase):
+
+    '''Test `minLength` constraint for an unsupported type'''
+
+    def test_constraints_minlength_valid_value(self):
+        '''minLength with unsupported type'''
+        value = 2
+        field = self._make_default_field(type='integer',
+                                         constraints={'minLength': 2})
+        _type = types.IntegerType(field)
+
+        with pytest.raises(exceptions.ConstraintNotSupported) as e:
+            _type.cast(value)
+        self.assertEqual(
+            e.value.msg, "Field type 'integer' does not support "
+                         "the minLength constraint")
+
+
 class TestStringTypeConstraints_MaxLength(ConstraintsBase):
 
     '''Test `maxLength` constraint for StringType'''
@@ -296,6 +314,24 @@ class TestObjectTypeConstraints_MaxLength(ConstraintsBase):
             e.value.msg, "The field 'Name' must have a maximum length of 2")
 
 
+class TestUnsupportedTypeConstraints_MaxLength(ConstraintsBase):
+
+    '''Test `maxLength` constraint for an unsupported type'''
+
+    def test_constraints_minlength_valid_value(self):
+        '''maxLength with unsupported type'''
+        value = 2
+        field = self._make_default_field(type='integer',
+                                         constraints={'maxLength': 2})
+        _type = types.IntegerType(field)
+
+        with pytest.raises(exceptions.ConstraintNotSupported) as e:
+            _type.cast(value)
+        self.assertEqual(
+            e.value.msg, "Field type 'integer' does not support "
+                         "the maxLength constraint")
+
+
 class TestIntegerTypeConstraints_Minimum(ConstraintsBase):
 
     '''Test `minimum` constraint for IntegerType'''
@@ -326,38 +362,6 @@ class TestIntegerTypeConstraints_Minimum(ConstraintsBase):
             _type.cast(value)
         self.assertEqual(
             e.value.msg, "The field 'Name' must not be less than 13")
-
-
-class TestIntegerTypeConstraints_Maximum(ConstraintsBase):
-
-    '''Test `maximum` constraint for IntegerType'''
-
-    def test_constraints_maximum_valid_value(self):
-        value = 12
-        field = self._make_default_field(type='integer',
-                                         constraints={'maximum': 13})
-        _type = types.IntegerType(field)
-
-        self.assertEqual(_type.cast(value), value)
-
-    def test_constraints_maximum_valid_value_equals(self):
-        value = 12
-        field = self._make_default_field(type='integer',
-                                         constraints={'maximum': 12})
-        _type = types.IntegerType(field)
-
-        self.assertEqual(_type.cast(value), value)
-
-    def test_constraints_maximum_invalid_value(self):
-        value = 12
-        field = self._make_default_field(type='integer',
-                                         constraints={'maximum': 11})
-        _type = types.IntegerType(field)
-
-        with pytest.raises(exceptions.ConstraintError) as e:
-            _type.cast(value)
-        self.assertEqual(
-            e.value.msg, "The field 'Name' must not be more than 11")
 
 
 class TestDateTypeConstraints_Minimum(ConstraintsBase):
@@ -392,41 +396,6 @@ class TestDateTypeConstraints_Minimum(ConstraintsBase):
             _type.cast(value)
         self.assertEqual(
             e.value.msg, "The field 'Name' must not be less than 1978-05-30")
-
-
-class TestDateTypeConstraints_Maximum(ConstraintsBase):
-
-    '''Test `maximum` constraint for DateType'''
-
-    def test_constraints_maximum_valid_value(self):
-        value = '1978-05-29'
-        field = self._make_default_field(type='date',
-                                         constraints={'maximum': '1978-05-30'})
-        _type = types.DateType(field)
-
-        self.assertEqual(_type.cast(value),
-                         datetime.datetime.strptime(value, '%Y-%m-%d').date())
-
-    def test_constraints_maximum_valid_value_equals(self):
-        value = '1978-05-29'
-        field = self._make_default_field(type='date',
-                                         constraints={'maximum': '1978-05-29'})
-        _type = types.DateType(field)
-
-        self.assertEqual(_type.cast(value),
-                         datetime.datetime.strptime(value, '%Y-%m-%d').date())
-
-    def test_constraints_maximum_invalid_value(self):
-        value = '1978-05-29'
-        field = self._make_default_field(type='date',
-                                         constraints={'maximum':
-                                                      '1978, 05, 28'})
-        _type = types.DateType(field)
-
-        with pytest.raises(exceptions.ConstraintError) as e:
-            _type.cast(value)
-        self.assertEqual(
-            e.value.msg, "The field 'Name' must not be more than 1978-05-28")
 
 
 class TestDateTimeTypeConstraints_Minimum(ConstraintsBase):
@@ -469,6 +438,129 @@ class TestDateTimeTypeConstraints_Minimum(ConstraintsBase):
                          "1978-05-30 12:30:20")
 
 
+class TestTimeTypeConstraints_Minimum(ConstraintsBase):
+
+    '''Test `minimum` constraint for TimeType'''
+
+    def test_constraints_minimum_valid_value(self):
+        value = '12:30:20'
+        field = self._make_default_field(type='time',
+                                         constraints={'minimum': '11:30:20'})
+        _type = types.TimeType(field)
+
+        struct_time = time.strptime(value, '%H:%M:%S')
+        expected_time = datetime.time(struct_time.tm_hour, struct_time.tm_min,
+                                      struct_time.tm_sec)
+        self.assertEqual(_type.cast(value), expected_time)
+
+    def test_constraints_minimum_valid_value_equals(self):
+        value = '12:30:20'
+        field = self._make_default_field(type='time',
+                                         constraints={'minimum': '12:30:20'})
+        _type = types.TimeType(field)
+
+        struct_time = time.strptime(value, '%H:%M:%S')
+        expected_time = datetime.time(struct_time.tm_hour, struct_time.tm_min,
+                                      struct_time.tm_sec)
+        self.assertEqual(_type.cast(value), expected_time)
+
+    def test_constraints_minimum_invalid_value(self):
+        value = '12:30:20'
+        field = self._make_default_field(type='time',
+                                         constraints={'minimum': '13:30:20'})
+        _type = types.TimeType(field)
+
+        with pytest.raises(exceptions.ConstraintError) as e:
+            _type.cast(value)
+        self.assertEqual(
+            e.value.msg, "The field 'Name' must not be less than 13:30:20")
+
+
+class TestUnsupportedTypeConstraints_Minimum(ConstraintsBase):
+
+    '''Test `minimum` constraint for an unsupported type'''
+
+    def test_constraints_minlength_valid_value(self):
+        '''minimum with unsupported type'''
+        value = 'string'
+        field = self._make_default_field(type='string',
+                                         constraints={'minimum': 2})
+        _type = types.StringType(field)
+
+        with pytest.raises(exceptions.ConstraintNotSupported) as e:
+            _type.cast(value)
+        self.assertEqual(
+            e.value.msg, "Field type 'string' does not support "
+                         "the minimum constraint")
+
+
+class TestIntegerTypeConstraints_Maximum(ConstraintsBase):
+
+    '''Test `maximum` constraint for IntegerType'''
+
+    def test_constraints_maximum_valid_value(self):
+        value = 12
+        field = self._make_default_field(type='integer',
+                                         constraints={'maximum': 13})
+        _type = types.IntegerType(field)
+
+        self.assertEqual(_type.cast(value), value)
+
+    def test_constraints_maximum_valid_value_equals(self):
+        value = 12
+        field = self._make_default_field(type='integer',
+                                         constraints={'maximum': 12})
+        _type = types.IntegerType(field)
+
+        self.assertEqual(_type.cast(value), value)
+
+    def test_constraints_maximum_invalid_value(self):
+        value = 12
+        field = self._make_default_field(type='integer',
+                                         constraints={'maximum': 11})
+        _type = types.IntegerType(field)
+
+        with pytest.raises(exceptions.ConstraintError) as e:
+            _type.cast(value)
+        self.assertEqual(
+            e.value.msg, "The field 'Name' must not be more than 11")
+
+
+class TestDateTypeConstraints_Maximum(ConstraintsBase):
+
+    '''Test `maximum` constraint for DateType'''
+
+    def test_constraints_maximum_valid_value(self):
+        value = '1978-05-29'
+        field = self._make_default_field(type='date',
+                                         constraints={'maximum': '1978-05-30'})
+        _type = types.DateType(field)
+
+        self.assertEqual(_type.cast(value),
+                         datetime.datetime.strptime(value, '%Y-%m-%d').date())
+
+    def test_constraints_maximum_valid_value_equals(self):
+        value = '1978-05-29'
+        field = self._make_default_field(type='date',
+                                         constraints={'maximum': '1978-05-29'})
+        _type = types.DateType(field)
+
+        self.assertEqual(_type.cast(value),
+                         datetime.datetime.strptime(value, '%Y-%m-%d').date())
+
+    def test_constraints_maximum_invalid_value(self):
+        value = '1978-05-29'
+        field = self._make_default_field(type='date',
+                                         constraints={'maximum':
+                                                      '1978, 05, 28'})
+        _type = types.DateType(field)
+
+        with pytest.raises(exceptions.ConstraintError) as e:
+            _type.cast(value)
+        self.assertEqual(
+            e.value.msg, "The field 'Name' must not be more than 1978-05-28")
+
+
 class TestDateTimeTypeConstraints_Maximum(ConstraintsBase):
 
     '''Test `maximum` constraint for DateTimeType'''
@@ -509,44 +601,6 @@ class TestDateTimeTypeConstraints_Maximum(ConstraintsBase):
                          "1978-05-28 12:30:20")
 
 
-class TestTimeTypeConstraints_Minimum(ConstraintsBase):
-
-    '''Test `minimum` constraint for TimeType'''
-
-    def test_constraints_minimum_valid_value(self):
-        value = '12:30:20'
-        field = self._make_default_field(type='time',
-                                         constraints={'minimum': '11:30:20'})
-        _type = types.TimeType(field)
-
-        struct_time = time.strptime(value, '%H:%M:%S')
-        expected_time = datetime.time(struct_time.tm_hour, struct_time.tm_min,
-                                      struct_time.tm_sec)
-        self.assertEqual(_type.cast(value), expected_time)
-
-    def test_constraints_minimum_valid_value_equals(self):
-        value = '12:30:20'
-        field = self._make_default_field(type='time',
-                                         constraints={'minimum': '12:30:20'})
-        _type = types.TimeType(field)
-
-        struct_time = time.strptime(value, '%H:%M:%S')
-        expected_time = datetime.time(struct_time.tm_hour, struct_time.tm_min,
-                                      struct_time.tm_sec)
-        self.assertEqual(_type.cast(value), expected_time)
-
-    def test_constraints_minimum_invalid_value(self):
-        value = '12:30:20'
-        field = self._make_default_field(type='time',
-                                         constraints={'minimum': '13:30:20'})
-        _type = types.TimeType(field)
-
-        with pytest.raises(exceptions.ConstraintError) as e:
-            _type.cast(value)
-        self.assertEqual(
-            e.value.msg, "The field 'Name' must not be less than 13:30:20")
-
-
 class TestTimeTypeConstraints_Maximum(ConstraintsBase):
 
     '''Test `maximum` constraint for TimeType'''
@@ -583,6 +637,24 @@ class TestTimeTypeConstraints_Maximum(ConstraintsBase):
             _type.cast(value)
         self.assertEqual(
             e.value.msg, "The field 'Name' must not be more than 11:30:20")
+
+
+class TestUnsupportedTypeConstraints_Maximum(ConstraintsBase):
+
+    '''Test `maximum` constraint for an unsupported type'''
+
+    def test_constraints_minlength_valid_value(self):
+        '''maximum with unsupported type'''
+        value = 'string'
+        field = self._make_default_field(type='string',
+                                         constraints={'maximum': 2})
+        _type = types.StringType(field)
+
+        with pytest.raises(exceptions.ConstraintNotSupported) as e:
+            _type.cast(value)
+        self.assertEqual(
+            e.value.msg, "Field type 'string' does not support "
+                         "the maximum constraint")
 
 
 class TestStringTypeConstraints_Enum(ConstraintsBase):
