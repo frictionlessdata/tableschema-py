@@ -101,3 +101,19 @@ class ConstraintNotSupported(JsonTableSchemaException):
     def __init__(self, msg=None):
         self.msg = msg or "The field does not support the constraint."
         super(ConstraintNotSupported, self).__init__(msg)
+
+
+class ConversionError(JsonTableSchemaException):
+    def __init__(self, msg=None):
+        self.msg = msg or "Error converting a row or field."
+        super(ConversionError, self).__init__(msg)
+
+
+class MultipleInvalid(JsonTableSchemaException):
+    def __init__(self, msg='Multiple errors found', errors=None):
+        self.msg = msg
+        if errors:
+            self.errors = errors
+        else:
+            self.errors = []
+        super(MultipleInvalid, self).__init__(msg)
