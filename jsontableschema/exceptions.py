@@ -4,6 +4,8 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import jsonschema.exceptions
+
 
 class JsonTableSchemaException(Exception):
     pass
@@ -117,3 +119,8 @@ class MultipleInvalid(JsonTableSchemaException):
         else:
             self.errors = []
         super(MultipleInvalid, self).__init__(msg)
+
+
+class SchemaValidationError(JsonTableSchemaException,
+                            jsonschema.exceptions.ValidationError):
+    pass

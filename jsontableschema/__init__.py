@@ -10,7 +10,8 @@ from . import model
 from . import utilities
 from . import compat
 from .infer import infer
-from .validate import validate
+from .validate import validate, validator
 
 
-__all__ = ['exceptions', 'types', 'model', 'utilities', 'compat', 'infer', 'validate']
+__all__ = ['exceptions', 'types', 'model', 'utilities', 'compat', 'infer',
+           'validate', 'validator']

@@ -51,7 +51,9 @@ class SchemaModel(object):
         if _as_python is None:
             raise exceptions.InvalidJSONError
 
-        if not validate(_as_python)[0]:
+        try:
+            validate(_as_python)
+        except exceptions.SchemaValidationError:
             raise exceptions.InvalidSchemaError
 
         self.as_python = self._expand(_as_python)

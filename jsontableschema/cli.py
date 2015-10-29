@@ -77,10 +77,12 @@ def validate(schema):
 
     """Validate that a supposed schema is in fact a JSON Table Schema."""
 
-    valid, errors = jsontableschema.validate(schema)
-
-    click.echo(valid)
-    click.echo(errors)
+    errors = [e.message for e in jsontableschema.validator.iter_errors(schema)]
+    if not errors:
+        click.echo(False)
+    else:
+        click.echo(True)
+        click.echo(errors)
 
 
 if __name__ == '__main__':
