@@ -34,14 +34,16 @@ def info():
 @main.command()
 @click.argument('data')
 @click.option('--row_limit', default=0, type=int)
+@click.option('--encoding', default='utf-8')
 @click.option('--to_file')
-def infer(data, row_limit, to_file):
+def infer(data, row_limit, encoding, to_file):
 
     """Infer a schema from data.
 
     * data must be a local filepath
     * data must be CSV
-    * data must be UTF-8 encoded
+    * the file encoding is assumed to be UTF-8 unless an encoding is passed
+      with --encoding
     * the first line of data must be headers
     * these constraints are just for the CLI
 
@@ -50,7 +52,7 @@ def infer(data, row_limit, to_file):
     if not row_limit:
         row_limit = None
 
-    with io.open(data, mode='r+t', encoding='utf-8') as stream:
+    with io.open(data, mode='r+t', encoding=encoding) as stream:
         headers = stream.readline().rstrip('\n').split(',')
         values = jsontableschema.compat.csv_reader(stream)
         response = jsontableschema.infer(headers, values, row_limit=row_limit)

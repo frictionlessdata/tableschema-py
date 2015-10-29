@@ -40,3 +40,29 @@ class TestCliInfer(base.BaseTestCase):
         self.assertEqual(schema_model.get_field('id')['type'], 'integer')
         self.assertEqual(schema_model.get_field('age')['type'], 'integer')
         self.assertEqual(schema_model.get_field('name')['type'], 'string')
+
+    def test_infer_schema_greek(self):
+        '''iso-8859-7 (greek) encoded data containing non-ascii characters.'''
+        runner = CliRunner()
+        result = runner.invoke(cli.infer,
+                               ['examples/data_infer_iso-8859-7.csv',
+                                '--encoding=iso-8859-7'])
+
+        # output is a string, evaluate to a dict
+        schema = ast.literal_eval(result.output)
+
+        schema_model = model.SchemaModel(schema)
+
+        self.assertEqual(schema_model.get_field('id')['type'], 'integer')
+        self.assertEqual(schema_model.get_field('age')['type'], 'integer')
+        self.assertEqual(schema_model.get_field('name')['type'], 'string')
+
+    def test_infer_schema_greek_no_encoding_defined(self):
+        '''iso-8859-7 (greek) encoded data containing non-ascii characters,
+        with no encoding arg passed returns an exception in the result.'''
+        runner = CliRunner()
+        result = runner.invoke(cli.infer,
+                               ['examples/data_infer_iso-8859-7.csv'])
+
+        # There's an exception in the result
+        self.assertTrue(isinstance(result.exception, UnicodeDecodeError))
