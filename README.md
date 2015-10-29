@@ -74,7 +74,9 @@ JSON Table Schema features a CLI called `jsontableschema`. This CLI exposes the 
 > jsontableschema infer path/to/data.csv
 ```
 
-The response is a schema as JSON.
+The optional argument `--encoding` allows a character encoding to be specified for the data file. The default is utf-8.
+
+The response is a schema as JSON. 
 
 #### Validate
 

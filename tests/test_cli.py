@@ -59,10 +59,12 @@ class TestCliInfer(base.BaseTestCase):
 
     def test_infer_schema_greek_no_encoding_defined(self):
         '''iso-8859-7 (greek) encoded data containing non-ascii characters,
-        with no encoding arg passed returns an exception in the result.'''
+        with no encoding arg passed returns an error message.'''
         runner = CliRunner()
         result = runner.invoke(cli.infer,
                                ['examples/data_infer_iso-8859-7.csv'])
 
         # There's an exception in the result
-        self.assertTrue(isinstance(result.exception, UnicodeDecodeError))
+        self.assertTrue("Could not decode the data file as utf-8. "
+                        "Please specify an encoding to use with the "
+                        "--encoding argument." in result.output,)

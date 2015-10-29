@@ -53,13 +53,20 @@ def infer(data, row_limit, encoding, to_file):
         row_limit = None
 
     with io.open(data, mode='r+t', encoding=encoding) as stream:
-        headers = stream.readline().rstrip('\n').split(',')
-        values = jsontableschema.compat.csv_reader(stream)
-        response = jsontableschema.infer(headers, values, row_limit=row_limit)
+        try:
+            headers = stream.readline().rstrip('\n').split(',')
+            values = jsontableschema.compat.csv_reader(stream)
+        except UnicodeDecodeError:
+            response = "Could not decode the data file as {0}. " \
+                "Please specify an encoding to use with the " \
+                "--encoding argument.".format(encoding)
+        else:
+            response = jsontableschema.infer(headers, values,
+                                             row_limit=row_limit)
 
-    if to_file:
-        with io.open(to_file, mode='w+t', encoding='utf-8') as dest:
-            dest.write(json.dumps(response, ensure_ascii=False, indent=2))
+        if to_file:
+            with io.open(to_file, mode='w+t', encoding='utf-8') as dest:
+                dest.write(json.dumps(response, ensure_ascii=False, indent=2))
 
     click.echo(response)
 
