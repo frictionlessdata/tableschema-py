@@ -6,7 +6,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import json
-from itertools import izip
+from future_builtins import zip
 from . import types
 from . import exceptions
 from . import utilities
@@ -190,7 +190,7 @@ class SchemaModel(object):
                 )
             )
         errors = []
-        for field_name, item in izip(self.headers, items):
+        for field_name, item in zip(self.headers, items):
             try:
                 yield self.cast(field_name, item)
             except exceptions.InvalidCastError as e:
