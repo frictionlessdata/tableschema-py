@@ -6,7 +6,10 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import json
-from future_builtins import zip
+try:
+    from future_builtins import zip
+except ImportError:
+    pass
 from . import types
 from . import exceptions
 from . import utilities
