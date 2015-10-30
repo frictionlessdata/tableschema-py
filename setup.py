@@ -73,7 +73,7 @@ setup(
     package_dir={info['slug']: info['slug']},
     install_requires=dependencies,
     zip_safe=False,
-    keywords=info['keywords'],
+    keywords="open data frictionless data json schema json table schema data package tabular data package",
     classifiers=classifiers,
     entry_points={
         'console_scripts': [
