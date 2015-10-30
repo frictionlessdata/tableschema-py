@@ -11,7 +11,7 @@ import datetime
 
 import pytest
 
-from . import types, exceptions
+from jsontableschema import types, exceptions
 from . import base
 
 

@@ -6,9 +6,10 @@ from __future__ import unicode_literals
 
 from datetime import datetime, date, time
 from decimal import Decimal
-from jsontableschema import types
-import pytest
-from . import base, exceptions
+
+from jsontableschema import types, exceptions
+
+from . import base
 
 
 class TestString(base.BaseTestCase):

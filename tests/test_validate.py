@@ -8,7 +8,7 @@ import os
 import io
 import json
 import jsontableschema
-from . import base, exceptions
+from . import base
 
 
 class TestValidateSchema(base.BaseTestCase):
@@ -45,15 +45,16 @@ class TestValidateSchema(base.BaseTestCase):
         filepath = os.path.join(self.data_dir, 'schema_invalid_empty.json')
         with io.open(filepath) as stream:
             schema = json.load(stream)
-        self.assertRaises(exceptions.SchemaValidationError,
+        self.assertRaises(jsontableschema.exceptions.SchemaValidationError,
                           jsontableschema.validate,
                           schema)
 
     def test_schema_invalid_wrong_type(self):
-        filepath = os.path.join(self.data_dir, 'schema_invalid_wrong_type.json')
+        filepath = os.path.join(self.data_dir,
+                                'schema_invalid_wrong_type.json')
         with io.open(filepath) as stream:
             schema = json.load(stream)
-        self.assertRaises(exceptions.SchemaValidationError,
+        self.assertRaises(jsontableschema.exceptions.SchemaValidationError,
                           jsontableschema.validate,
                           schema)
 
@@ -61,7 +62,7 @@ class TestValidateSchema(base.BaseTestCase):
         filepath = os.path.join(self.data_dir, 'schema_invalid_pk_string.json')
         with io.open(filepath) as stream:
             schema = json.load(stream)
-        self.assertRaises(exceptions.SchemaValidationError,
+        self.assertRaises(jsontableschema.exceptions.SchemaValidationError,
                           jsontableschema.validate,
                           schema)
 
@@ -69,7 +70,7 @@ class TestValidateSchema(base.BaseTestCase):
         filepath = os.path.join(self.data_dir, 'schema_invalid_pk_array.json')
         with io.open(filepath) as stream:
             schema = json.load(stream)
-        self.assertRaises(exceptions.SchemaValidationError,
+        self.assertRaises(jsontableschema.exceptions.SchemaValidationError,
                           jsontableschema.validate,
                           schema)
 
@@ -100,7 +101,7 @@ class TestValidateSchema(base.BaseTestCase):
         filepath = os.path.join(self.data_dir, 'schema_invalid_fk_string.json')
         with io.open(filepath) as stream:
             schema = json.load(stream)
-        self.assertRaises(exceptions.SchemaValidationError,
+        self.assertRaises(jsontableschema.exceptions.SchemaValidationError,
                           jsontableschema.validate,
                           schema)
 
@@ -109,7 +110,7 @@ class TestValidateSchema(base.BaseTestCase):
                                 'schema_invalid_fk_no_reference.json')
         with io.open(filepath) as stream:
             schema = json.load(stream)
-        self.assertRaises(exceptions.SchemaValidationError,
+        self.assertRaises(jsontableschema.exceptions.SchemaValidationError,
                           jsontableschema.validate,
                           schema)
 
@@ -118,7 +119,7 @@ class TestValidateSchema(base.BaseTestCase):
                                 'schema_invalid_fk_array.json')
         with io.open(filepath) as stream:
             schema = json.load(stream)
-        self.assertRaises(exceptions.SchemaValidationError,
+        self.assertRaises(jsontableschema.exceptions.SchemaValidationError,
                           jsontableschema.validate,
                           schema)
 
@@ -127,7 +128,7 @@ class TestValidateSchema(base.BaseTestCase):
                                 'schema_invalid_fk_string_array_ref.json')
         with io.open(filepath) as stream:
             schema = json.load(stream)
-        self.assertRaises(exceptions.SchemaValidationError,
+        self.assertRaises(jsontableschema.exceptions.SchemaValidationError,
                           jsontableschema.validate,
                           schema)
 
@@ -136,7 +137,7 @@ class TestValidateSchema(base.BaseTestCase):
                                 'schema_invalid_fk_array_string_ref.json')
         with io.open(filepath) as stream:
             schema = json.load(stream)
-        self.assertRaises(exceptions.SchemaValidationError,
+        self.assertRaises(jsontableschema.exceptions.SchemaValidationError,
                           jsontableschema.validate,
                           schema)
 
@@ -149,7 +150,7 @@ class TestValidateSchema(base.BaseTestCase):
                                 'schema_invalid_fk_array_wrong_number.json')
         with io.open(filepath) as stream:
             schema = json.load(stream)
-        self.assertRaises(exceptions.SchemaValidationError,
+        self.assertRaises(jsontableschema.exceptions.SchemaValidationError,
                           jsontableschema.validate,
                           schema)
 
