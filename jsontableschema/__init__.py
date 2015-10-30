@@ -6,11 +6,12 @@ from __future__ import unicode_literals
 
 from . import exceptions
 from . import types
-from . import models
+from . import model
 from . import utilities
 from . import compat
 from .infer import infer
-from .validate import validate
+from .validate import validate, validator
 
 
-__all__ = ['exceptions', 'types', 'models', 'utilities', 'compat', 'infer', 'validate']
+__all__ = ['exceptions', 'types', 'model', 'utilities', 'compat', 'infer',
+           'validate', 'validator']

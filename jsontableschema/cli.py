@@ -2,13 +2,13 @@
 from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
-from __future__ import unicode_literals
 
 import os
 import io
 import json
-import csv
+
 import click
+
 import jsontableschema
 
 
@@ -34,14 +34,16 @@ def info():
 @main.command()
 @click.argument('data')
 @click.option('--row_limit', default=0, type=int)
+@click.option('--encoding', default='utf-8')
 @click.option('--to_file')
-def infer(data, row_limit, to_file):
+def infer(data, row_limit, encoding, to_file):
 
     """Infer a schema from data.
 
     * data must be a local filepath
     * data must be CSV
-    * data must be UTF-8 encoded
+    * the file encoding is assumed to be UTF-8 unless an encoding is passed
+      with --encoding
     * the first line of data must be headers
     * these constraints are just for the CLI
 
@@ -50,14 +52,21 @@ def infer(data, row_limit, to_file):
     if not row_limit:
         row_limit = None
 
-    with io.open(data, mode='r+t', encoding='utf-8') as stream:
-        headers = stream.readline().rstrip('\n').split(',')
-        values = csv.reader(stream)
-        response = jsontableschema.infer(headers, values, row_limit=row_limit)
+    with io.open(data, mode='r+t', encoding=encoding) as stream:
+        try:
+            headers = stream.readline().rstrip('\n').split(',')
+            values = jsontableschema.compat.csv_reader(stream)
+        except UnicodeDecodeError:
+            response = "Could not decode the data file as {0}. " \
+                "Please specify an encoding to use with the " \
+                "--encoding argument.".format(encoding)
+        else:
+            response = jsontableschema.infer(headers, values,
+                                             row_limit=row_limit)
 
-    if to_file:
-        with io.open(to_file, mode='w+t', encoding='utf-8') as dest:
-            dest.write(json.dumps(response, ensure_ascii=False, indent=2))
+        if to_file:
+            with io.open(to_file, mode='w+t', encoding='utf-8') as dest:
+                dest.write(json.dumps(response, ensure_ascii=False, indent=2))
 
     click.echo(response)
 
@@ -68,10 +77,12 @@ def validate(schema):
 
     """Validate that a supposed schema is in fact a JSON Table Schema."""
 
-    valid, errors = jsontableschema.validate(schema)
-
-    click.echo(valid)
-    click.echo(errors)
+    errors = [e.message for e in jsontableschema.validator.iter_errors(schema)]
+    if not errors:
+        click.echo(False)
+    else:
+        click.echo(True)
+        click.echo(errors)
 
 
 if __name__ == '__main__':

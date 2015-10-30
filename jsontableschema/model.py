@@ -1,4 +1,4 @@
-"""useful models for JSON Table Schema."""
+"""useful model for JSON Table Schema."""
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 from __future__ import division
@@ -6,6 +6,10 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import json
+try:
+    from future_builtins import zip
+except ImportError:
+    pass
 from . import types
 from . import exceptions
 from . import utilities
@@ -50,7 +54,9 @@ class SchemaModel(object):
         if _as_python is None:
             raise exceptions.InvalidJSONError
 
-        if not validate(_as_python)[0]:
+        try:
+            validate(_as_python)
+        except exceptions.SchemaValidationError:
             raise exceptions.InvalidSchemaError
 
         self.as_python = self._expand(_as_python)
@@ -175,3 +181,40 @@ class SchemaModel(object):
             'geojson': types.GeoJSONType,
             'any': types.AnyType
         }
+
+    def convert_row(self, *items, **kwargs):
+        fail_fast = kwargs.pop('fail_fast', False)
+        if len(self.headers) != len(items):
+            raise exceptions.ConversionError(
+                'The number of items to convert does not match the number of '
+                'fields given in the schema\n'
+                'headers : {0} - {1}\nitems : {2} - {3}'.format(
+                    len(self.headers), self.headers, len(items), items
+                )
+            )
+        errors = []
+        for field_name, item in zip(self.headers, items):
+            try:
+                yield self.cast(field_name, item)
+            except exceptions.InvalidCastError as e:
+                if fail_fast:
+                    raise
+                else:
+                    errors.append(e)
+        if errors:
+            raise exceptions.MultipleInvalid(errors=errors)
+
+    def convert(self, rows, fail_fast=False):
+        errors = []
+        for row in rows:
+            try:
+                yield list(self.convert_row(*row, fail_fast=fail_fast))
+            except exceptions.MultipleInvalid as e:
+                errors.extend(e.errors)
+            except exceptions.ConversionError as e:
+                if fail_fast:
+                    raise
+                else:
+                    errors.append(e)
+        if errors:
+            raise exceptions.MultipleInvalid(errors=errors)
