@@ -38,7 +38,10 @@ long_description = '{0}\n\n{1}'.format(description_text, license_text)
 dependencies = [
     'click>=3.3',
     'requests>=2.5.1',
-    'python-dateutil>=2.4.0'
+    'python-dateutil>=2.4.0',
+    'rfc3987>=1.3.4',
+    'jsonschema>=2.5.1',
+    'future>=0.15.2'
 ]
 
 classifiers = [
