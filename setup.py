@@ -18,7 +18,7 @@ is_py3 = (_ver[0] == 3)
 DIR = os.path.abspath(os.path.dirname(__file__))
 PKG = os.path.join(DIR, 'jsontableschema')
 README = 'README.md'
-LICENSE = 'LICENSE.md'
+LICENSE = 'LICENSE'
 INFO = 'info.json'
 README_PATH = os.path.join(DIR, README)
 LICENSE_PATH = os.path.join(DIR, LICENSE)
@@ -69,7 +69,7 @@ setup(
     url=info['url'],
     license=info['license'],
     packages=find_packages(exclude=['docs', 'tests']),
-    package_data={'': [INFO]},
+    package_data={'jsontableschema': ['*.json', 'geojson/*json']},
     package_dir={info['slug']: info['slug']},
     install_requires=dependencies,
     zip_safe=False,
