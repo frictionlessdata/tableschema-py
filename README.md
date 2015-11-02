@@ -25,18 +25,45 @@ A utility library for working with [JSON Table Schema](http://dataprotocols.org/
 
 ### Components
 
-* `types`: a collection of classes to validate type/format of data described by a JSON Table Schema
-* `model.SchemaModel`: A model around a schema with useful methods for interaction
-* `infer`: a utility that creates a JSON Table Schema based on a data sample
+* `model.SchemaModel`: a python model of a JSON Table Schema with useful methods for interaction
+* `types`: a collection of classes to validate type/format and constraints of data described by a JSON Table Schema
 * `validate`: a utility to validate a **schema** as valid according to the current spec
+* `infer`: a utility that creates a JSON Table Schema based on a data sample
 
 Let's look at each of these in more detail.
+
+#### Model
+
+A model of a schema with helpful methods for working with the schema and
+supported data. SchemaModel instances can be initialized with a schema source as a filepath or url to a JSON file, or a Python dict. The schema is initially validated (see [validate](#validate) below), and will raise an exception if not a valid JSON Table Schema.
+
+```python
+from jsontableschema.model import SchemaModel
+...
+schema = SchemaModel(file_path_to_schema)
+```
+
+Some methods available to SchemaModel instances:
+
+* `headers()` - return an array of the schema headers
+* `required_headers()` - return headers with the `required` constraint as an array
+* `fields()` - return an array of the schema's fields
+* `primaryKey()` - return the primary key field for the schema
+* `foreignKey()` - return the foreign key property for the schema
+* `cast(field_name, value, index=0)` - return a value cast against a named `field_name`.
+* `get_field(field_name, index=0)` - return the field object for `field_name`
+* `has_field(field_name)` - return a bool if the field exists in the schema
+* `get_type(field_name, index=0)` - return the type for a given `field_name`
+* `get_fields_by_type(type_name)` - return all fields that match the given type
+* `get_constraints(field_name, index=0)` - return the constraints object for a given `field_name`
+
+Where the optional `index` argument is available, it can be used as a positional argument if the schema has multiple fields with the same name.
 
 #### Types
 
 Data values can be cast to native Python objects with a type instance from `jsontableschema.types`. 
 
-Types can either be instantiated directly, or returned from `SchemaModel` instances.
+Types can either be instantiated directly, or returned from `SchemaModel` instances instantiated with a JSON Table Schema.
 
 Casting a value will check the value is of the expected type, is in the correct format, and complies with any constraints imposed by a schema. E.g. a date value (in ISO 8601 format) can be cast with a DateType instance:
 
@@ -78,13 +105,41 @@ Casting a value that doesn't meet the constraints will raise a `ConstraintError`
 Note: the `unique` constraint is not currently supported.
 
 
-#### Model
+#### Validate
+
+Given a schema as JSON file, url to JSON file, or a Python dict, `validate` returns `True` for a valid JSON Table Schema, or raises an exception, `SchemaValidationError`.
+
+```python
+import io
+import json
+
+from jsontableschema import validate
+
+filepath = 'schema_to_validate.json'
+
+with io.open(filepath) as stream:
+    schema = json.load(stream)
+
+is_valid = jsontableschema.validate(schema)
+print(is_valid)
+# True
 
 ```
-from jsontableschema.model import SchemaModel
+
+It may be useful to report multiple errors when validating a schema. This can be done with `validator.iter_errors()`.
+
+```python
+
+from jsontableschema import validator
+
+filepath = 'schema_with_multiple_errors.json'
+with io.open(filepath) as stream:
+    schema = json.load(stream)
+    errors = [i for i in validator.iter_errors(schema)]
 ```
 
-A model of a schema with helpful methods for working with the data a schema represents.
+
+Note: `validate()` validates whether a **schema** is a validate JSON Table Schema. It does **not** validate data against a schema.
 
 #### Infer
 
@@ -101,13 +156,12 @@ id,age,name
 Call `infer` with headers and values from the datafile:
 
 ```python
-import os
 import io
 import csv
 
 from jsontableschema import infer
 
-filepath = os.path.join(self.data_dir, 'data_to_infer.csv')
+filepath = 'data_to_infer.csv'
 with io.open(filepath) as stream:
     headers = stream.readline().rstrip('\n').split(',')
     values = csv.reader(stream)
@@ -145,14 +199,6 @@ schema = infer(headers, values)
 
 The number of rows used by `infer` can be limited with the `row_limit` argument.
 
-#### Validate
-
-```
-from jsontableschema import validate
-```
-
-Give a schema as any of JSON file, url to JSON file, or a Python dict, and get back a response as to whether it is valid.
-
 ### CLI
 
 JSON Table Schema features a CLI called `jsontableschema`. This CLI exposes the `infer` and `validate` functions for command line use.
@@ -165,7 +211,7 @@ JSON Table Schema features a CLI called `jsontableschema`. This CLI exposes the 
 
 The optional argument `--encoding` allows a character encoding to be specified for the data file. The default is utf-8.
 
-The response is a schema as JSON. 
+See the above [Infer](#infer) section for details. The response is a schema as JSON. 
 
 #### Validate
 
