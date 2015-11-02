@@ -90,7 +90,8 @@ class SchemaModel(object):
         return [f for f in self.as_python.get('fields')]
 
     def cast(self, field_name, value, index=0):
-        """Return boolean if value can be cast to field_name's type."""
+        """Return the cast value or raise an exception if value can't be cast
+        as the field_name's type."""
 
         _type = self.get_type(field_name, index=index)
 
