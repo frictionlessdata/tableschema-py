@@ -75,6 +75,9 @@ date_type = types.DateType(field_descriptor)
 
 Casting a value that doesn't meet the constraints will raise a `ConstraintError` exception.
 
+Note: the `unique` constraint is not currently supported.
+
+
 #### Model
 
 ```
@@ -85,11 +88,62 @@ A model of a schema with helpful methods for working with the data a schema repr
 
 #### Infer
 
-```
-from jsontableschema import infer
+Given headers and data, `infer` will return a JSON Table Schema as a Python dict based on the data values. Given the data file, data_to_infer.csv:
+
+```csv
+id,age,name
+1,39,Paul
+2,23,Jimmy
+3,36,Jane
+4,28,Judy
 ```
 
-Give a sample of data, get back a schema for the data.
+Call `infer` with headers and values from the datafile:
+
+```python
+import os
+import io
+import csv
+
+from jsontableschema import infer
+
+filepath = os.path.join(self.data_dir, 'data_to_infer.csv')
+with io.open(filepath) as stream:
+    headers = stream.readline().rstrip('\n').split(',')
+    values = csv.reader(stream)
+
+schema = infer(headers, values)
+```
+
+`schema` is now a schema dict:
+
+```python
+{u'fields': [
+    {
+        u'description': u'',
+        u'format': u'default',
+        u'name': u'id',
+        u'title': u'',
+        u'type': u'integer'
+    },
+    {
+        u'description': u'',
+        u'format': u'default',
+        u'name': u'age',
+        u'title': u'',
+        u'type': u'integer'
+    },
+    {
+        u'description': u'',
+        u'format': u'default',
+        u'name': u'name',
+        u'title': u'',
+        u'type': u'string'
+    }]
+}
+```
+
+The number of rows used by `infer` can be limited with the `row_limit` argument.
 
 #### Validate
 
