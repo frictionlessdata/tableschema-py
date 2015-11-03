@@ -41,6 +41,7 @@ supported data. SchemaModel instances can be initialized with a schema source as
 from jsontableschema.model import SchemaModel
 ...
 schema = SchemaModel(file_path_to_schema)
+schema.convert('12345', 'a string', 'another field')
 ```
 
 Some methods available to SchemaModel instances:
@@ -56,8 +57,11 @@ Some methods available to SchemaModel instances:
 * `get_type(field_name, index=0)` - return the type for a given `field_name`
 * `get_fields_by_type(type_name)` - return all fields that match the given type
 * `get_constraints(field_name, index=0)` - return the constraints object for a given `field_name`
+* `convert_row(*args, fail_fast=False)` - convert the arguments given to the types of the current schema,
+* `convert(rows, fail_fast=False)` - convert rows using the current schema of the SchemaModel instance.
 
 Where the optional `index` argument is available, it can be used as a positional argument if the schema has multiple fields with the same name.
+Where the option `fail_fast` is given, it will raise the first error it encouters, otherwise an exceptions.MultipleInvalid will be raised (if there are errors).
 
 #### Types
 
