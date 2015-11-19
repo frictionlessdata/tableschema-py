@@ -16,7 +16,7 @@ import base64
 import binascii
 import uuid
 from dateutil.parser import parse as date_parse
-import rfc3987
+from rfc3986 import is_valid_uri
 import unicodedata
 import jsonschema
 from future.utils import raise_with_traceback
@@ -161,11 +161,9 @@ class StringType(LengthConstraintMixin, JTSType):
     def cast_uri(self, value):
         if not self._type_check(value):
             return False
-
-        try:
-            rfc3987.parse(value, rule="URI")
+        if is_valid_uri(value, require_scheme=True):
             return value
-        except ValueError:
+        else:
             raise exceptions.InvalidURI('{0} is not a valid uri'.format(value))
 
     def cast_binary(self, value):
