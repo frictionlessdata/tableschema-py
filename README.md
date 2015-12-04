@@ -43,7 +43,7 @@ from jsontableschema.model import SchemaModel
 schema = SchemaModel(file_path_to_schema)
 
 # convert a row
-schema.convert('12345', 'a string', 'another field')
+schema.convert_row('12345', 'a string', 'another field')
 
 # convert a set of rows
 schema.convert([['12345', 'a string', 'another field'],
