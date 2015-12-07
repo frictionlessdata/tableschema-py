@@ -52,11 +52,11 @@ schema.convert([['12345', 'a string', 'another field'],
 
 Some methods available to SchemaModel instances:
 
-* `headers()` - return an array of the schema headers
-* `required_headers()` - return headers with the `required` constraint as an array
-* `fields()` - return an array of the schema's fields
-* `primaryKey()` - return the primary key field for the schema
-* `foreignKey()` - return the foreign key property for the schema
+* `headers` - return an array of the schema headers (property)
+* `required_headers` - return headers with the `required` constraint as an array (property)
+* `fields` - return an array of the schema's fields (property)
+* `primaryKey` - return the primary key field for the schema (property)
+* `foreignKey` - return the foreign key property for the schema (property)
 * `cast(field_name, value, index=0)` - return a value cast against a named `field_name`.
 * `get_field(field_name, index=0)` - return the field object for `field_name`
 * `has_field(field_name)` - return a bool if the field exists in the schema
