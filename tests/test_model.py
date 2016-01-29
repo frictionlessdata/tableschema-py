@@ -116,6 +116,16 @@ class TestModel(base.BaseTestCase):
         m = model.SchemaModel(self.schema_min)
         self.assertEqual(len(m.get_fields_by_type('string')), 2)
 
+    def test_fields_arent_required_by_default(self):
+        schema = {
+            "fields": [
+                {"name": "id", "constraints": {"required": True}},
+                {"name": "label"}
+            ]
+        }
+        m = model.SchemaModel(schema)
+        self.assertEqual(len(m.required_headers), 1)
+
 
 class TestData(base.BaseTestCase):
     def setUp(self):
