@@ -40,7 +40,6 @@ class SchemaModel(object):
     FALSE_VALUES = [False] + utilities.FALSE_VALUES
 
     DEFAULTS = {
-        'constraints': {'required': True},
         'format': 'default',
         'type': 'string'
     }
@@ -72,7 +71,7 @@ class SchemaModel(object):
     @property
     def required_headers(self):
         _raw = [f['name'] for f in self.as_python.get('fields')
-                if f['constraints']['required']]
+                if f.get('constraints', {}).get('required')]
         if self.case_insensitive_headers:
             return [name.lower() for name in _raw]
         return _raw
@@ -153,13 +152,6 @@ class SchemaModel(object):
             # ensure we have a default format if no format was declared
             if not field.get('format'):
                 field['format'] = self.DEFAULTS['format']
-
-            # ensure we have a minimum constraints declaration
-            if not field.get('constraints'):
-                field['constraints'] = self.DEFAULTS['constraints']
-
-            elif field['constraints'].get('required') is None:
-                field['constraints']['required'] = self.DEFAULTS['constraints']['required']
 
         return schema
 
