@@ -1,0 +1,14 @@
+[BASIC]
+
+# List of builtins function names that should not be used, separated by a comma.
+bad-functions=map,filter,input,open
+
+[FORMAT]
+
+# Maximum number of characters on a single line.
+max-line-length=79
+
+[MESSAGES CONTROL]
+
+# Allow modules to be without docstrings.
+disable=C0111

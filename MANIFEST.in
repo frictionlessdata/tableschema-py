@@ -1,2 +1,6 @@
-include LICENSE
+global-include VERSION
+include LICENSE.md
+include Makefile
+include pylintrc
 include README.md
+include tox.ini
