@@ -5,7 +5,6 @@
 
 A utility library for working with JSON Table Schema in Python.
 
-
 ## Start
 
 ```
@@ -71,7 +70,7 @@ Where the option `fail_fast` is given, it will raise the first error it encouter
 
 #### Types
 
-Data values can be cast to native Python objects with a type instance from `jsontableschema.types`. 
+Data values can be cast to native Python objects with a type instance from `jsontableschema.types`.
 
 Types can either be instantiated directly, or returned from `SchemaModel` instances instantiated with a JSON Table Schema.
 
@@ -221,7 +220,7 @@ JSON Table Schema features a CLI called `jsontableschema`. This CLI exposes the 
 
 The optional argument `--encoding` allows a character encoding to be specified for the data file. The default is utf-8.
 
-See the above [Infer](#infer) section for details. The response is a schema as JSON. 
+See the above [Infer](#infer) section for details. The response is a schema as JSON.
 
 #### Validate
 
@@ -230,3 +229,11 @@ See the above [Infer](#infer) section for details. The response is a schema as J
 ```
 
 The response is...
+
+## Contributing
+
+Please read the contribution guideline:
+
+[How to Contribute](CONTRIBUTING.md)
+
+Thanks!

@@ -1,41 +1,25 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
+from __future__ import absolute_import
 
 import os
-import sys
 import io
-import json
 from setuptools import setup, find_packages
 
 
-_ver = sys.version_info
-is_py2 = (_ver[0] == 2)
-is_py3 = (_ver[0] == 3)
+# Helpers
+def read(*paths):
+    """Read a text file."""
+    basedir = os.path.dirname(__file__)
+    fullpath = os.path.join(basedir, *paths)
+    contents = io.open(fullpath, encoding='utf-8').read().strip()
+    return contents
 
 
-DIR = os.path.abspath(os.path.dirname(__file__))
-PKG = os.path.join(DIR, 'jsontableschema')
-README = 'README.md'
-LICENSE = 'LICENSE'
-INFO = 'info.json'
-README_PATH = os.path.join(DIR, README)
-LICENSE_PATH = os.path.join(DIR, LICENSE)
-INFO_PATH = os.path.join(PKG, INFO)
-
-with io.open(README_PATH, mode='r+t', encoding='utf-8') as stream:
-    description_text = stream.read()
-
-with io.open(LICENSE_PATH, mode='r+t', encoding='utf-8') as stream:
-    license_text = stream.read()
-
-with io.open(INFO_PATH, mode='r+t', encoding='utf-8') as stream:
-    info = json.loads(stream.read())
-
-long_description = '{0}\n\n{1}'.format(description_text, license_text)
-
-dependencies = [
+# Prepare
+PACKAGE = 'jsontableschema'
+INSTALL_REQUIRES = [
     'click>=3.3',
     'requests>=2.5.1',
     'python-dateutil>=2.4.0',
@@ -43,41 +27,59 @@ dependencies = [
     'jsonschema>=2.5.1',
     'future>=0.15.2'
 ]
-
-classifiers = [
-    'Development Status :: 4 - Beta',
-    'Environment :: Web Environment',
-    'Intended Audience :: Developers',
-    'License :: OSI Approved :: MIT License',
-    'Operating System :: OS Independent',
-    'Programming Language :: Python :: 2',
-    'Programming Language :: Python :: 2.7',
-    'Programming Language :: Python :: 3',
-    'Programming Language :: Python :: 3.3',
-    'Programming Language :: Python :: 3.4',
-    'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
-    'Topic :: Software Development :: Libraries :: Python Modules'
+LINT_REQUIRES = [
+    'pylint',
 ]
+TESTS_REQUIRE = [
+    'tox',
+]
+README = read('README.md')
+VERSION = read(PACKAGE, 'VERSION')
+PACKAGES = find_packages(exclude=['examples', 'tests'])
 
+
+# Run
 setup(
-    name=info['slug'],
-    version=info['version'],
-    description=info['description'],
-    long_description=long_description,
-    author=info['author'],
-    author_email=info['author_email'],
-    url=info['url'],
-    license=info['license'],
-    packages=find_packages(exclude=['docs', 'tests']),
-    package_data={'jsontableschema': ['*.json', 'geojson/*json']},
-    package_dir={info['slug']: info['slug']},
-    install_requires=dependencies,
-    zip_safe=False,
-    keywords="open data frictionless data json schema json table schema data package tabular data package",
-    classifiers=classifiers,
+    name=PACKAGE,
+    version=VERSION,
+    packages=PACKAGES,
+    include_package_data=True,
+    install_requires=INSTALL_REQUIRES,
+    tests_require=TESTS_REQUIRE,
+    extras_require={'develop': LINT_REQUIRES + TESTS_REQUIRE},
     entry_points={
         'console_scripts': [
             'jsontableschema = jsontableschema.cli:main',
         ]
-    }
+    },
+    zip_safe=False,
+    long_description=README,
+    description='A utility library for working with JSON Table Schema in Python',
+    author='Open Knowledge Foundation',
+    author_email='info@okfn.org',
+    url='https://github.com/okfn/jsontableschema-py',
+    license='MIT',
+    keywords=[
+        'frictionless data',
+        'open data',
+        'json schema',
+        'json table schema',
+        'data package',
+        'tabular data package',
+    ],
+    classifiers=[
+        'Development Status :: 4 - Beta',
+        'Environment :: Web Environment',
+        'Intended Audience :: Developers',
+        'License :: OSI Approved :: MIT License',
+        'Operating System :: OS Independent',
+        'Programming Language :: Python :: 2',
+        'Programming Language :: Python :: 2.7',
+        'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.3',
+        'Programming Language :: Python :: 3.4',
+        'Programming Language :: Python :: 3.5',
+        'Topic :: Internet :: WWW/HTTP :: Dynamic Content',
+        'Topic :: Software Development :: Libraries :: Python Modules'
+    ],
 )
