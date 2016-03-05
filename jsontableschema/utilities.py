@@ -9,6 +9,7 @@ import io
 import sys
 import json
 import requests
+from copy import deepcopy
 from importlib import import_module
 
 from . import compat
@@ -30,7 +31,7 @@ def load_json_source(source):
 
     elif isinstance(source, (dict, list)):
         # the source has already been loaded
-        return source
+        return deepcopy(source)
 
     if compat.parse.urlparse(source).scheme in REMOTE_SCHEMES:
         source = requests.get(source).text
