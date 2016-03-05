@@ -126,6 +126,12 @@ class TestModel(base.BaseTestCase):
         m = model.SchemaModel(schema)
         self.assertEqual(len(m.required_headers), 1)
 
+    def test_schema_is_not_mutating(self):
+        schema = {"fields": [{"name": "id"}]}
+        schema_copy = copy.deepcopy(schema)
+        model.SchemaModel(schema)
+        self.assertEqual(schema, schema_copy)
+
 
 class TestData(base.BaseTestCase):
     def setUp(self):
