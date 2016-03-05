@@ -48,6 +48,18 @@ def load_json_source(source):
         raise exceptions.InvalidJSONError
 
 
+def ensure_dir(path):
+    """Ensure directory exists.
+
+    Parameters
+    ----------
+    path: str
+
+    """
+    dirpath = os.path.dirname(path)
+    if dirpath and not os.path.exists(dirpath):
+        os.makedirs(dirpath)
+
 
 class PluginImporter(object):
     """Plugin importer.

@@ -25,7 +25,9 @@ INSTALL_REQUIRES = [
     'python-dateutil>=2.4.0',
     'rfc3986>=0.3.0',
     'jsonschema>=2.5.1',
-    'future>=0.15.2'
+    'future>=0.15.2',
+    'tabulator>=0.3',
+    'unicodecsv>=0.14',
 ]
 LINT_REQUIRES = [
     'pylint',
