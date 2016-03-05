@@ -224,14 +224,14 @@ To write you own storage driver implement
 `jsontableschema.storage.Storage` interface:
 
 ```python
-from jsontableschema import storage
+from jsontableschema.storage import Storage
 
-class CustomStorage(storage.Storage):
+class CustomStorage(Storage):
 
     pass
 ```
 
-Reference: [Tabular Storage](blob/master/jsontableschema/storage.py)
+Reference: [Tabular Storage](https://github.com/datapackages/jsontableschema-py/blob/feature/plugins-and-storage/jsontableschema/storage.py)
 
 ### Plugins
 
