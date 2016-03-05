@@ -29,6 +29,7 @@ A utility library for working with [JSON Table Schema](http://dataprotocols.org/
 * `types`: a collection of classes to validate type/format and constraints of data described by a JSON Table Schema
 * `validate`: a utility to validate a **schema** as valid according to the current spec
 * `infer`: a utility that creates a JSON Table Schema based on a data sample
+* `storage`: Tabular Storage base class and import/export utilities
 
 Let's look at each of these in more detail.
 
@@ -208,6 +209,30 @@ schema = infer(headers, values)
 ```
 
 The number of rows used by `infer` can be limited with the `row_limit` argument.
+
+#### Storage
+
+A module for storing JSON Table Schema data in different storages.
+
+##### Tabular Storage
+
+On level between the high-level interface and low-level driver
+package uses **Tabular Storage** concept:
+
+![Tabular Storage](files/storage.png)
+
+To write you own storage driver implement
+`jsontableschema.storage.Storage` interface:
+
+```python
+from jsontableschema import storage
+
+class CustomStorage(storage.Storage):
+
+    pass
+```
+
+Reference: [Tabular Storage](blob/master/jsontableschema/storage.py)
 
 ### Plugins
 
