@@ -243,13 +243,13 @@ project = json.load(io.open('.credentials.json', encoding='utf-8'))['project_id'
 
 # Export
 export_resource('bigquery',
-    table='table_name', schema='schema_path', data='data_path',
-    prefix='prefix_', service=service, project=project, dataset='dataset')
+    service=service, project=project, dataset='dataset', prefix='prefix_',
+    table='table_name', schema='schema_path', data='data_path')
 
 # Import
 import_resource('bigquery',
+    service=service, project=project, dataset='dataset', prefix='prefix_',
     table='table_name', schema='schema_path', data='data_path')
-    prefix='prefix_', service=service, project=project, dataset='dataset')
 ```
 
 #### SQL
@@ -264,13 +264,13 @@ engine = create_engine('sqlite:///:memory:')
 
 # Export
 export_resource('sql',
-    table='table_name', schema='schema_path', data='data_path',
-    prefix='prefix_', engine=engine)
+    engine=engine, prefix='prefix_',
+    table='table_name', schema='schema_path', data='data_path')
 
 # Import
 import_resource('sql',
-    table='table_name', schema='schema_path', data='data_path',
-    prefix='prefix_', engine=engine)
+    engine=engine, prefix='prefix_',
+    table='table_name', schema='schema_path', data='data_path')
 ```
 
 ### Storage
@@ -299,7 +299,7 @@ Reference:
 JSON Table Schema has a plugin system.
 Any package with the name like `jsontableschema_<name>` could be imported as:
 
-```
+```python
 from jsontableschema.plugins import <name>
 ```
 
@@ -312,7 +312,7 @@ List of official supported plugins:
 
 Tabular Storage implementation for Google's BigQuery:
 
-```
+```python
 from jsontableschema.plugins.bigquery import Storage
 
 # Use Storage here
@@ -325,8 +325,8 @@ Reference:
 
 Tabular Storage implementation for SQL:
 
-```
-from jsontableschema.plugins.bigquery import Storage
+```python
+from jsontableschema.plugins.sql import Storage
 
 # Use Storage here
 ```
@@ -341,20 +341,22 @@ JSON Table Schema features a CLI called `jsontableschema`. This CLI exposes the 
 ### Infer
 
 ```
-> jsontableschema infer path/to/data.csv
+$ jsontableschema infer path/to/data.csv
 ```
 
 The optional argument `--encoding` allows a character encoding to be specified for the data file. The default is utf-8.
 
-See the above [Infer](#infer) section for details. The response is a schema as JSON.
+The response is a schema as JSON.
+
+See the above [Infer](#infer) section for details.
 
 ### Validate
 
 ```
-> jsontableschema validate path/to-schema.json
+$ jsontableschema validate path/to-schema.json
 ```
 
-The response is...
+See the above [Validate](#validate) section for details.
 
 ## Contributing
 
