@@ -209,6 +209,18 @@ schema = infer(headers, values)
 
 The number of rows used by `infer` can be limited with the `row_limit` argument.
 
+### Plugins
+
+JSON Table Schema has a plugin system.
+Any package with the name like `jsontableschema_<name>` could be imported as:
+
+```
+from jsontableschema.plugins import <name>
+```
+
+If a plugin is not installed `ImportError` will be raised with
+a message describing how to install the plugin.
+
 ### CLI
 
 JSON Table Schema features a CLI called `jsontableschema`. This CLI exposes the `infer` and `validate` functions for command line use.
