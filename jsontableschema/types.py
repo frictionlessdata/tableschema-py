@@ -498,7 +498,7 @@ class GeoPointType(LengthConstraintMixin, JTSType):
 
 def load_geojson_schema():
     filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                            'geojson/geojson.json')
+                            'schemas/geojson.json')
     with open(filepath) as f:
         json_table_schema = json.load(f)
     return json_table_schema
