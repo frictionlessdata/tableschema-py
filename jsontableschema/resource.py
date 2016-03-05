@@ -8,29 +8,36 @@ import io
 import json
 import unicodecsv as csv
 from tabulator import topen
-from jsontableschema.model import SchemaModel
+from importlib import import_module
 
+from .model import SchemaModel
 from . import compat
 from . import utilities
 
 
 # Module API
 
-def import_resource(storage, table, schema, data):
-    """Import JSONTableSchema resource to storage's table.
+def export_resource(backend, table, schema, data, **options):
+    """Export JSONTableSchema resource to storage's table.
 
     Parameters
     ----------
-    storage: object
-        Storage object.
+    backend: str
+        Backend name like `sql` or `bigquery`.
     table: str
         Table name.
     schema: str
         Path to schema file.
     data: str
         Path to data file.
+    options: dict
+        Backend options.
 
     """
+
+    # Get storage
+    plugin = import_module('jsontableschema.plugins.%s' % backend)
+    storage = plugin.Storage(**options)
 
     # Create table
     model = SchemaModel(schema)
@@ -44,21 +51,27 @@ def import_resource(storage, table, schema, data):
         storage.write(table, data)
 
 
-def export_resource(storage, table, schema, data):
-    """Export JSONTableSchema resource from storage's table.
+def import_resource(backend, table, schema, data, **options):
+    """Import JSONTableSchema resource from storage's table.
 
     Parameters
     ----------
-    storage: object
-        Storage object.
+    backend: str
+        Backend name like `sql` or `bigquery`.
     table: str
         Table name.
     schema: str
         Path to schema file.
     data: str
         Path to data file.
+    options: dict
+        Backend options.
 
     """
+
+    # Get storage
+    plugin = import_module('jsontableschema.plugins.%s' % backend)
+    storage = plugin.Storage(**options)
 
     # Save schema
     mode = 'w'
