@@ -15,7 +15,7 @@ from . import compat, exceptions
 
 def load_validator():
     filepath = os.path.join(os.path.dirname(os.path.realpath(__file__)),
-                            'json-table-schema.json')
+                            'schemas/json-table-schema.json')
     with open(filepath) as f:
         json_table_schema = json.load(f)
     return json_table_schema, validator_for(json_table_schema)

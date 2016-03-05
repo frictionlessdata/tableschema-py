@@ -4,10 +4,10 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from ..helpers import PluginImporter
+from ..utilities import PluginImporter
 
 
-# Start importer
+# Register importer
 importer = PluginImporter(
     virtual='jsontableschema.plugins.',
     actual='jsontableschema_')
