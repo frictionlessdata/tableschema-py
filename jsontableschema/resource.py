@@ -17,27 +17,29 @@ from . import utilities
 
 # Module API
 
-def export_resource(backend, table, schema, data, **options):
+def export_resource(table, schema, data, backend, **backend_options):
     """Export JSONTableSchema resource to storage's table.
+
+    All parameters should be used as keyword arguments.
 
     Parameters
     ----------
-    backend: str
-        Backend name like `sql` or `bigquery`.
     table: str
         Table name.
     schema: str
         Path to schema file.
     data: str
         Path to data file.
-    options: dict
-        Backend options.
+    backend: str
+        Backend name like `sql` or `bigquery`.
+    backend_options: dict
+        Backend options mentioned in backend docs.
 
     """
 
     # Get storage
     plugin = import_module('jsontableschema.plugins.%s' % backend)
-    storage = plugin.Storage(**options)
+    storage = plugin.Storage(**backend_options)
 
     # Create table
     model = SchemaModel(schema)
@@ -51,27 +53,29 @@ def export_resource(backend, table, schema, data, **options):
         storage.write(table, data)
 
 
-def import_resource(backend, table, schema, data, **options):
+def import_resource(table, schema, data, backend, **backend_options):
     """Import JSONTableSchema resource from storage's table.
+
+    All parameters should be used as keyword arguments.
 
     Parameters
     ----------
-    backend: str
-        Backend name like `sql` or `bigquery`.
     table: str
         Table name.
     schema: str
         Path to schema file.
     data: str
         Path to data file.
-    options: dict
-        Backend options.
+    backend: str
+        Backend name like `sql` or `bigquery`.
+    backend_options: dict
+        Backend options mentioned in backend docs.
 
     """
 
     # Get storage
     plugin = import_module('jsontableschema.plugins.%s' % backend)
-    storage = plugin.Storage(**options)
+    storage = plugin.Storage(**backend_options)
 
     # Save schema
     mode = 'w'

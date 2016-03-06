@@ -26,18 +26,20 @@ class Test_export_resource(unittest.TestCase):
         self.SchemaModel = patch.object(module, 'SchemaModel').start()
         self.import_module = patch.object(module, 'import_module').start()
         self.storage = self.import_module.return_value.Storage.return_value
-        self.options = {'prefix': 'prefix_'}
+        self.backend_options = {'prefix': 'prefix_'}
 
     # Tests
 
     def test_export_resource(self):
 
         # Call function
-        module.export_resource('backend', 'table', 'schema', 'data', **self.options)
+        module.export_resource(
+            table='table', schema='schema', data='data',
+            backend='backend', **self.backend_options)
 
         # Assert calls
         self.import_module.assert_called_with('jsontableschema.plugins.backend')
-        self.import_module.return_value.Storage.assert_called_with(**self.options)
+        self.import_module.return_value.Storage.assert_called_with(**self.backend_options)
         self.SchemaModel.assert_called_with('schema')
         self.storage.check.assert_called_with('table')
         self.storage.create.assert_called_with(
@@ -50,11 +52,13 @@ class Test_export_resource(unittest.TestCase):
     def test_import_resource(self):
 
         # Call function
-        module.import_resource('backend', 'table', 'schema', 'data', **self.options)
+        module.import_resource(
+            table='table', schema='schema', data='data',
+            backend='backend', **self.backend_options)
 
         # Assert calls
         self.import_module.assert_called_with('jsontableschema.plugins.backend')
-        self.import_module.return_value.Storage.assert_called_with(**self.options)
+        self.import_module.return_value.Storage.assert_called_with(**self.backend_options)
         self.ensure_dir.assert_has_calls([call('schema'), call('data')])
         self.open.assert_has_calls([
             call('schema', mode=ANY, encoding=ANY),

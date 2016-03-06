@@ -16,12 +16,10 @@ A utility library for working with [JSON Table Schema](http://dataprotocols.org/
   - [Infer](#infer) - a utility that creates a JSON Table Schema based on a data sample
   - [Validate](#validate) - a utility to validate a **schema** as valid according to the current spec
   - [Export/import](#exportimport) - utilities to export and import resources
-    - [BigQuery](#bigquery) - export/import to BigQuery
-    - [SQL](#sql) - export/import to SQL
   - [Storage](#storage) - Tabular Storage interface declaration
 - [Plugins](#plugins)
-  - [BigQuery](#bigquery-1) - Tabular Storage implementation for BigQuery
-  - [SQL](#sql-1) - Tabular Storage implementation for SQL
+  - [BigQuery](#bigquery) - Tabular Storage implementation for BigQuery
+  - [SQL](#sql) - Tabular Storage implementation for SQL
 - [CLI](#cli)
   - [Infer](#infer-1) - command line interface to infer utility
   - [Validate](#validate-1) - command line interface to validate utility
@@ -223,56 +221,33 @@ Note: `validate()` validates whether a **schema** is a validate JSON Table Schem
 This utilities provide export and import possibilites
 to JSON Table Schema resource (schema and data file).
 
-#### BigQuery
+This functionality requires some storage plugin installed. See
+[plugins](#plugins) section for more information. Let's imagine we
+have installed `jsontableschema_mystorage` (not a real name) plugin.
 
-To start using Google BigQuery service:
-- Create a new project - [link](https://console.developers.google.com/home/dashboard)
-- Create a service key - [link](https://console.developers.google.com/apis/credentials)
-- Download json credentials and set `GOOGLE_APPLICATION_CREDENTIALS` environment variable
+Then we could export and import resources:
 
-```python
-import io
-import os
-import json
-from apiclient.discovery import build
-from oauth2client.client import GoogleCredentials
+> All parameters should be used as keyword arguments.
 
-os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = '.credentials.json'
-credentials = GoogleCredentials.get_application_default()
-service = build('bigquery', 'v2', credentials=credentials)
-project = json.load(io.open('.credentials.json', encoding='utf-8'))['project_id']
-
-# Export
-export_resource('bigquery',
-    service=service, project=project, dataset='dataset', prefix='prefix_',
-    table='table_name', schema='schema_path', data='data_path')
-
-# Import
-import_resource('bigquery',
-    service=service, project=project, dataset='dataset', prefix='prefix_',
-    table='table_name', schema='schema_path', data='data_path')
-```
-
-#### SQL
-
-Exporting/importring data to SQL table:
 
 ```python
-from sqlalchemy import create_engine
 from jsontableschema import export_resource, import_resource
 
-engine = create_engine('sqlite:///:memory:')
-
 # Export
-export_resource('sql',
-    engine=engine, prefix='prefix_',
-    table='table_name', schema='schema_path', data='data_path')
+export_resource(
+    table='table_name', schema='schema_path', data='data_path',
+    backend='mystorage, '**<mystorage_options>)
 
 # Import
-import_resource('sql',
-    engine=engine, prefix='prefix_',
-    table='table_name', schema='schema_path', data='data_path')
+import_resource(
+    table='table_name', schema='schema_path', data='data_path',
+    backend='mystorage', **<mystorage_options>)
 ```
+
+Options could be a SQLAlchemy engine or a BigQuery project and dataset name etc.
+Detailed desctiption you could find in a concrete plugin documentation.
+
+See concrete exmples in [plugins](#plugins) section.
 
 ### Storage
 
@@ -307,11 +282,50 @@ from jsontableschema.plugins import <name>
 If a plugin is not installed `ImportError` will be raised with
 a message describing how to install the plugin.
 
-List of official supported plugins:
+Below there is a list of official supported plugins.
 
 ### BigQuery
 
-Tabular Storage implementation for Google's BigQuery:
+Tabular Storage implementation for Google's BigQuery.
+
+Installation:
+
+```
+$ pip install jsontableschema_bigquery
+```
+
+Export/import:
+
+> To start using Google BigQuery service:
+> - Create a new project - [link](https://console.developers.google.com/home/dashboard)
+> - Create a service key - [link](https://console.developers.google.com/apis/credentials)
+> - Download json credentials and set `GOOGLE_APPLICATION_CREDENTIALS` environment variable
+
+```python
+import io
+import os
+import json
+from apiclient.discovery import build
+from oauth2client.client import GoogleCredentials
+from jsontableschema import export_resource, import_resource
+
+os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = '.credentials.json'
+credentials = GoogleCredentials.get_application_default()
+service = build('bigquery', 'v2', credentials=credentials)
+project = json.load(io.open('.credentials.json', encoding='utf-8'))['project_id']
+
+# Export
+export_resource(
+    table='table_name', schema='schema_path', data='data_path',
+    backend='bigquery', service=service, project=project, dataset='dataset', prefix='prefix_')
+
+# Import
+import_resource(
+    table='table_name', schema='schema_path', data='data_path',
+    backend='bigquery', service=service, project=project, dataset='dataset', prefix='prefix_')
+```
+
+Storage usage:
 
 ```python
 from jsontableschema.plugins.bigquery import Storage
@@ -325,6 +339,33 @@ Reference:
 ### SQL
 
 Tabular Storage implementation for SQL:
+
+Installation:
+
+```
+$ pip install jsontableschema_sql
+```
+
+Export/import:
+
+```python
+from sqlalchemy import create_engine
+from jsontableschema import export_resource, import_resource
+
+engine = create_engine('sqlite:///:memory:')
+
+# Export
+export_resource(
+    table='table_name', schema='schema_path', data='data_path',
+    backend='sql', engine=engine, prefix='prefix_')
+
+# Import
+import_resource(
+    table='table_name', schema='schema_path', data='data_path',
+    backend='sql', engine=engine, prefix='prefix_')
+```
+
+Storage usage:
 
 ```python
 from jsontableschema.plugins.sql import Storage
