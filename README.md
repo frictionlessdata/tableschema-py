@@ -196,9 +196,10 @@ filepath = 'schema_to_validate.json'
 with io.open(filepath) as stream:
     schema = json.load(stream)
 
-is_valid = jsontableschema.validate(schema)
-print(is_valid)
-# True
+try:
+    jsontableschema.validate(schema)
+except jsontableschema.exceptions.SchemaValidationError as e:
+   # handle errors
 
 ```
 
