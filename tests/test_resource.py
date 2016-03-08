@@ -12,7 +12,7 @@ from importlib import import_module
 module = import_module('jsontableschema.resource')
 
 
-class Test_export_resource(unittest.TestCase):
+class TestResource(unittest.TestCase):
 
     # Helpers
 
