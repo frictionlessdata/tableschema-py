@@ -11,10 +11,10 @@ from . import utilities
 from . import compat
 from . import storage
 from .infer import infer
-from .resource import import_resource, export_resource
+from .resource import push_resource, pull_resource
 from .validate import validate, validator
 
 
 __all__ = ['exceptions', 'types', 'model', 'utilities',
            'compat', 'infer', 'validate', 'validator',
-           'storage', 'import_resource', 'export_resource']
+           'storage', 'push_resource', 'pull_resource']

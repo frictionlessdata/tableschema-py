@@ -30,10 +30,10 @@ class TestResource(unittest.TestCase):
 
     # Tests
 
-    def test_export_resource(self):
+    def test_push_resource(self):
 
         # Call function
-        module.export_resource(
+        module.push_resource(
             table='table', schema='schema', data='data',
             backend='backend', **self.backend_options)
 
@@ -48,11 +48,10 @@ class TestResource(unittest.TestCase):
         self.storage.write.assert_called_with(
                 'table', self.topen.return_value.__enter__.return_value)
 
-
-    def test_import_resource(self):
+    def test_pull_resource(self):
 
         # Call function
-        module.import_resource(
+        module.pull_resource(
             table='table', schema='schema', data='data',
             backend='backend', **self.backend_options)
 

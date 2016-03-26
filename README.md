@@ -16,7 +16,7 @@ A utility library for working with [JSON Table Schema](http://dataprotocols.org/
   - [Types](#types) - a collection of classes to validate type/format and constraints of data described by a JSON Table Schema
   - [Infer](#infer) - a utility that creates a JSON Table Schema based on a data sample
   - [Validate](#validate) - a utility to validate a **schema** as valid according to the current spec
-  - [Export/import](#exportimport) - utilities to export and import resources
+  - [Push/pull](#pullpull) - utilities to push and pull resources to/from storage
   - [Storage](#storage) - Tabular Storage interface declaration
 - [Plugins](#plugins)
   - [BigQuery](#bigquery) - Tabular Storage implementation for BigQuery
@@ -218,30 +218,30 @@ with io.open(filepath) as stream:
 
 Note: `validate()` validates whether a **schema** is a validate JSON Table Schema. It does **not** validate data against a schema.
 
-### Export/import
+### Push/pull
 
-This utilities provide export and import possibilites
+This utilities provide push and pull to/from storage possibilites
 to JSON Table Schema resource (schema and data file).
 
 This functionality requires some storage plugin installed. See
 [plugins](#plugins) section for more information. Let's imagine we
 have installed `jsontableschema_mystorage` (not a real name) plugin.
 
-Then we could export and import resources:
+Then we could push and pull resources to/from the storage:
 
 > All parameters should be used as keyword arguments.
 
 
 ```python
-from jsontableschema import export_resource, import_resource
+from jsontableschema import push_resource, pull_resource
 
-# Export
-export_resource(
+# Push
+push_resource(
     table='table_name', schema='schema_path', data='data_path',
     backend='mystorage, '**<mystorage_options>)
 
 # Import
-import_resource(
+pull_resource(
     table='table_name', schema='schema_path', data='data_path',
     backend='mystorage', **<mystorage_options>)
 ```
@@ -296,7 +296,7 @@ Installation:
 $ pip install jsontableschema_bigquery
 ```
 
-Export/import:
+Push/pull:
 
 > To start using Google BigQuery service:
 > - Create a new project - [link](https://console.developers.google.com/home/dashboard)
@@ -309,20 +309,20 @@ import os
 import json
 from apiclient.discovery import build
 from oauth2client.client import GoogleCredentials
-from jsontableschema import export_resource, import_resource
+from jsontableschema import push_resource, pull_resource
 
 os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = '.credentials.json'
 credentials = GoogleCredentials.get_application_default()
 service = build('bigquery', 'v2', credentials=credentials)
 project = json.load(io.open('.credentials.json', encoding='utf-8'))['project_id']
 
-# Export
-export_resource(
+# Push
+push_resource(
     table='table_name', schema='schema_path', data='data_path',
     backend='bigquery', service=service, project=project, dataset='dataset', prefix='prefix_')
 
-# Import
-import_resource(
+# Pull
+pull_resource(
     table='table_name', schema='schema_path', data='data_path',
     backend='bigquery', service=service, project=project, dataset='dataset', prefix='prefix_')
 ```
@@ -348,21 +348,21 @@ Installation:
 $ pip install jsontableschema_sql
 ```
 
-Export/import:
+Push/pull:
 
 ```python
 from sqlalchemy import create_engine
-from jsontableschema import export_resource, import_resource
+from jsontableschema import push_resource, pull_resource
 
 engine = create_engine('sqlite:///:memory:')
 
-# Export
-export_resource(
+# Push
+push_resource(
     table='table_name', schema='schema_path', data='data_path',
     backend='sql', engine=engine, prefix='prefix_')
 
 # Import
-import_resource(
+pull_resource(
     table='table_name', schema='schema_path', data='data_path',
     backend='sql', engine=engine, prefix='prefix_')
 ```

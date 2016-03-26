@@ -17,8 +17,8 @@ from . import utilities
 
 # Module API
 
-def export_resource(table, schema, data, backend, **backend_options):
-    """Export JSONTableSchema resource to storage's table.
+def push_resource(table, schema, data, backend, **backend_options):
+    """Push JSONTableSchema resource to storage's table.
 
     All parameters should be used as keyword arguments.
 
@@ -53,8 +53,8 @@ def export_resource(table, schema, data, backend, **backend_options):
         storage.write(table, data)
 
 
-def import_resource(table, schema, data, backend, **backend_options):
-    """Import JSONTableSchema resource from storage's table.
+def pull_resource(table, schema, data, backend, **backend_options):
+    """Pull JSONTableSchema resource from storage's table.
 
     All parameters should be used as keyword arguments.
 
