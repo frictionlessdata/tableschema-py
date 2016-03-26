@@ -9,9 +9,12 @@ from . import types
 from . import model
 from . import utilities
 from . import compat
+from . import storage
 from .infer import infer
+from .resource import push_resource, pull_resource
 from .validate import validate, validator
 
 
-__all__ = ['exceptions', 'types', 'model', 'utilities', 'compat', 'infer',
-           'validate', 'validator']
+__all__ = ['exceptions', 'types', 'model', 'utilities',
+           'compat', 'infer', 'validate', 'validator',
+           'storage', 'push_resource', 'pull_resource']

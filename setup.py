@@ -19,13 +19,16 @@ def read(*paths):
 
 # Prepare
 PACKAGE = 'jsontableschema'
+NAME = PACKAGE.replace('_', '-')
 INSTALL_REQUIRES = [
     'click>=3.3',
     'requests>=2.5.1',
     'python-dateutil>=2.4.0',
     'rfc3986>=0.3.0',
     'jsonschema>=2.5.1',
-    'future>=0.15.2'
+    'future>=0.15.2',
+    'tabulator>=0.3',
+    'unicodecsv>=0.14',
 ]
 LINT_REQUIRES = [
     'pylint',
@@ -40,7 +43,7 @@ PACKAGES = find_packages(exclude=['examples', 'tests'])
 
 # Run
 setup(
-    name=PACKAGE,
+    name=NAME,
     version=VERSION,
     packages=PACKAGES,
     include_package_data=True,
@@ -57,7 +60,7 @@ setup(
     description='A utility library for working with JSON Table Schema in Python',
     author='Open Knowledge Foundation',
     author_email='info@okfn.org',
-    url='https://github.com/okfn/jsontableschema-py',
+    url='https://github.com/frictionlessdata/jsontableschema-py',
     license='MIT',
     keywords=[
         'frictionless data',
