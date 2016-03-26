@@ -4,3 +4,5 @@ include Makefile
 include pylintrc
 include README.md
 include tox.ini
+
+global-include *.json
