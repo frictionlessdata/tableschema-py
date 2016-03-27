@@ -231,7 +231,6 @@ Then we could push and pull resources to/from the storage:
 
 > All parameters should be used as keyword arguments.
 
-
 ```python
 from jsontableschema import push_resource, pull_resource
 
