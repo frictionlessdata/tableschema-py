@@ -225,7 +225,7 @@ to JSON Table Schema resource (schema and data file).
 
 This functionality requires some storage plugin installed. See
 [plugins](#plugins) section for more information. Let's imagine we
-have installed `jsontableschema_mystorage` (not a real name) plugin.
+have installed `jsontableschema-mystorage` (not a real name) plugin.
 
 Then we could push and pull resources to/from the storage:
 
@@ -293,7 +293,7 @@ Tabular Storage implementation for Google's BigQuery.
 Installation:
 
 ```
-$ pip install jsontableschema_bigquery
+$ pip install jsontableschema-bigquery
 ```
 
 Push/pull:
@@ -345,7 +345,7 @@ Tabular Storage implementation for SQL:
 Installation:
 
 ```
-$ pip install jsontableschema_sql
+$ pip install jsontableschema-sql
 ```
 
 Push/pull:
