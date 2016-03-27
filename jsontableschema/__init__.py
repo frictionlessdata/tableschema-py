@@ -11,7 +11,7 @@ from . import utilities
 from . import compat
 from . import storage
 from .infer import infer
-from .resource import push_resource, pull_resource
+from .pushpull import push_resource, pull_resource
 from .validate import validate, validator
 
 

@@ -9,7 +9,7 @@ import pytest
 import unittest
 from mock import MagicMock, patch, mock_open, call, ANY
 from importlib import import_module
-module = import_module('jsontableschema.resource')
+module = import_module('jsontableschema.pushpull')
 
 
 class TestResource(unittest.TestCase):
