@@ -16,7 +16,7 @@ A utility library for working with [JSON Table Schema](http://dataprotocols.org/
   - [Types](#types) - a collection of classes to validate type/format and constraints of data described by a JSON Table Schema
   - [Infer](#infer) - a utility that creates a JSON Table Schema based on a data sample
   - [Validate](#validate) - a utility to validate a **schema** as valid according to the current spec
-  - [Push/pull](#pullpull) - utilities to push and pull resources to/from storage
+  - [Push/pull](#pushpull) - utilities to push and pull resources to/from storage
   - [Storage](#storage) - Tabular Storage interface declaration
 - [Plugins](#plugins)
   - [BigQuery](#bigquery) - Tabular Storage implementation for BigQuery
