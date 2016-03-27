@@ -8,7 +8,7 @@ Recommended way to get started is to create and activate a project virtual envir
 To install package and development dependencies into active environment:
 
 ```
-$ make develop
+$ make install
 ```
 
 ## Linting

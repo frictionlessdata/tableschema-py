@@ -1,4 +1,4 @@
-.PHONY: all develop list lint release test version
+.PHONY: all install list lint release test version
 
 
 PACKAGE := $(shell grep '^PACKAGE =' setup.py | cut -d "'" -f2)
@@ -7,7 +7,7 @@ VERSION := $(shell head -n 1 $(PACKAGE)/VERSION)
 
 all: list
 
-develop:
+install:
 	pip install --upgrade -e .[develop]
 
 list:
