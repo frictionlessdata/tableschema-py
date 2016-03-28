@@ -45,7 +45,8 @@ class TestStringTypeConstraints_Required(ConstraintsBase):
         field = self._make_default_field(type='string')
         _type = types.StringType(field)
 
-        self.assertEqual(_type.cast(value), '')
+        # Required is false so cast null value to None
+        self.assertEqual(_type.cast(value), None)
 
     def test_constraints_required_true_with_value(self):
         '''Required True with a value'''
@@ -83,7 +84,8 @@ class TestStringTypeConstraints_Required(ConstraintsBase):
                                          constraints={'required': False})
         _type = types.StringType(field)
 
-        self.assertEqual(_type.cast(value), value)
+        # Required is false so cast null value to None
+        self.assertEqual(_type.cast(value), None)
 
 
 class TestStringTypeConstraints_MinLength(ConstraintsBase):

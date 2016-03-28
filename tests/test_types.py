@@ -4,10 +4,11 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import pytest
 from datetime import datetime, date, time
 from decimal import Decimal
 
-from jsontableschema import types, exceptions
+from jsontableschema import types, exceptions, utilities
 
 from . import base
 
@@ -37,6 +38,19 @@ class TestString(base.BaseTestCase):
 
         value = 1
         self.assertRaises(exceptions.InvalidCastError, _type.cast, value)
+
+    def test_null_value_required(self):
+        self.field['constraints']['required'] = True
+        for value in utilities.NULL_VALUES:
+            _type = types.StringType(self.field)
+            with pytest.raises(exceptions.ConstraintError):
+                _type.cast(value)
+
+    def test_null_value_not_required(self):
+        self.field['constraints']['required'] = False
+        for value in utilities.NULL_VALUES:
+            _type = types.StringType(self.field)
+            assert _type.cast(value) == None
 
     def test_valid_email(self):
         self.field['format'] = 'email'
@@ -123,6 +137,19 @@ class TestNumber(base.BaseTestCase):
         _type = types.NumberType(self.field)
 
         self.assertRaises(exceptions.InvalidCastError, _type.cast, value)
+
+    def test_null_value_required(self):
+        self.field['constraints']['required'] = True
+        for value in utilities.NULL_VALUES:
+            _type = types.NumberType(self.field)
+            with pytest.raises(exceptions.ConstraintError):
+                _type.cast(value)
+
+    def test_null_value_not_required(self):
+        self.field['constraints']['required'] = False
+        for value in utilities.NULL_VALUES:
+            _type = types.NumberType(self.field)
+            assert _type.cast(value) == None
 
     def test_number_type_with_currency_format_true(self):
         value1 = '10,000.00'
@@ -256,7 +283,8 @@ class TestNull(base.BaseTestCase):
             'type': 'null',
             'format': 'default',
             'constraints': {
-                'required': True
+                # Can't init NullType if field is required
+                'required': False,
             }
         }
 
@@ -638,4 +666,5 @@ class TestGeoJson(base.BaseTestCase):
         self.field['type'] = 'geojson'
         _type = types.GeoJSONType(self.field)
 
-        self.assertRaises(exceptions.InvalidGeoJSONType, _type.cast, value)
+        # Required is false so cast null value to None
+        assert _type.cast(value) == None
