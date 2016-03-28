@@ -184,6 +184,11 @@ class TestData(base.BaseTestCase):
         self.assertEqual(['string', Decimal(10.0), 1, 'string', 'string'],
                          converted_row)
 
+    def test_convert_row_null_values(self):
+        m = model.SchemaModel(self.schema)
+        converted_row = list(m.convert_row('string', '', '-', 'string', 'null'))
+        assert ['string', None, None, 'string', None] == converted_row
+
     def test_convert_row_too_few_items(self):
         m = model.SchemaModel(self.schema)
         self.assertRaises(exceptions.ConversionError, list,
