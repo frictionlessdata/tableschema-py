@@ -683,7 +683,6 @@ class TestNullValues(base.BaseTestCase):
         for name, value in self.none_string_types.items():
             self.field['type'] = name
             _type = value(self.field)
-            print(name)
             self.assertRaises(error, _type.cast, 'null')
             self.assertRaises(error, _type.cast, 'none')
             self.assertRaises(error, _type.cast, 'nil')
