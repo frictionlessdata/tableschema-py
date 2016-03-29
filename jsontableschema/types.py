@@ -39,6 +39,7 @@ class JTSType(PatternConstraintMixin, EnumConstraintMixin,
     py = type(None)
     name = ''
     formats = ('default',)
+    null_values = list(utilities.NULL_VALUES)
 
     def __init__(self, field=None, **kwargs):
         """Setup some variables for easy access. `field` is the field
@@ -73,16 +74,16 @@ class JTSType(PatternConstraintMixin, EnumConstraintMixin,
     def cast(self, value, skip_constraints=False):
         """Return boolean if `value` can be cast as type `self.py`."""
 
-        # We check on `constraints.required` before we cast
-        if not skip_constraints:
-            required = self._get_constraint_value('required')
-            if required is not None:
-                if not required and (value in (None, utilities.NULL_VALUES)):
-                    return None
-                elif required and value in (None, ''):
-                    raise exceptions.ConstraintError(
-                        msg="The field '{0}' requires a value".format(
-                            self.field_name))
+        # Return None/raise constraint error if value is null_value
+        if value in ([None] + self.null_values):
+            if not skip_constraints:
+                # Now default value for required is False
+                required = self._get_constraint_value('required') or False
+                if required:
+                    message = "The field '{0}' requires a value"
+                    message = message.format(self.field_name)
+                    raise exceptions.ConstraintError(message)
+            return None
 
         # We can check against other pre-cast constraints here too.
         if not skip_constraints:
@@ -145,6 +146,11 @@ class StringType(LengthConstraintMixin, JTSType):
     name = 'string'
     formats = ('default', 'email', 'uri', 'binary', 'uuid')
     email_pattern = re.compile(r'[^@]+@[^@]+\.[^@]+')
+
+    # String has a special case null values
+    # without an empty string ('')
+    null_values = list(JTSType.null_values)
+    null_values.remove('')
 
     def cast_email(self, value):
         if not self._type_check(value):
@@ -249,7 +255,6 @@ class NullType(JTSType):
 
     py = type(None)
     name = 'null'
-    null_values = utilities.NULL_VALUES
 
     def cast_default(self, value):
         if isinstance(value, self.py):
