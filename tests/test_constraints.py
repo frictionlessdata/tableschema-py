@@ -45,8 +45,7 @@ class TestStringTypeConstraints_Required(ConstraintsBase):
         field = self._make_default_field(type='string')
         _type = types.StringType(field)
 
-        # Required is false so cast null value to None
-        self.assertEqual(_type.cast(value), None)
+        self.assertEqual(_type.cast(value), '')
 
     def test_constraints_required_true_with_value(self):
         '''Required True with a value'''
@@ -58,15 +57,13 @@ class TestStringTypeConstraints_Required(ConstraintsBase):
         self.assertEqual(_type.cast(value), value)
 
     def test_constraints_required_true_with_no_value(self):
-        '''Required True with no value (empty string) raises an exception.'''
+        '''Required True with no value (empty string) returns empty string.'''
         value = ''
         field = self._make_default_field(type='string',
                                          constraints={'required': True})
         _type = types.StringType(field)
 
-        with pytest.raises(exceptions.ConstraintError) as e:
-            _type.cast(value)
-        self.assertEqual(e.value.msg, "The field 'Name' requires a value")
+        assert _type.cast(value) == value
 
     def test_constraints_required_false_with_value(self):
         '''Required False with a value'''
@@ -84,8 +81,7 @@ class TestStringTypeConstraints_Required(ConstraintsBase):
                                          constraints={'required': False})
         _type = types.StringType(field)
 
-        # Required is false so cast null value to None
-        self.assertEqual(_type.cast(value), None)
+        self.assertEqual(_type.cast(value), '')
 
 
 class TestStringTypeConstraints_MinLength(ConstraintsBase):

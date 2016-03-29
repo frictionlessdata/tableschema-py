@@ -39,19 +39,6 @@ class TestString(base.BaseTestCase):
         value = 1
         self.assertRaises(exceptions.InvalidCastError, _type.cast, value)
 
-    def test_null_value_required(self):
-        self.field['constraints']['required'] = True
-        for value in utilities.NULL_VALUES:
-            _type = types.StringType(self.field)
-            with pytest.raises(exceptions.ConstraintError):
-                _type.cast(value)
-
-    def test_null_value_not_required(self):
-        self.field['constraints']['required'] = False
-        for value in utilities.NULL_VALUES:
-            _type = types.StringType(self.field)
-            assert _type.cast(value) == None
-
     def test_valid_email(self):
         self.field['format'] = 'email'
         _type = types.StringType(self.field)
@@ -137,19 +124,6 @@ class TestNumber(base.BaseTestCase):
         _type = types.NumberType(self.field)
 
         self.assertRaises(exceptions.InvalidCastError, _type.cast, value)
-
-    def test_null_value_required(self):
-        self.field['constraints']['required'] = True
-        for value in utilities.NULL_VALUES:
-            _type = types.NumberType(self.field)
-            with pytest.raises(exceptions.ConstraintError):
-                _type.cast(value)
-
-    def test_null_value_not_required(self):
-        self.field['constraints']['required'] = False
-        for value in utilities.NULL_VALUES:
-            _type = types.NumberType(self.field)
-            assert _type.cast(value) == None
 
     def test_number_type_with_currency_format_true(self):
         value1 = '10,000.00'
@@ -668,3 +642,87 @@ class TestGeoJson(base.BaseTestCase):
 
         # Required is false so cast null value to None
         assert _type.cast(value) == None
+
+
+class TestNullValues(base.BaseTestCase):
+
+    none_string_types = {
+        'number': types.NumberType,
+        'integer': types.IntegerType,
+        'boolean': types.BooleanType,
+        'null': types.NullType,
+        'array': types.ArrayType,
+        'object': types.ObjectType,
+        'date': types.DateType,
+        'time': types.TimeType,
+        'datetime': types.DateTimeType,
+        'geopoint': types.GeoPointType,
+        'geojson': types.GeoJSONType,
+        # TODO: review
+        # Type `any` just cast to True always
+        # 'any': types.AnyType,
+    }
+
+    string_types = {
+        'string': types.StringType,
+    }
+
+    def setUp(self):
+        super(TestNullValues, self).setUp()
+        self.field = {
+            'name': 'Name',
+            'type': 'string',
+            'format': 'default',
+            'constraints': {
+                'required': True,
+            }
+        }
+
+    def test_required_field_non_string_types(self):
+        error = exceptions.ConstraintError
+        for name, value in self.none_string_types.items():
+            self.field['type'] = name
+            _type = value(self.field)
+            print(name)
+            self.assertRaises(error, _type.cast, 'null')
+            self.assertRaises(error, _type.cast, 'none')
+            self.assertRaises(error, _type.cast, 'nil')
+            self.assertRaises(error, _type.cast, 'nan')
+            self.assertRaises(error, _type.cast, '-')
+            self.assertRaises(error, _type.cast, '')
+
+    def test_required_field_string_types(self):
+        error = exceptions.ConstraintError
+        for name, value in self.string_types.items():
+            self.field['type'] = name
+            _type = value(self.field)
+            self.assertRaises(error, _type.cast, 'null')
+            self.assertRaises(error, _type.cast, 'none')
+            self.assertRaises(error, _type.cast, 'nil')
+            self.assertRaises(error, _type.cast, 'nan')
+            self.assertRaises(error, _type.cast, '-')
+            assert _type.cast('') == ''
+
+    def test_optional_field_non_string_types(self):
+        self.field['constraints']['required'] = False
+        for name, value in self.none_string_types.items():
+            self.field['type'] = name
+            _type = value(self.field)
+            assert _type.cast('null') == None
+            assert _type.cast('none') == None
+            assert _type.cast('nil') == None
+            assert _type.cast('nan') == None
+            assert _type.cast('-') == None
+            assert _type.cast('') == None
+
+    def test_optional_field_non_string_types(self):
+        self.field['constraints']['required'] = False
+        for name, value in self.string_types.items():
+            self.field['type'] = name
+            _type = value(self.field)
+            assert _type.cast('null') == None
+            assert _type.cast('none') == None
+            assert _type.cast('nil') == None
+            assert _type.cast('nan') == None
+            assert _type.cast('-') == None
+            assert _type.cast('') == ''

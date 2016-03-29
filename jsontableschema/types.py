@@ -39,6 +39,7 @@ class JTSType(PatternConstraintMixin, EnumConstraintMixin,
     py = type(None)
     name = ''
     formats = ('default',)
+    null_values = list(utilities.NULL_VALUES)
 
     def __init__(self, field=None, **kwargs):
         """Setup some variables for easy access. `field` is the field
@@ -73,8 +74,8 @@ class JTSType(PatternConstraintMixin, EnumConstraintMixin,
     def cast(self, value, skip_constraints=False):
         """Return boolean if `value` can be cast as type `self.py`."""
 
-        # Return None/raise constraint error if value is NULL_VALUE
-        if value in ([None] + utilities.NULL_VALUES):
+        # Return None/raise constraint error if value is null_value
+        if value in ([None] + self.null_values):
             if not skip_constraints:
                 # Now default value for required is False
                 required = self._get_constraint_value('required') or False
@@ -145,6 +146,11 @@ class StringType(LengthConstraintMixin, JTSType):
     name = 'string'
     formats = ('default', 'email', 'uri', 'binary', 'uuid')
     email_pattern = re.compile(r'[^@]+@[^@]+\.[^@]+')
+
+    # String has a special case null values
+    # without an empty string ('')
+    null_values = list(JTSType.null_values)
+    null_values.remove('')
 
     def cast_email(self, value):
         if not self._type_check(value):
@@ -249,7 +255,6 @@ class NullType(JTSType):
 
     py = type(None)
     name = 'null'
-    null_values = utilities.NULL_VALUES
 
     def cast_default(self, value):
         if isinstance(value, self.py):
