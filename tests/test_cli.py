@@ -16,7 +16,7 @@ class TestCliInfer(base.BaseTestCase):
 
     def test_infer_schema(self):
         runner = CliRunner()
-        result = runner.invoke(cli.infer, ['examples/data_infer.csv'])
+        result = runner.invoke(cli.infer, ['data/data_infer.csv'])
 
         # output is a string, evaluate to a dict
         schema = ast.literal_eval(result.output)
@@ -30,7 +30,7 @@ class TestCliInfer(base.BaseTestCase):
     def test_infer_schema_utf8(self):
         '''UTF8 encoded data containing non-ascii characters.'''
         runner = CliRunner()
-        result = runner.invoke(cli.infer, ['examples/data_infer_utf8.csv'])
+        result = runner.invoke(cli.infer, ['data/data_infer_utf8.csv'])
 
         # output is a string, evaluate to a dict
         schema = ast.literal_eval(result.output)
@@ -45,7 +45,7 @@ class TestCliInfer(base.BaseTestCase):
         '''iso-8859-7 (greek) encoded data containing non-ascii characters.'''
         runner = CliRunner()
         result = runner.invoke(cli.infer,
-                               ['examples/data_infer_iso-8859-7.csv',
+                               ['data/data_infer_iso-8859-7.csv',
                                 '--encoding=iso-8859-7'])
 
         # output is a string, evaluate to a dict
@@ -62,7 +62,7 @@ class TestCliInfer(base.BaseTestCase):
         with no encoding arg passed returns an error message.'''
         runner = CliRunner()
         result = runner.invoke(cli.infer,
-                               ['examples/data_infer_iso-8859-7.csv'])
+                               ['data/data_infer_iso-8859-7.csv'])
 
         # There's an exception in the result
         self.assertTrue("Could not decode the data file as utf-8. "

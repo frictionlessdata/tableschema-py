@@ -13,8 +13,8 @@ class BaseTestCase(unittest.TestCase):
     """Common stuff for tests."""
 
     data_dir = os.path.abspath(os.path.join(
-        os.path.dirname(os.path.dirname(__file__)), 'examples'))
-    remote_dir = 'https://raw.githubusercontent.com/okfn/jsontableschema-py/master/examples/'
+        os.path.dirname(os.path.dirname(__file__)), 'data'))
+    remote_dir = 'https://raw.githubusercontent.com/okfn/jsontableschema-py/master/data/'
 
     def setUp(self):
         self.openfiles = []
