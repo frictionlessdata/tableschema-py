@@ -30,6 +30,7 @@ class ObjectType(base.JTSType):
     python_type = dict
 
     def cast_default(self, value, fmt=None):
+
         if isinstance(value, self.python_type):
             return value
 

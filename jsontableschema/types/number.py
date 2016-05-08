@@ -54,6 +54,9 @@ class NumberType(base.JTSType):
         if isinstance(value, self.python_type):
             return value
 
+        if isinstance(value, (int, float)):
+            return self.python_type(value)
+
         try:
             pattern = '[{0}{1}]'.format(self.separators, self.currencies)
             value = re.sub(pattern, '', value)
