@@ -28,3 +28,4 @@ def check_maxLength(name, value, max_length):
         raise exceptions.ConstraintError(
             "The field '{0}' must have a maximum length of {1}"
             .format(name, max_length))
+    return True

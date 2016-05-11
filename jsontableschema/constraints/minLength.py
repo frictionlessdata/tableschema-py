@@ -28,3 +28,4 @@ def check_minLength(name, value, min_length):
         raise exceptions.ConstraintError(
             "The field '{0}' must have a minimum length of {1}"
             .format(name, min_length))
+    return True

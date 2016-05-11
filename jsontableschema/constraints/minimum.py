@@ -30,3 +30,4 @@ def check_minimum(name, value, minimum):
         raise exceptions.ConstraintError(
             "The field '{0}' must not be less than {1}"
             .format(name, minimum))
+    return True

@@ -28,3 +28,4 @@ def check_enum(name, value, enum):
         raise exceptions.ConstraintError(
             "The value for field '{0}' must be in the enum array"
             .format(name))
+    return True

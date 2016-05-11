@@ -42,3 +42,5 @@ def check_pattern(name, value, pattern):
         raise exceptions.ConstraintError(
             "The value for field '{0}' must match the pattern"
             .format(name))
+
+    return True

@@ -28,3 +28,4 @@ def check_required(name, value, required, null_values):
         message = 'The field "{0}" requires a value'
         message = message.format(name)
         raise exceptions.ConstraintError(message)
+    return True

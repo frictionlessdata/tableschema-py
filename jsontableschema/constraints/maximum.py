@@ -30,3 +30,4 @@ def check_maximum(name, value, maximum):
         raise exceptions.ConstraintError(
             "The field '{0}' must not be more than {1}"
             .format(name, maximum))
+    return True
