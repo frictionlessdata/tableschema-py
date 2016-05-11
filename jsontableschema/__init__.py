@@ -7,8 +7,6 @@ from __future__ import unicode_literals
 from . import exceptions
 from . import types
 from . import model
-from . import utilities
-from . import compat
 from . import storage
 from .infer import infer
 from .pushpull import push_resource, pull_resource

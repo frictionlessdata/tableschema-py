@@ -548,9 +548,10 @@ class TestDateTypeConstraints_Maximum(ConstraintsBase):
 
     def test_constraints_maximum_invalid_value(self):
         value = '1978-05-29'
+        # value of maximum constraint should have the same format
         field = self._make_default_field(type='date',
                                          constraints={'maximum':
-                                                      '1978, 05, 28'})
+                                                      '1978-05-28'})
         _type = types.DateType(field)
 
         with pytest.raises(exceptions.ConstraintError) as e:
@@ -982,11 +983,8 @@ class TestIntegerTypeConstraints_Pattern(ConstraintsBase):
 
         _type = types.IntegerType(field)
 
-        with pytest.raises(exceptions.ConstraintError) as e:
-            _type.cast(value)
-        self.assertEqual(
-            e.value.msg, "The value for field 'Name' "
-                         "must match the pattern")
+        # Can't check pattern for already cast value
+        self.assertEqual(_type.cast(value), value)
 
 
 class TestNumberTypeConstraints_Pattern(ConstraintsBase):

@@ -153,6 +153,13 @@ class TestNumber(base.BaseTestCase):
         self.assertRaises(exceptions.InvalidCastError, _type.cast, value2)
         self.assertRaises(exceptions.InvalidCastError, _type.cast, value3)
 
+    def test_number_type_with_already_cast_value(self):
+        for value in [1, 1.0, Decimal(1)]:
+            for format in ['default', 'currency']:
+                self.field['format'] = format
+                _type = types.NumberType(self.field)
+                self.assertEqual(_type.cast(value), value)
+
 
 class TestInteger(base.BaseTestCase):
     def setUp(self):
@@ -177,6 +184,13 @@ class TestInteger(base.BaseTestCase):
         _type = types.IntegerType(self.field)
 
         self.assertRaises(exceptions.InvalidCastError, _type.cast, value)
+
+    def test_integer_type_with_already_cast_value(self):
+        for value in [1]:
+            for format in ['default']:
+                self.field['format'] = format
+                _type = types.IntegerType(self.field)
+                self.assertEqual(_type.cast(value), value)
 
 
 class TestBoolean(base.BaseTestCase):
@@ -247,6 +261,13 @@ class TestBoolean(base.BaseTestCase):
         self.assertRaises(exceptions.InvalidBooleanType, _type.cast, value)
         value = 11231902333
         self.assertRaises(exceptions.InvalidBooleanType, _type.cast, value)
+
+    def test_boolean_type_with_already_cast_value(self):
+        for value in [True, False]:
+            for format in ['default']:
+                self.field['format'] = format
+                _type = types.BooleanType(self.field)
+                self.assertEqual(_type.cast(value), value)
 
 
 class TestNull(base.BaseTestCase):
@@ -413,6 +434,13 @@ class TestDate(base.BaseTestCase):
 
         self.assertRaises(exceptions.InvalidDateType, _type.cast, value)
 
+    def test_date_type_with_already_cast_value(self):
+        for value in [date(2015, 1, 1)]:
+            for format in ['default', 'any', 'fmt:%Y-%m-%d']:
+                self.field['format'] = format
+                _type = types.DateType(self.field)
+                self.assertEqual(_type.cast(value), value)
+
 
 class TestTime(base.BaseTestCase):
     def setUp(self):
@@ -450,7 +478,7 @@ class TestTime(base.BaseTestCase):
 
     def test_time_invalid_type_format(self):
         value = 3.00
-        self.field['format'] = 'fmt:%H:%M'
+        self.field['format'] = 'fmt:any'
         _type = types.TimeType(self.field)
         self.assertRaises(exceptions.InvalidTimeType, _type.cast, value)
 
@@ -461,6 +489,13 @@ class TestTime(base.BaseTestCase):
         value = []
         _type = types.TimeType(self.field)
         self.assertRaises(exceptions.InvalidTimeType, _type.cast, value)
+
+    def test_time_type_with_already_cast_value(self):
+        for value in [time(12, 0, 0)]:
+            for format in ['default', 'any', 'fmt:any']:
+                self.field['format'] = format
+                _type = types.TimeType(self.field)
+                self.assertEqual(_type.cast(value), value)
 
 
 class TestDateTime(base.BaseTestCase):
@@ -508,6 +543,13 @@ class TestDateTime(base.BaseTestCase):
         self.field['format'] = 'fmt:notavalidformat'
         _type = types.DateTimeType(self.field)
         self.assertRaises(exceptions.InvalidDateTimeType, _type.cast, value)
+
+    def test_datetime_type_with_already_cast_value(self):
+        for value in [datetime(2015, 1, 1, 12, 0, 0)]:
+            for format in ['default', 'any', 'fmt:any']:
+                self.field['format'] = format
+                _type = types.DateTimeType(self.field)
+                self.assertEqual(_type.cast(value), value)
 
 
 class TestGeoPoint(base.BaseTestCase):
@@ -658,9 +700,7 @@ class TestNullValues(base.BaseTestCase):
         'datetime': types.DateTimeType,
         'geopoint': types.GeoPointType,
         'geojson': types.GeoJSONType,
-        # TODO: review
-        # Type `any` just cast to True always
-        # 'any': types.AnyType,
+        'any': types.AnyType,
     }
 
     string_types = {
@@ -725,3 +765,21 @@ class TestNullValues(base.BaseTestCase):
             assert _type.cast('nan') == None
             assert _type.cast('-') == None
             assert _type.cast('') == ''
+
+
+class TestAny(base.BaseTestCase):
+    def setUp(self):
+        super(TestAny, self).setUp()
+        self.field = {
+            'name': 'Name',
+            'type': 'any',
+            'format': 'default',
+            'constraints': {
+                'required': True
+            }
+        }
+
+    def test_any_type(self):
+        for value in ['1', 2, time(12, 0, 0)]:
+            _type = types.AnyType(self.field)
+            self.assertEquals(_type.cast(value), value)
