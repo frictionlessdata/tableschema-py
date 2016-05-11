@@ -15,10 +15,6 @@ from . import base
 
 # Module API
 
-# TODO: review
-# - code is too complex
-# - what's is canonical python object to represent geopoint?
-# - if value is already cast we need return value as it is
 class GeoPointType(base.JTSType):
 
     # Public
@@ -41,7 +37,6 @@ class GeoPointType(base.JTSType):
                     try:
                         geopoints = [decimal.Decimal(points[0].strip()),
                                      decimal.Decimal(points[1].strip())]
-                        # TODO: check degree minute second formats?
                         self.__check_latitude_longtiude_range(geopoints)
                         return geopoints
                     except decimal.DecimalException as e:
@@ -92,7 +87,6 @@ class GeoPointType(base.JTSType):
             try:
                 geopoints = [decimal.Decimal(longitude),
                              decimal.Decimal(latitude)]
-                # TODO: check degree minute second formats?
                 self.__check_latitude_longtiude_range(geopoints)
                 return geopoints
             except decimal.DecimalException as e:

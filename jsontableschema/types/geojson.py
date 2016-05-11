@@ -16,9 +16,6 @@ from . import base
 
 # Module API
 
-# TODO: review
-# - should return already cast value as it is
-# - implemet topojson format
 class GeoJSONType(base.JTSType):
 
     # Public

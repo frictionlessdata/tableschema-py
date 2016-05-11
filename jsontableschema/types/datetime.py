@@ -30,8 +30,6 @@ class DateTimeType(base.JTSType):
     # ---
     python_type = datetime.datetime
     ISO8601 = '%Y-%m-%dT%H:%M:%SZ'
-    # TODO: stuff from messy tables for date parsing, to replace this simple format map?
-    # https://github.com/okfn/messytables/blob/master/messytables/dateparser.py#L10
     raw_formats = ['DD/MM/YYYYThh/mm/ss']
     py_formats = ['%Y/%m/%dT%H:%M:%S']
     format_map = dict(zip(raw_formats, py_formats))

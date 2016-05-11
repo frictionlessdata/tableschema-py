@@ -31,8 +31,6 @@ class DateType(base.JTSType):
     python_type = datetime.date
     formats = ('default', 'any', 'fmt')
     ISO8601 = '%Y-%m-%d'
-    # TODO: stuff from messy tables for date parsing, to replace this simple format map?
-    # https://github.com/okfn/messytables/blob/master/messytables/dateparser.py#L10
     raw_formats = ['DD/MM/YYYY', 'DD/MM/YY', 'YYYY/MM/DD']
     py_formats = ['%d/%m/%Y', '%d/%m/%y', '%Y/%m/%d']
     format_map = dict(zip(raw_formats, py_formats))

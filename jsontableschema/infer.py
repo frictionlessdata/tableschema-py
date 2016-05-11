@@ -28,7 +28,6 @@ def infer(headers, values, row_limit=None, explicit=False, primary_key=None):
     schema = {'fields': []}
     type_matches = {}
 
-    # TODO: Ensure that passed PKs are in headers
     if primary_key:
         schema['primaryKey'] = primary_key
 
@@ -106,7 +105,6 @@ class _TypeGuesser(object):
         for _type in reversed(self._types):
             result = _type(self.type_options.get(_type.name, {})).test(value)
             if result:
-                # TODO: do format guessing
                 rv = (_type.name, 'default')
                 break
 

@@ -548,7 +548,6 @@ class TestDateTypeConstraints_Maximum(ConstraintsBase):
 
     def test_constraints_maximum_invalid_value(self):
         value = '1978-05-29'
-        # TODO: review
         # value of maximum constraint should have the same format
         field = self._make_default_field(type='date',
                                          constraints={'maximum':
@@ -984,7 +983,6 @@ class TestIntegerTypeConstraints_Pattern(ConstraintsBase):
 
         _type = types.IntegerType(field)
 
-        # TODO: review
         # Can't check pattern for already cast value
         self.assertEqual(_type.cast(value), value)
 

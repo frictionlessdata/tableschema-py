@@ -103,8 +103,6 @@ class JTSType(object):
                         self.__field_name, value, pattern)
 
         # Cast value
-        # TODO: review
-        # Should it silently failback to cast_default?
         cast_name = 'cast_%s' % self.__format_main
         cast_func = getattr(self, cast_name, self.cast_default)
         cast_value = cast_func(value, self.__format_fmt)
