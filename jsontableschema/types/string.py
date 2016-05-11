@@ -6,6 +6,9 @@ from __future__ import unicode_literals
 
 import re
 import uuid
+import base64
+import decimal
+import binascii
 from rfc3986 import is_valid_uri
 from future.utils import raise_with_traceback
 from .. import exceptions

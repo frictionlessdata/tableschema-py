@@ -83,7 +83,7 @@ class JTSType(object):
         """
 
         # If value is null
-        if value in self.null_values+[None]:
+        if value in self.null_values + [None]:
 
             # Check required constraint
             if not skip_constraints:

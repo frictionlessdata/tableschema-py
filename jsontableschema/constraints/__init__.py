@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 
 
 from .enum import check_enum
-from . maximum import check_maximum
+from .maximum import check_maximum
 from .maxLength import check_maxLength
 from .minimum import check_minimum
 from .minLength import check_minLength
