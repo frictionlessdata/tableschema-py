@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 
 from functools import partial
 from abc import ABCMeta, abstractmethod
+import six
 from .. import compat
 from .. import exceptions
 from .. import constraints
@@ -70,6 +71,28 @@ class JTSType(object):
             self.__format_main = 'fmt'
             self.__format_fmt = self.__format.strip('fmt:')
 
+    @property
+    def _field(self):
+        """Returns original field object for this type
+        Should be used for getting extra properties for this type
+        """
+        return self.__field if self.__field is not None else {}
+
+    def _is_null(self, value):
+        """Check for null value.
+        If value is string-like, will strip it before testing.
+
+        Args:
+            value (any): value to test for nullity
+
+        Returns:
+            true if a null value
+
+        """
+        if type(value) in six.string_types or type(value) is six.text_type:
+            value = value.strip()
+        return value in self.null_values + [None]
+
     def cast(self, value, skip_constraints=False):
         """Cast value.
 
@@ -83,7 +106,7 @@ class JTSType(object):
         """
 
         # If value is null
-        if value in self.null_values + [None]:
+        if self._is_null(value):
 
             # Check required constraint
             if not skip_constraints:

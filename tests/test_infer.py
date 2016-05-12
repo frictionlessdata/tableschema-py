@@ -26,7 +26,7 @@ class TestInferSchema(base.BaseTestCase):
 
     def test_infer_schema_utf8(self):
         filepath = os.path.join(self.data_dir, 'data_infer_utf8.csv')
-        with io.open(filepath) as stream:
+        with io.open(filepath, encoding='utf8') as stream:
             headers = stream.readline().rstrip('\n').split(',')
             values = jsontableschema.compat.csv_reader(stream)
             schema = jsontableschema.infer(headers, values)
