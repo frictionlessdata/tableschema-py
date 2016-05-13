@@ -39,8 +39,8 @@ class NumberType(base.JTSType):
 
     def __preprocess_value(self, value):
         if type(value) is six.text_type:
-            group_char = self._field.get('groupChar', ',')
-            decimal_char = self._field.get('decimalChar', '.')
+            group_char = self.field.get('groupChar', ',')
+            decimal_char = self.field.get('decimalChar', '.')
             value = value.replace(group_char, '').replace(decimal_char, '.')
         return value
 

@@ -52,7 +52,7 @@ class JTSType(object):
     def __init__(self, field=None):
 
         # Set default field
-        self.__field = None
+        self.__field = {}
         self.__field_name = None
         self.__format = 'default'
         self.__constraints = {}
@@ -72,13 +72,13 @@ class JTSType(object):
             self.__format_fmt = self.__format.strip('fmt:')
 
     @property
-    def _field(self):
+    def field(self):
         """Returns original field object for this type
         Should be used for getting extra properties for this type
         """
-        return self.__field if self.__field is not None else {}
+        return self.__field
 
-    def _is_null(self, value):
+    def __is_null(self, value):
         """Check for null value.
         If value is string-like, will strip it before testing.
 
@@ -106,7 +106,7 @@ class JTSType(object):
         """
 
         # If value is null
-        if self._is_null(value):
+        if self.__is_null(value):
 
             # Check required constraint
             if not skip_constraints:
