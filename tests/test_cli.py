@@ -3,6 +3,7 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 
+import os
 import ast
 
 from click.testing import CliRunner
@@ -10,6 +11,8 @@ from click.testing import CliRunner
 from . import base
 from jsontableschema import cli
 from jsontableschema import model
+
+os.environ['LC_ALL'] = 'en_US.UTF-8'
 
 
 class TestCliInfer(base.BaseTestCase):
@@ -31,7 +34,6 @@ class TestCliInfer(base.BaseTestCase):
         '''UTF8 encoded data containing non-ascii characters.'''
         runner = CliRunner()
         result = runner.invoke(cli.infer, ['data/data_infer_utf8.csv'])
-
         # output is a string, evaluate to a dict
         schema = ast.literal_eval(result.output)
 

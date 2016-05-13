@@ -125,22 +125,59 @@ class TestNumber(base.BaseTestCase):
 
         self.assertRaises(exceptions.InvalidCastError, _type.cast, value)
 
+    def test_number_type_with_localized_settings(self):
+        _type = types.NumberType(self.field)
+        for value in [
+            '10,000.00',
+            '10,000,000.23',
+            '10.23',
+            '1,000'
+        ]:
+            self.assertTrue(_type.cast(value))
+
+        self.field['groupChar'] = '#'
+        _type = types.NumberType(self.field)
+        for value in [
+            '10#000.00',
+            '10#000#000.23',
+            '10.23',
+            '1#000'
+        ]:
+            self.assertTrue(_type.cast(value))
+
+        self.field['decimalChar'] = '@'
+        _type = types.NumberType(self.field)
+        for value in [
+            '10#000@00',
+            '10#000#000@23',
+            '10@23',
+            '1#000'
+        ]:
+            self.assertTrue(_type.cast(value))
+
     def test_number_type_with_currency_format_true(self):
-        value1 = '10,000.00'
-        value2 = '10;000.00'
-        value3 = '$10000.00'
         self.field['format'] = 'currency'
         _type = types.NumberType(self.field)
+        for value in [
+            '10,000.00',
+            '10,000,000.00',
+            '$10000.00',
+            '  10,000.00 €',
+        ]:
+            self.assertTrue(_type.cast(value))
 
-        self.assertTrue(_type.cast(value1))
-        self.assertTrue(_type.cast(value2))
-        self.assertTrue(_type.cast(value3))
+        self.field['decimalChar'] = ','
+        self.field['groupChar'] = ' '
 
-        value = '$10, 000.00'
-        self.assertTrue(_type.cast(value))
+        _type = types.NumberType(self.field)
+        for value in [
+            '10 000,00',
+            '10 000 000,00',
+            '10000,00 ₪',
+            '  10 000,00 £',
+        ]:
+            self.assertTrue(_type.cast(value))
 
-        value = '£10 000.00'
-        self.assertTrue(_type.cast(value))
 
     def test_number_type_with_currency_format_false(self):
         value1 = '10,000a.00'
@@ -605,7 +642,7 @@ class TestGeoPoint(base.BaseTestCase):
     def test_array_invalid(self):
         self.field['format'] = 'array'
         _type = types.GeoPointType(self.field)
-        self.assertRaises(exceptions.InvalidGeoPointType, _type.cast, ' ')
+        self.assertRaises(exceptions.InvalidGeoPointType, _type.cast, '1,2')
         self.assertRaises(exceptions.InvalidGeoPointType, _type.cast,
                           '["a", "b"]')
         self.assertRaises(exceptions.InvalidGeoPointType, _type.cast,
