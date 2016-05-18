@@ -118,7 +118,11 @@ class JTSType(object):
         # Check against post-cast constraints
         if not skip_constraints:
             for check_name, check_value in self.__constraints.items():
-                if check_name in ['required', 'pattern', 'unique']:
+                # We can't handle unique constraint on this level
+                # (shouldn't be added to supported_constraints in subclass)
+                if check_name in ['unique']:
+                    continue
+                if check_name in ['required', 'pattern']:
                     continue
                 if check_name not in self.supported_constraints:
                     raise exceptions.ConstraintNotSupported(
