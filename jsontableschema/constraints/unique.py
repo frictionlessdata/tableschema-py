@@ -12,8 +12,9 @@ from .. import exceptions
 def check_unique(name, values):
     """Unique values constraint.
 
-    Return:
-        bool: always return True because it's not implemented
+    Raises:
+        ConstraintNotSupported: always
 
     """
-    return True
+    raise exceptions.ConstraintNotSupported(
+        'Unique constraint is not supported')
