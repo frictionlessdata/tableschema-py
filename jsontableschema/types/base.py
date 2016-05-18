@@ -78,21 +78,6 @@ class JTSType(object):
         """
         return self.__field
 
-    def __is_null(self, value):
-        """Check for null value.
-        If value is string-like, will strip it before testing.
-
-        Args:
-            value (any): value to test for nullity
-
-        Returns:
-            true if a null value
-
-        """
-        if type(value) in six.string_types or type(value) is six.text_type:
-            value = value.strip()
-        return value in self.null_values + [None]
-
     def cast(self, value, skip_constraints=False):
         """Cast value.
 
@@ -133,6 +118,10 @@ class JTSType(object):
         # Check against post-cast constraints
         if not skip_constraints:
             for check_name, check_value in self.__constraints.items():
+                # We can't handle unique constraint on this level
+                # (shouldn't be added to supported_constraints in subclass)
+                if check_name in ['unique']:
+                    continue
                 if check_name in ['required', 'pattern']:
                     continue
                 if check_name not in self.supported_constraints:
@@ -175,3 +164,20 @@ class JTSType(object):
 
         """
         pass  # pragma: no cover
+
+    # Private
+
+    def __is_null(self, value):
+        """Check for null value.
+        If value is string-like, will strip it before testing.
+
+        Args:
+            value (any): value to test for nullity
+
+        Returns:
+            true if a null value
+
+        """
+        if type(value) in six.string_types or type(value) is six.text_type:
+            value = value.strip()
+        return value in self.null_values + [None]
