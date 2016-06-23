@@ -41,7 +41,9 @@ class NumberType(base.JTSType):
         if type(value) is six.text_type:
             group_char = self.field.get('groupChar', ',')
             decimal_char = self.field.get('decimalChar', '.')
+            percent_char = '%‰‱％﹪٪';
             value = value.replace(group_char, '').replace(decimal_char, '.')
+            value = re.sub('['+percent_char+']', '', value)
         return value
 
     def cast_default(self, value, fmt=None):
