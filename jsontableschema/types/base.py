@@ -67,9 +67,9 @@ class JTSType(object):
         # Set parsed format (fmt feature)
         self.__format_main = self.__format
         self.__format_fmt = None
-        if self.__format.startswith('fmt'):
+        if self.__format.startswith('fmt:'):
             self.__format_main = 'fmt'
-            self.__format_fmt = self.__format.strip('fmt:')
+            self.__format_fmt = self.__format[4:]
 
     @property
     def field(self):
