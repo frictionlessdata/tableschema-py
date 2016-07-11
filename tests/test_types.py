@@ -446,6 +446,14 @@ class TestDate(base.BaseTestCase):
 
         self.assertEquals(_type.cast(value), date(2014, 6, 10))
 
+    def test_date_type_fmt_stripping_bug(self):
+
+        value = '2014-06'
+        self.field['format'] = 'fmt:%Y-%m'
+        _type = types.DateType(self.field)
+
+        self.assertEquals(_type.cast(value), date(2014, 6, 1))
+
     def test_non_iso_date_fails_for_default(self):
         value = '01-01-2019'
         _type = types.DateType(self.field)
