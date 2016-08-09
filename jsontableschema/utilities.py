@@ -45,7 +45,7 @@ def load_json_source(source):
 
     try:
         return json.loads(source)
-    except ValueError as e:
+    except ValueError:
         raise exceptions.InvalidJSONError
 
 

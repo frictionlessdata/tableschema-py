@@ -40,16 +40,16 @@ class GeoJSONType(base.JTSType):
             try:
                 jsonschema.validate(value, _geojson_schema)
                 return value
-            except jsonschema.exceptions.ValidationError as e:
+            except jsonschema.exceptions.ValidationError:
                 raise_with_traceback(exceptions.InvalidGeoJSONType())
         if isinstance(value, compat.str):
             try:
                 geojson = json.loads(value)
                 jsonschema.validate(geojson, _geojson_schema)
                 return geojson
-            except (TypeError, ValueError) as e:
+            except (TypeError, ValueError):
                 raise_with_traceback(exceptions.InvalidGeoJSONType())
-            except jsonschema.exceptions.ValidationError as e:
+            except jsonschema.exceptions.ValidationError:
                 raise_with_traceback(exceptions.InvalidGeoJSONType())
 
     def cast_topojson(self, value, fmt=None):
