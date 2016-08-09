@@ -32,7 +32,8 @@ class NumberType(base.JTSType):
     ]
     # ---
     python_type = decimal.Decimal
-    # TODO: Change this initialization to something more performant (http://bit.ly/1qgkK7B)
+    # We could change this initialization to something
+    # more performant (http://bit.ly/1qgkK7B)
     currencies = u''.join(compat.chr(i) for i
                           in range(0xffff)
                           if unicodedata.category(compat.chr(i)) == 'Sc')
@@ -41,7 +42,7 @@ class NumberType(base.JTSType):
         if type(value) is six.text_type:
             group_char = self.field.get('groupChar', ',')
             decimal_char = self.field.get('decimalChar', '.')
-            percent_char = '%‰‱％﹪٪';
+            percent_char = '%‰‱％﹪٪'
             value = value.replace(group_char, '').replace(decimal_char, '.')
             value = re.sub('['+percent_char+']', '', value)
         return value

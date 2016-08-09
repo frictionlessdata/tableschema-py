@@ -4,9 +4,10 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import six
+from six import add_metaclass
 from functools import partial
 from abc import ABCMeta, abstractmethod
-import six
 from .. import compat
 from .. import exceptions
 from .. import constraints
@@ -14,6 +15,7 @@ from .. import constraints
 
 # Module API
 
+@add_metaclass(ABCMeta)
 class JTSType(object):
     """Base class for all JSON Table Schema types.
 
@@ -96,7 +98,8 @@ class JTSType(object):
             # Check required constraint
             if not skip_constraints:
                 required = self.__constraints.get('required', False)
-                constraints.check_required(self.__field_name, value, required,
+                constraints.check_required(
+                    self.__field_name, value, required,
                     self.null_values+[None])
 
             return None
