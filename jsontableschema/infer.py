@@ -137,14 +137,13 @@ class _TypeResolver(object):
                 else:
                     counts[result] = 1
 
-            # tuple representation of `counts` dict, sorted by values of `counts`
+            # tuple representation of `counts` dict sorted by values
             sorted_counts = sorted(counts.items(), key=operator.itemgetter(1),
                                    reverse=True)
             rv = {
                 'type': sorted_counts[0][0][0],
                 'format': sorted_counts[0][0][1]
             }
-
 
         return rv
 

@@ -19,8 +19,6 @@ install:
   - pip install coveralls
 
 script:
-  # FIXME: configure linter
-  # - make lint
   - make test
 
 after_success:

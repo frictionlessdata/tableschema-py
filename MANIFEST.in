@@ -1,7 +1,8 @@
 global-include VERSION
 include LICENSE.md
 include Makefile
-include pylintrc
+include pylama.ini
+include pytest.ini
 include README.md
 include tox.ini
 

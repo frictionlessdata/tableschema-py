@@ -30,10 +30,8 @@ INSTALL_REQUIRES = [
     'tabulator>=0.3',
     'unicodecsv>=0.14',
 ]
-LINT_REQUIRES = [
-    'pylint',
-]
 TESTS_REQUIRE = [
+    'pylama',
     'tox',
 ]
 README = read('README.md')
@@ -49,7 +47,7 @@ setup(
     include_package_data=True,
     install_requires=INSTALL_REQUIRES,
     tests_require=TESTS_REQUIRE,
-    extras_require={'develop': LINT_REQUIRES + TESTS_REQUIRE},
+    extras_require={'develop': TESTS_REQUIRE},
     entry_points={
         'console_scripts': [
             'jsontableschema = jsontableschema.cli:main',

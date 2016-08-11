@@ -97,7 +97,8 @@ class JSONTableSchemaValidator(BaseValidator):
                             'be a string when foreignKey.reference.fields.'
                             'is a string'
                         )
-                    if not len(fk.get('fields')) == len(fk['reference']['fields']):
+                    if not (len(fk.get('fields')) ==
+                            len(fk['reference']['fields'])):
                         yield exceptions.SchemaValidationError(
                             'A JSON Table Schema foreignKey.fields must '
                             'contain the same number entries as '
