@@ -5,6 +5,7 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 
 from copy import deepcopy
+from .field import Field
 from .validate import validate, validator
 from . import compat
 from . import exceptions
@@ -17,7 +18,7 @@ class Schema(object):
     """JSON Table Schema schema representation.
 
     Args:
-        descriptor (dict/str): schema descriptor (could be paht/url)
+        descriptor (dict/str): schema descriptor/path/url
 
     """
 
@@ -66,7 +67,7 @@ class Schema(object):
     @property
     def fields(self):
         if self.__fields is None:
-            pass
+            self.__fields = [Field(fd) for fd in self.__descriptor['fields']]
         return self.__fields
 
     def get_field(self, name):
