@@ -78,7 +78,7 @@ class Schema(object):
             exceptions.MultipleInvalid
 
         Returns:
-            mixed[]: converted row
+            mixed[]: converted row tuple
 
         """
         # Check row length
@@ -102,7 +102,7 @@ class Schema(object):
         if errors:
             raise exceptions.MultipleInvalid(errors=errors)
 
-        return result
+        return tuple(result)
 
     @property
     def fields(self):

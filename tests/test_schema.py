@@ -65,42 +65,42 @@ def test_validate():
 
 def test_convert_row():
     schema = Schema(DESCRIPTOR_MAX)
-    source = ['string', '10.0', '1', 'string', 'string']
-    target = ['string', Decimal(10.0), 1, 'string', 'string']
+    source = ('string', '10.0', '1', 'string', 'string')
+    target = ('string', Decimal(10.0), 1, 'string', 'string')
     assert schema.convert_row(source) == target
 
 
 def test_convert_row_null_values():
     schema = Schema(DESCRIPTOR_MAX)
-    source = ['string', '', '-', 'string', 'null']
-    target = ['string', None, None, 'string', None]
+    source = ('string', '', '-', 'string', 'null')
+    target = ('string', None, None, 'string', None)
     assert schema.convert_row(source) == target
 
 
 def test_convert_row_too_short():
     schema = Schema(DESCRIPTOR_MAX)
-    source = ['string', '10.0', '1', 'string']
+    source = ('string', '10.0', '1', 'string')
     with pytest.raises(exceptions.ConversionError):
         schema.convert_row(source)
 
 
 def test_convert_row_too_long():
     schema = Schema(DESCRIPTOR_MAX)
-    source = ['string', '10.0', '1', 'string', 'string', 'string']
+    source = ('string', '10.0', '1', 'string', 'string', 'string')
     with pytest.raises(exceptions.ConversionError):
         schema.convert_row(source)
 
 
 def test_convert_row_wrong_type_fail_fast():
     schema = Schema(DESCRIPTOR_MAX)
-    source = ['string', 'notdecimal', '10.6', 'string', 'string']
+    source = ('string', 'notdecimal', '10.6', 'string', 'string')
     with pytest.raises(exceptions.InvalidCastError):
         schema.convert_row(source, fail_fast=True)
 
 
 def test_convert_row_wrong_type_multiple_errors():
     schema = Schema(DESCRIPTOR_MAX)
-    source = ['string', 'notdecimal', '10.6', 'string', 'string']
+    source = ('string', 'notdecimal', '10.6', 'string', 'string')
     with pytest.raises(exceptions.MultipleInvalid) as excinfo:
         schema.convert_row(source)
     assert len(excinfo.value.errors) == 2
