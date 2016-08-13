@@ -15,7 +15,7 @@ class Table(object):
 
     Args:
         source (mixed): data source
-        schema (Schema/dict/str): schema instance, descriptor or url
+        schema (Schema/dict/str): schema instance, descriptor, path or url
         backend (None/str): backend name like sql` or `bigquery`
         options (dict): tabulator options or backend options
 
@@ -23,7 +23,7 @@ class Table(object):
 
     # Public
 
-    def __init__(source, schema=None, backend=None, **options):
+    def __init__(self, source, schema=None, backend=None, **options):
 
         # Instantiate schema
         self.__schema = None
@@ -45,13 +45,17 @@ class Table(object):
         return self.__schema
 
     @property
-    def data(self):
+    def headers(self):
+        pass
+
+    @property
+    def read(self, limit=None, fail_fast=False):
         """dict[]: table data
         """
         return list(self.iter())
 
-    def iter(self):
+    def iter(self, keyed=False):
         pass
 
-    def save(self, path, backend=None, **options):
+    def save(self, target, backend=None, **options):
         pass
