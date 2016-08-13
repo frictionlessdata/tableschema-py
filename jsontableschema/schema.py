@@ -168,5 +168,11 @@ class Schema(object):
             target (str): file path
 
         """
-        with io.open(target, 'w', encoding='utf-8') as file:
+        mode = 'w'
+        encoding = 'utf-8'
+        if compat.is_py2:
+            mode = 'wb'
+            encoding = None
+        utilities.ensure_dir(target)
+        with io.open(target, mode=mode, encoding=encoding) as file:
             json.dump(self.__descriptor, file, indent=4)
