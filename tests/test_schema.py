@@ -5,6 +5,7 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 
 import io
+import os
 import json
 import pytest
 import requests
@@ -137,3 +138,9 @@ def test_primary_key():
 def test_foreign_keys():
     assert Schema(DESCRIPTOR_MIN).foreign_keys == []
     assert Schema(DESCRIPTOR_MAX).foreign_keys == DESCRIPTOR_MAX['foreignKeys']
+
+
+def test_save(tmpdir):
+    path = str(tmpdir.join('schema.json'))
+    Schema(DESCRIPTOR_MIN).save(path)
+    assert DESCRIPTOR_MIN == json.load(io.open(path, encoding='utf-8'))

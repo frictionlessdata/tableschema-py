@@ -4,6 +4,8 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
+import io
+import json
 from copy import deepcopy
 from .field import Field
 from .validate import validate, validator
@@ -158,3 +160,13 @@ class Schema(object):
         """dict[]: foreign keys
         """
         return self.__descriptor.get('foreignKeys', [])
+
+    def save(self, target):
+        """Save schema descriptor.
+
+        Args:
+            target (str): file path
+
+        """
+        with io.open(target, 'w', encoding='utf-8') as file:
+            json.dump(self.__descriptor, file, indent=4)
