@@ -45,10 +45,6 @@ class Table(object):
         return self.__schema
 
     @property
-    def headers(self):
-        pass
-
-    @property
     def read(self, limit=None, fail_fast=False):
         """dict[]: table data
         """
