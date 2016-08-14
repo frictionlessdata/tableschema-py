@@ -5,6 +5,7 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 
 from tabulator import topen
+from importlib import import_module
 from .schema import Schema
 from . import exceptions
 from . import compat
@@ -31,10 +32,19 @@ class Table(object):
         if isinstance(schema, (compat.str, dict)):
             schema = Schema(schema)
 
+        # Instantiate storage
+        storage = None
+        if backend is not None:
+            module = 'jsontableschema.plugins.%s' % backend
+            storage = import_module(module).Storage(**options)
+            # https://github.com/frictionlessdata/jsontableschema-py/issues/70
+            # if schema is not None:
+            #     storage.describe(source, schema)
+
         # Set attributes
         self.__source = source
         self.__schema = schema
-        self.__backend = backend
+        self.__storage = storage
         self.__options = options
 
     @property
@@ -42,8 +52,16 @@ class Table(object):
         """Schema: schema instance
         """
         if self.__schema is None:
-            message = 'Schema infering is not supported yet'
-            raise NotImplementedError(message)
+
+            # Tabulator
+            if self.__storage is None:
+                message = 'Schema infering is not supported yet'
+                raise NotImplementedError(message)
+
+            # Storage
+            else:
+                self.__schema = self.__storage.describe(self.__source)
+
         return self.__schema
 
     def iter(self, keyed=False):
@@ -58,7 +76,7 @@ class Table(object):
         """
 
         # Tabulator
-        if self.__backend is None:
+        if self.__storage is None:
             options = {}
             options.update(extract_headers=True)
             options.update(self.__options)
@@ -71,8 +89,11 @@ class Table(object):
 
         # Storage
         else:
-            message = 'Storage integration is not supported yet'
-            raise NotImplementedError(message)
+            for row in self.__storage.read(self.__source):
+                row = self.schema.convert_row(row)
+                if keyed:
+                    row = dict(zip(self.schema.headers, row))
+                yield row
 
     def read(self, keyed=False, limit=None, fail_fast=False):
         """Read table rows.

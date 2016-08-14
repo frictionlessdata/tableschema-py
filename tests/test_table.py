@@ -4,6 +4,8 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
+from mock import Mock, patch
+from jsontableschema.schema import Schema
 from jsontableschema.table import Table
 
 
@@ -65,4 +67,18 @@ def test_read_limit():
     table = Table(DATA_MIN, schema=SCHEMA_MIN)
     expect = [('one', 1)]
     actual = table.read(limit=1)
+    assert actual == expect
+
+
+@patch('jsontableschema.table.import_module')
+def test_read_storage(import_module):
+    # Mocks
+    import_module.return_value = Mock(Storage=Mock(return_value=Mock(
+        describe = Mock(return_value=Schema(SCHEMA_MIN)),
+        read = Mock(return_value=DATA_MIN[1:]),
+    )))
+    # Tests
+    table = Table('table', backend='storage')
+    expect = [('one', 1), ('two', 2)]
+    actual = table.read()
     assert actual == expect
