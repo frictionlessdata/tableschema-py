@@ -5,7 +5,7 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 
 import io
-import csv
+import unicodecsv
 from tabulator import topen
 from importlib import import_module
 from .schema import Schema
@@ -63,7 +63,7 @@ class Table(object):
 
             # Storage
             else:
-                self.__schema = self.__storage.describe(self.__source)
+                self.__schema = Schema(self.__storage.describe(self.__source))
 
         return self.__schema
 
@@ -151,9 +151,9 @@ class Table(object):
         if backend is None:
             # It's temporal for now supporting only csv
             # https://github.com/frictionlessdata/tabulator-py/issues/36
-            utilities.ensure_dir(data)
+            utilities.ensure_dir(target)
             with io.open(target, 'wb') as file:
-                writer = csv.writer(file, encoding='utf-8')
+                writer = unicodecsv.writer(file, encoding='utf-8')
                 writer.writerow(self.schema.headers)
                 for row in self.iter():
                     writer.writerow(row)
@@ -164,5 +164,5 @@ class Table(object):
             storage = import_module(module).Storage(**options)
             if storage.check(target):
                 storage.delete(target)
-            storage.create(target, self.schema)
+            storage.create(target, self.schema.descriptor)
             storage.write(target, self.iter())
