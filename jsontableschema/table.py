@@ -4,10 +4,13 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
+import io
+import csv
 from tabulator import topen
 from importlib import import_module
 from .schema import Schema
 from . import exceptions
+from . import utilities
 from . import compat
 
 
@@ -143,5 +146,23 @@ class Table(object):
             options (dict): tabulator options or backend options
 
         """
-        message = 'Table saving is not supported yet'
-        raise NotImplementedError(message)
+
+        # Tabulator
+        if backend is None:
+            # It's temporal for now supporting only csv
+            # https://github.com/frictionlessdata/tabulator-py/issues/36
+            utilities.ensure_dir(data)
+            with io.open(target, 'wb') as file:
+                writer = csv.writer(file, encoding='utf-8')
+                writer.writerow(self.schema.headers)
+                for row in self.iter():
+                    writer.writerow(row)
+
+        # Storage
+        if backend is not None:
+            module = 'jsontableschema.plugins.%s' % backend
+            storage = import_module(module).Storage(**options)
+            if storage.check(target):
+                storage.delete(target)
+            storage.create(target, self.schema)
+            storage.write(target, self.iter())
