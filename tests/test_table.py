@@ -5,8 +5,7 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 
 from mock import Mock, patch
-from jsontableschema.schema import Schema
-from jsontableschema.table import Table
+from jsontableschema import Schema, Table
 
 
 # Constants

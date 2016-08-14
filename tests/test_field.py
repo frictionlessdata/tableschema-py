@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 import io
 import json
 import requests
-from jsontableschema.field import Field
+from jsontableschema import Field
 
 
 # Constants

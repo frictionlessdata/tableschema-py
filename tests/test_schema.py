@@ -10,8 +10,7 @@ import json
 import pytest
 import requests
 from decimal import Decimal
-from jsontableschema import exceptions
-from jsontableschema.schema import Schema
+from jsontableschema import Schema, exceptions
 
 
 # Constants
