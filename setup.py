@@ -27,7 +27,7 @@ INSTALL_REQUIRES = [
     'rfc3986>=0.3.0',
     'jsonschema>=2.5.1',
     'future>=0.15.2',
-    'tabulator>=0.3',
+    'tabulator>=0.5',
     'unicodecsv>=0.14',
 ]
 TESTS_REQUIRE = [
