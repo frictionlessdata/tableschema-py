@@ -15,9 +15,9 @@ DATA_MIN = [('key', 'value'), ('one', '1'), ('two', '2')]
 SCHEMA_MIN = {'fields': [{'name': 'key'}, {'name': 'value', 'type': 'integer'}]}
 SCHEMA_CSV = {
     'fields': [
-        {'name': 'id', 'type': 'integer'},
-        {'name': 'age', 'type': 'integer'},
-        {'name': 'name',},
+        {'name': 'id', 'type': 'integer', 'format': 'default', 'description': '', 'title': ''},
+        {'name': 'age', 'type': 'integer', 'format': 'default', 'description': '', 'title': ''},
+        {'name': 'name', 'type': 'string', 'format': 'default', 'description': '', 'title': ''},
     ],
 }
 
@@ -26,6 +26,19 @@ SCHEMA_CSV = {
 
 def test_schema():
     assert Table(DATA_MIN, schema=SCHEMA_MIN).schema.descriptor == SCHEMA_MIN
+
+
+def test_schema_infer_tabulator():
+    assert Table('data/data_infer.csv').schema.descriptor == SCHEMA_CSV
+
+
+@patch('jsontableschema.table.import_module')
+def test_schema_infer_storage(import_module):
+    # Mocks
+    import_module.return_value = Mock(Storage=Mock(return_value=Mock(
+        describe = Mock(return_value=SCHEMA_MIN),
+    )))
+    assert Table('table', backend='storage').schema.descriptor == SCHEMA_MIN
 
 
 def test_iter():

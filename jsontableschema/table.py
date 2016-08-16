@@ -9,6 +9,7 @@ import unicodecsv
 from tabulator import topen
 from importlib import import_module
 from .schema import Schema
+from .infer import infer
 from . import exceptions
 from . import utilities
 from . import compat
@@ -58,8 +59,12 @@ class Table(object):
 
             # Tabulator
             if self.__storage is None:
-                message = 'Schema infering is not supported yet'
-                raise NotImplementedError(message)
+                options = {}
+                options.update(headers='row1')
+                options.update(self.__options)
+                with topen(self.__source, **options) as table:
+                    descriptor = infer(table.headers, table.sample)
+                self.__schema = Schema(descriptor)
 
             # Storage
             else:
@@ -81,7 +86,7 @@ class Table(object):
         # Tabulator
         if self.__storage is None:
             options = {}
-            options.update(extract_headers=True)
+            options.update(headers='row1')
             options.update(self.__options)
             with topen(self.__source, **options) as table:
                 for row in table:
