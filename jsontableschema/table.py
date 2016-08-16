@@ -134,6 +134,9 @@ class Table(object):
             backend (None/str): backend name like sql` or `bigquery`
             options (dict): tabulator options or backend options
 
+        Returns:
+            None/Storage: storage instance if backend used
+
         """
 
         # Tabulator
@@ -155,6 +158,7 @@ class Table(object):
                 storage.delete(target)
             storage.create(target, self.schema.descriptor)
             storage.write(target, self.iter())
+            return storage
 
     # Private
 
