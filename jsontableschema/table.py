@@ -30,7 +30,12 @@ class Table(object):
 
     # Public
 
-    def __init__(self, source, schema=None, backend=None, **options):
+    def __init__(self, source, schema=None, post_convert=None,
+                 backend=None, **options):
+
+        # Initiate if None
+        if post_convert is None:
+            post_convert = []
 
         # Instantiate schema
         if isinstance(schema, (compat.str, dict)):
@@ -50,60 +55,39 @@ class Table(object):
         self.__schema = schema
         self.__storage = storage
         self.__options = options
+        self.__post_convert = post_convert
 
     @property
     def schema(self):
         """Schema: schema instance
         """
         if self.__schema is None:
-
-            # Tabulator
-            if self.__storage is None:
-                options = {}
-                options.update(headers='row1')
-                options.update(self.__options)
-                with topen(self.__source, **options) as table:
-                    descriptor = infer(table.headers, table.sample)
-                self.__schema = Schema(descriptor)
-
-            # Storage
-            else:
-                self.__schema = Schema(self.__storage.describe(self.__source))
-
+            self.__schema = self.__infer_schema()
         return self.__schema
 
-    def iter(self, keyed=False):
+    def iter(self, keyed=False, extended=False):
         """Yields table rows.
 
         Args:
             keyed (bool): yield keyed rows
+            extended (bool): yield extended rows
 
         Yields:
-            mixed[]/mixed{}: row or keyed row
+            mixed[]/mixed{}: row or keyed row or extended row
 
         """
-
-        # Tabulator
-        if self.__storage is None:
-            options = {}
-            options.update(headers='row1')
-            options.update(self.__options)
-            with topen(self.__source, **options) as table:
-                for row in table:
-                    row = self.schema.convert_row(row)
-                    if keyed:
-                        row = dict(zip(self.schema.headers, row))
-                    yield row
-
-        # Storage
-        else:
-            for row in self.__storage.read(self.__source):
-                row = self.schema.convert_row(row)
-                if keyed:
-                    row = dict(zip(self.schema.headers, row))
+        extended_rows = self.__iter_extended_rows()
+        for processor in self.__post_convert:
+            extended_rows = processor(extended_rows)
+        for number, headers, row in extended_rows:
+            if extended:
+                yield (number, headers, row)
+            elif keyed:
+                yield dict(zip(headers, row))
+            else:
                 yield row
 
-    def read(self, keyed=False, limit=None, fail_fast=False):
+    def read(self, keyed=False, extended=False, limit=None, fail_fast=False):
         """Read table rows.
 
         Args:
@@ -119,7 +103,7 @@ class Table(object):
         count = 0
         errors = []
         result = []
-        rows = self.iter(keyed=keyed)
+        rows = self.iter(keyed=keyed, extended=extended)
         while True:
             try:
                 row = next(rows)
@@ -171,3 +155,39 @@ class Table(object):
                 storage.delete(target)
             storage.create(target, self.schema.descriptor)
             storage.write(target, self.iter())
+
+    # Private
+
+    def __infer_schema(self):
+
+        # Tabulator
+        if self.__storage is None:
+            options = {}
+            options.update(headers='row1')
+            options.update(self.__options)
+            with topen(self.__source, **options) as table:
+                descriptor = infer(table.headers, table.sample)
+            return Schema(descriptor)
+
+        # Storage
+        else:
+            return Schema(self.__storage.describe(self.__source))
+
+    def __iter_extended_rows(self):
+
+        # Tabulator
+        if self.__storage is None:
+            options = {}
+            options.update(headers='row1')
+            options.update(self.__options)
+            with topen(self.__source, **options) as table:
+                for number, headers, row in table.iter(extended=True):
+                    row = self.schema.convert_row(row)
+                    yield (number, self.schema.headers, row)
+
+        # Storage
+        else:
+            rows = self.__storage.read(self.__source)
+            for number, row in enumerate(rows, start=1):
+                row = self.schema.convert_row(row)
+                yield (number, self.schema.headers, row)

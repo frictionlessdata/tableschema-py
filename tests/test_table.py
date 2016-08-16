@@ -94,3 +94,15 @@ def test_read_storage(import_module):
     expect = [('one', 1), ('two', 2)]
     actual = table.read()
     assert actual == expect
+
+
+def test_processors():
+    def skip_under_30(erows):
+        for number, headers, row in erows:
+            krow = dict(zip(headers, row))
+            if krow['age'] >= 30:
+                yield (number, headers, row)
+    table = Table('data/data_infer.csv', post_convert=[skip_under_30])
+    expect = [(1, 39, 'Paul'), (3, 36, 'Jane')]
+    actual = table.read()
+    assert actual == expect
