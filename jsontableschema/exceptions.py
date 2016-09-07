@@ -131,6 +131,12 @@ class ConstraintNotSupported(JsonTableSchemaException):
         super(ConstraintNotSupported, self).__init__(msg)
 
 
+# Storage
+
+class StorageError(JsonTableSchemaException):
+    pass
+
+
 # Deprecated
 
 class ConversionError(JsonTableSchemaException):
