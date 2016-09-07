@@ -8,18 +8,19 @@ import operator
 from . import types
 
 
-def infer(headers, values, row_limit=None, explicit=False, primary_key=None):
+# Module API
 
+def infer(headers, values, row_limit=None, explicit=False, primary_key=None):
     """Return a schema from the passed headers and values.
 
     Args:
-    * `headers`: a list of header names
-    * `values`: a reader over data, yielding each row as a list of values
-    * `explicit`: be explicit.
-    * `primary_key`: pass in a primary key or iterable of keys.
+        headers: a list of header names
+        values: a reader over data, yielding each row as a list of values
+        explicit: be explicit.
+        primary_key: pass in a primary key or iterable of keys.
 
     Returns:
-    * A JSON Table Schema as a Python dict.
+        A JSON Table Schema as a Python dict.
 
     """
 
@@ -89,11 +90,10 @@ def infer(headers, values, row_limit=None, explicit=False, primary_key=None):
 # Internal
 
 class _TypeGuesser(object):
-
     """Guess the type for a value.
 
     Returns:
-        * A tuple  of ('type', 'format')
+        A tuple  of ('type', 'format')
 
     """
 
@@ -112,8 +112,8 @@ class _TypeGuesser(object):
 
 
 class _TypeResolver(object):
-
-    """Get the best matching type/format from a list of possible ones."""
+    """Get the best matching type/format from a list of possible ones.
+    """
 
     def __init__(self):
         self._types = _get_available_types()
@@ -149,7 +149,8 @@ class _TypeResolver(object):
 
 
 def _get_available_types():
-    """Return available types."""
+    """Return available types.
+    """
     return [
         types.AnyType,
         types.StringType,
