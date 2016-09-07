@@ -4,6 +4,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import warnings
 import jsonschema.exceptions
 
 
@@ -121,13 +122,13 @@ class InvalidGeoJSONType(InvalidCastError):
 
 class ConstraintError(JsonTableSchemaException):
     def __init__(self, msg=None):
-        self.msg = msg or "The value didn't validate against a constraint."
+        self.msg = msg or 'The value didn\'t validate against a constraint.'
         super(ConstraintError, self).__init__(msg)
 
 
 class ConstraintNotSupported(JsonTableSchemaException):
     def __init__(self, msg=None):
-        self.msg = msg or "The field does not support the constraint."
+        self.msg = msg or 'The field does not support the constraint.'
         super(ConstraintNotSupported, self).__init__(msg)
 
 
@@ -135,5 +136,8 @@ class ConstraintNotSupported(JsonTableSchemaException):
 
 class ConversionError(JsonTableSchemaException):
     def __init__(self, msg=None):
-        self.msg = msg or "Error converting a row or field."
+        # DEPRECATED [v0.7-v1)
+        message = 'exceptions.ConversionError is deprecated [v0.7-v1)'
+        warnings.warn(message, UserWarning)
+        self.msg = msg or 'Error converting a row or field.'
         super(ConversionError, self).__init__(msg)
