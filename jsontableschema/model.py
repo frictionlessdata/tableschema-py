@@ -6,6 +6,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import json
+import warnings
 try:
     from future_builtins import zip
 except ImportError:
@@ -45,6 +46,10 @@ class SchemaModel(object):
     }
 
     def __init__(self, schema_source, case_insensitive_headers=False):
+
+        # DEPRECATED [v0.7-v1)
+        message = 'Class models.SchemaModel is deprecated [v0.7-v1)'
+        warnings.warn(message, UserWarning)
 
         self.schema_source = schema_source
         self.case_insensitive_headers = case_insensitive_headers

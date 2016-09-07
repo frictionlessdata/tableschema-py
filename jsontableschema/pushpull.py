@@ -6,10 +6,10 @@ from __future__ import unicode_literals
 
 import io
 import json
+import warnings
 import unicodecsv as csv
 from tabulator import topen
 from importlib import import_module
-
 from .model import SchemaModel
 from . import compat
 from . import utilities
@@ -36,6 +36,10 @@ def push_resource(table, schema, data, backend, **backend_options):
         Backend options mentioned in backend docs.
 
     """
+
+    # DEPRECATED [v0.7-v1)
+    message = 'Function push_resource is deprecated [v0.7-v1)'
+    warnings.warn(message, UserWarning)
 
     # Get storage
     plugin = import_module('jsontableschema.plugins.%s' % backend)
@@ -72,6 +76,10 @@ def pull_resource(table, schema, data, backend, **backend_options):
         Backend options mentioned in backend docs.
 
     """
+
+    # DEPRECATED [v0.7-v1)
+    message = 'Function pull_resource is deprecated [v0.7-v1)'
+    warnings.warn(message, UserWarning)
 
     # Get storage
     plugin = import_module('jsontableschema.plugins.%s' % backend)
