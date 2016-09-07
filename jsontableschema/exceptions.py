@@ -7,19 +7,43 @@ from __future__ import unicode_literals
 import jsonschema.exceptions
 
 
+# Base
+
 class JsonTableSchemaException(Exception):
     pass
 
+
+class MultipleInvalid(JsonTableSchemaException):
+    def __init__(self, msg='Multiple errors found', errors=None):
+        self.msg = msg
+        if errors:
+            self.errors = errors
+        else:
+            self.errors = []
+        super(MultipleInvalid, self).__init__(msg)
+
+
+# Load
+
+class InvalidJSONError(Exception):
+    def __init__(self, msg=None):
+        self.msg = msg or 'The obj cannot be parsed as JSON.'
+
+
+# Validate
 
 class InvalidSchemaError(Exception):
     def __init__(self, msg=None):
         self.msg = msg or 'The obj is not a valid JSON Table Schema.'
 
 
-class InvalidJSONError(Exception):
-    def __init__(self, msg=None):
-        self.msg = msg or 'The obj cannot be parsed as JSON.'
+class SchemaValidationError(
+        JsonTableSchemaException,
+        jsonschema.exceptions.ValidationError):
+    pass
 
+
+# Convert
 
 class InvalidCastError(JsonTableSchemaException):
     pass
@@ -93,6 +117,8 @@ class InvalidGeoJSONType(InvalidCastError):
     pass
 
 
+# Constraints
+
 class ConstraintError(JsonTableSchemaException):
     def __init__(self, msg=None):
         self.msg = msg or "The value didn't validate against a constraint."
@@ -105,22 +131,9 @@ class ConstraintNotSupported(JsonTableSchemaException):
         super(ConstraintNotSupported, self).__init__(msg)
 
 
+# Deprecated
+
 class ConversionError(JsonTableSchemaException):
     def __init__(self, msg=None):
         self.msg = msg or "Error converting a row or field."
         super(ConversionError, self).__init__(msg)
-
-
-class MultipleInvalid(JsonTableSchemaException):
-    def __init__(self, msg='Multiple errors found', errors=None):
-        self.msg = msg
-        if errors:
-            self.errors = errors
-        else:
-            self.errors = []
-        super(MultipleInvalid, self).__init__(msg)
-
-
-class SchemaValidationError(JsonTableSchemaException,
-                            jsonschema.exceptions.ValidationError):
-    pass

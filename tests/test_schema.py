@@ -79,14 +79,14 @@ def test_convert_row_null_values():
 def test_convert_row_too_short():
     schema = Schema(DESCRIPTOR_MAX)
     source = ('string', '10.0', '1', 'string')
-    with pytest.raises(exceptions.ConversionError):
+    with pytest.raises(exceptions.InvalidCastError):
         schema.convert_row(source)
 
 
 def test_convert_row_too_long():
     schema = Schema(DESCRIPTOR_MAX)
     source = ('string', '10.0', '1', 'string', 'string', 'string')
-    with pytest.raises(exceptions.ConversionError):
+    with pytest.raises(exceptions.InvalidCastError):
         schema.convert_row(source)
 
 

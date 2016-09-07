@@ -74,31 +74,38 @@ class Schema(object):
             fail_fast (bool): raise first occured error
 
         Raises:
-            exceptions.ConversionError
-            exceptions.MultipleInvalid
+            exceptions.InvalidCastError
+            exceptions.MultipleInvalid (fail_fast=False)
 
         Returns:
             mixed[]: converted row tuple
 
         """
+
+        # Prepare
+        errors = []
+
         # Check row length
         if len(row) != len(self.fields):
             message = 'Row length (%s) doesn\'t match fields count (%s)'
             message = message % (len(row), len(self.fields))
-            raise exceptions.ConversionError(message)
+            exception = exceptions.InvalidCastError(message)
+            if fail_fast:
+                raise exception
+            errors.append(exception)
 
         # Convert
         result = []
-        errors = []
-        for field, value in zip(self.fields, row):
-            try:
-                result.append(field.convert_value(value))
-            except exceptions.InvalidCastError as exception:
-                if fail_fast:
-                    raise
-                errors.append(exception)
+        if not errors:
+            for field, value in zip(self.fields, row):
+                try:
+                    result.append(field.convert_value(value))
+                except exceptions.InvalidCastError as exception:
+                    if fail_fast:
+                        raise
+                    errors.append(exception)
 
-        # Raise errors
+        # Raise
         if errors:
             raise exceptions.MultipleInvalid(errors=errors)
 
