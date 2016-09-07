@@ -66,7 +66,7 @@ class Schema(object):
                 raise exceptions.MultipleInvalid(errors=errors)
         return True
 
-    def convert_row(self, row, fail_fast=False):
+    def convert_row(self, row, fail_fast=True):
         """Convert row to schema types.
 
         Args:

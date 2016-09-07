@@ -90,18 +90,18 @@ def test_convert_row_too_long():
         schema.convert_row(source)
 
 
-def test_convert_row_wrong_type_fail_fast():
+def test_convert_row_wrong_type_fail_fast_false():
     schema = Schema(DESCRIPTOR_MAX)
     source = ('string', 'notdecimal', '10.6', 'string', 'string')
-    with pytest.raises(exceptions.InvalidCastError):
-        schema.convert_row(source, fail_fast=True)
+    with pytest.raises(exceptions.MultipleInvalid):
+        schema.convert_row(source, fail_fast=False)
 
 
 def test_convert_row_wrong_type_multiple_errors():
     schema = Schema(DESCRIPTOR_MAX)
     source = ('string', 'notdecimal', '10.6', 'string', 'string')
     with pytest.raises(exceptions.MultipleInvalid) as excinfo:
-        schema.convert_row(source)
+        schema.convert_row(source, fail_fast=False)
     assert len(excinfo.value.errors) == 2
 
 

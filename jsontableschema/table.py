@@ -10,7 +10,6 @@ from tabulator import topen
 from importlib import import_module
 from .schema import Schema
 from .infer import infer
-from . import exceptions
 from . import helpers
 from . import compat
 
@@ -87,41 +86,22 @@ class Table(object):
             else:
                 yield row
 
-    def read(self, keyed=False, extended=False, limit=None, fail_fast=False):
+    def read(self, keyed=False, extended=False, limit=None):
         """Read table rows.
 
         Args:
             limit (int): return this amount of rows
-            fail_fast (bool): raise first occured error
 
         Returns:
             tuple[]: table rows
 
         """
-
-        # Collect rows
-        count = 0
-        errors = []
         result = []
         rows = self.iter(keyed=keyed, extended=extended)
-        while True:
-            try:
-                row = next(rows)
-                result.append(row)
-                count += 1
-                if count == limit:
-                    break
-            except exceptions.JsonTableSchemaException as exception:
-                if fail_fast:
-                    raise exception
-                errors.append(exception)
-            except StopIteration:
+        for count, row in enumerate(rows, start=1):
+            result.append(row)
+            if count == limit:
                 break
-
-        # Raise errors
-        if errors:
-            raise exceptions.MultipleInvalid(errors=errors)
-
         return result
 
     def save(self, target, backend=None, **options):

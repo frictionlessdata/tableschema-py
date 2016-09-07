@@ -6,10 +6,8 @@ from __future__ import unicode_literals
 
 import os
 import json
-
 import jsonschema
 from jsonschema.validators import validator_for
-
 from . import compat, exceptions
 
 
