@@ -81,8 +81,9 @@ class _JSONTableSchemaValidator(_BaseValidator):
             raise jsonschema.exceptions.SchemaError.create_from(error)
 
     def iter_errors(self, instance, _schema=None):
-        for e in super(_JSONTableSchemaValidator, self).iter_errors(instance,
-                                                                   _schema):
+
+        for e in super(_JSONTableSchemaValidator, self).iter_errors(
+                instance, _schema):
             yield exceptions.SchemaValidationError(
                 e.message, e.validator, e.path, e.cause, e.context,
                 e.validator_value, e.instance, e.schema, e.schema_path,

@@ -32,6 +32,17 @@ DESCRIPTOR_MAX = {
 
 # Tests
 
+
+def test_init():
+    # Valid
+    assert Schema(DESCRIPTOR_MIN)
+    assert Schema(DESCRIPTOR_MAX)
+    assert Schema('data/schema_valid_full.json')
+    assert Schema('data/schema_valid_simple.json')
+    # Invalid
+    with pytest.raises(exceptions.SchemaValidationError) as exception:
+        Schema('data/schema_invalid_multiple_errors.json')
+
 def test_descriptor():
     # Dict
     assert Schema(DESCRIPTOR_MIN).descriptor == DESCRIPTOR_MIN
@@ -46,20 +57,6 @@ def test_descriptor():
     expect = Schema(url).descriptor
     actual = requests.get(url).json()
     assert expect == actual
-
-
-def test_validate():
-    # Valid
-    assert Schema(DESCRIPTOR_MIN).validate()
-    assert Schema(DESCRIPTOR_MAX).validate()
-    assert Schema('data/schema_valid_full.json').validate()
-    assert Schema('data/schema_valid_simple.json').validate()
-    # Invalid
-    with pytest.raises(exceptions.MultipleInvalid) as exception:
-        Schema('data/schema_invalid_multiple_errors.json').validate()
-    # Invalid (fail fast)
-    with pytest.raises(exceptions.InvalidSchemaError) as exception:
-        Schema('data/schema_invalid_multiple_errors.json').validate(fail_fast=True)
 
 
 def test_convert_row():

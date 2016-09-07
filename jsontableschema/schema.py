@@ -8,7 +8,7 @@ import io
 import json
 from copy import deepcopy
 from .field import Field
-from .validate import validate, validator
+from .validate import validate
 from . import compat
 from . import helpers
 from . import exceptions
@@ -21,6 +21,7 @@ class Schema(object):
 
     Raises:
         exceptions.InvalidJSONError
+        exceptions.SchemaValidationError
 
     Args:
         descriptor (dict/str): schema descriptor/path/url
@@ -30,41 +31,19 @@ class Schema(object):
     # Public
 
     def __init__(self, descriptor):
+
+        # Set attributes
         self.__descriptor = deepcopy(helpers.load_json_source(descriptor))
         self.__fields = None
+
+        # Validate
+        validate(self.__descriptor)
 
     @property
     def descriptor(self):
         """dict: schema descriptor
         """
         return self.__descriptor
-
-    def validate(self, fail_fast=False):
-        """Validate schema descriptor.
-
-        Args:
-            fail_fast (bool): raise first error
-
-        Raises:
-            exceptions.InvalidSchemaError
-            exceptions.MultipleInvalid
-
-        Returns:
-            bool: True if valid
-
-        """
-        # Raise first error
-        if fail_fast:
-            try:
-                validate(self.__descriptor)
-            except exceptions.SchemaValidationError:
-                raise exceptions.InvalidSchemaError
-        # Raise all errors
-        else:
-            errors = list(validator.iter_errors(self.__descriptor))
-            if errors:
-                raise exceptions.MultipleInvalid(errors=errors)
-        return True
 
     def convert_row(self, row, fail_fast=True):
         """Convert row to schema types.
