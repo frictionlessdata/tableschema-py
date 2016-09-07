@@ -117,8 +117,8 @@ class PluginImporter(object):
             module = import_module(realname)
         except ImportError:
             message = 'Plugin "%s" is not installed. '
-            message += 'Run `pip install %s` to install.'
-            message = message % (fullname, realname)
+            message += 'Run "pip install %s" to install.'
+            message = message % (fullname, realname.replace('_', '-'))
             raise ImportError(message)
         sys.modules[realname] = module
         sys.modules[fullname] = module
