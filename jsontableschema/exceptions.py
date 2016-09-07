@@ -4,7 +4,6 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import warnings
 import jsonschema.exceptions
 
 
@@ -136,8 +135,5 @@ class ConstraintNotSupported(JsonTableSchemaException):
 
 class ConversionError(JsonTableSchemaException):
     def __init__(self, msg=None):
-        # DEPRECATED [v0.7-v1)
-        message = 'exceptions.ConversionError is deprecated [v0.7-v1)'
-        warnings.warn(message, UserWarning)
         self.msg = msg or 'Error converting a row or field.'
         super(ConversionError, self).__init__(msg)
