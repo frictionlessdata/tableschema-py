@@ -12,7 +12,7 @@ from tabulator import topen
 from importlib import import_module
 from .model import SchemaModel
 from . import compat
-from . import utilities
+from . import helpers
 
 
 # Module API
@@ -91,13 +91,13 @@ def pull_resource(table, schema, data, backend, **backend_options):
     if compat.is_py2:
         mode = 'wb'
         encoding = None
-    utilities.ensure_dir(schema)
+    helpers.ensure_dir(schema)
     with io.open(schema, mode=mode, encoding=encoding) as file:
         schema = storage.describe(table)
         json.dump(schema, file, indent=4)
 
     # Save data
-    utilities.ensure_dir(data)
+    helpers.ensure_dir(data)
     with io.open(data, 'wb') as file:
         model = SchemaModel(schema)
         data = storage.read(table)

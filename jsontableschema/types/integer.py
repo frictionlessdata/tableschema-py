@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 import decimal
 from future.utils import raise_with_traceback
 from .. import exceptions
-from .. import utilities
+from .. import helpers
 from . import base
 
 
@@ -25,7 +25,7 @@ class IntegerType(base.JTSType):
         'minimum',
         'maximum',
     ]
-    null_values = utilities.NULL_VALUES
+    null_values = helpers.NULL_VALUES
     # ---
     python_type = int
 

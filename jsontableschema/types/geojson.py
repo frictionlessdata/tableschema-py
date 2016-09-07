@@ -9,7 +9,7 @@ import json
 import jsonschema
 from future.utils import raise_with_traceback
 from .. import exceptions
-from .. import utilities
+from .. import helpers
 from .. import compat
 from . import base
 
@@ -21,7 +21,7 @@ class GeoJSONType(base.JTSType):
     # Public
 
     name = 'geojson'
-    null_values = utilities.NULL_VALUES
+    null_values = helpers.NULL_VALUES
     supported_constraints = [
         'required',
         'pattern',

@@ -7,9 +7,7 @@ from __future__ import unicode_literals
 import pytest
 from datetime import datetime, date, time
 from decimal import Decimal
-
-from jsontableschema import types, exceptions, utilities
-
+from jsontableschema import types, exceptions
 from . import base
 
 

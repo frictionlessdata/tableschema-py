@@ -12,8 +12,8 @@ import binascii
 from rfc3986 import is_valid_uri
 from future.utils import raise_with_traceback
 from .. import exceptions
+from .. import helpers
 from .. import compat
-from .. import utilities
 from . import base
 
 
@@ -24,7 +24,7 @@ class StringType(base.JTSType):
     # Public
 
     name = 'string'
-    null_values = [value for value in utilities.NULL_VALUES if value != '']
+    null_values = [value for value in helpers.NULL_VALUES if value != '']
     supported_constraints = [
         'required',
         'pattern',

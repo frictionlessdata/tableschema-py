@@ -7,13 +7,9 @@ from __future__ import unicode_literals
 
 import json
 import warnings
-try:
-    from future_builtins import zip
-except ImportError:
-    pass
 from . import types
+from . import helpers
 from . import exceptions
-from . import utilities
 from .validate import validate
 
 
@@ -36,9 +32,9 @@ class SchemaModel(object):
 
     """
 
-    NULL_VALUES = [None] + utilities.NULL_VALUES
-    TRUE_VALUES = [True] + utilities.TRUE_VALUES
-    FALSE_VALUES = [False] + utilities.FALSE_VALUES
+    NULL_VALUES = [None] + helpers.NULL_VALUES
+    TRUE_VALUES = [True] + helpers.TRUE_VALUES
+    FALSE_VALUES = [False] + helpers.FALSE_VALUES
 
     DEFAULTS = {
         'format': 'default',
@@ -141,7 +137,7 @@ class SchemaModel(object):
         """Return schema as a Python data structure (dict)."""
 
         try:
-            return utilities.load_json_source(self.schema_source)
+            return helpers.load_json_source(self.schema_source)
         except Exception:
             return None
 

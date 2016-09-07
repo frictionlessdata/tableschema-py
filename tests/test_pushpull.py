@@ -22,7 +22,7 @@ class TestResource(unittest.TestCase):
         self.json = patch.object(module, 'json').start()
         self.topen = patch.object(module, 'topen').start()
         self.open = patch.object(module.io, 'open').start()
-        self.ensure_dir = patch.object(module.utilities, 'ensure_dir').start()
+        self.ensure_dir = patch.object(module.helpers, 'ensure_dir').start()
         self.SchemaModel = patch.object(module, 'SchemaModel').start()
         self.import_module = patch.object(module, 'import_module').start()
         self.storage = self.import_module.return_value.Storage.return_value

@@ -10,8 +10,8 @@ from copy import deepcopy
 from .field import Field
 from .validate import validate, validator
 from . import compat
+from . import helpers
 from . import exceptions
-from . import utilities
 
 
 # Module API
@@ -30,7 +30,7 @@ class Schema(object):
     # Public
 
     def __init__(self, descriptor):
-        self.__descriptor = deepcopy(utilities.load_json_source(descriptor))
+        self.__descriptor = deepcopy(helpers.load_json_source(descriptor))
         self.__fields = None
 
     @property
@@ -173,6 +173,6 @@ class Schema(object):
         if compat.is_py2:
             mode = 'wb'
             encoding = None
-        utilities.ensure_dir(target)
+        helpers.ensure_dir(target)
         with io.open(target, mode=mode, encoding=encoding) as file:
             json.dump(self.__descriptor, file, indent=4)

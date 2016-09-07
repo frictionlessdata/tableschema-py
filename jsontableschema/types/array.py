@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 
 import json
 from .. import exceptions
-from .. import utilities
+from .. import helpers
 from . import base
 
 
@@ -17,7 +17,7 @@ class ArrayType(base.JTSType):
     # Public
 
     name = 'array'
-    null_values = utilities.NULL_VALUES
+    null_values = helpers.NULL_VALUES
     supported_constraints = [
         'required',
         'pattern',

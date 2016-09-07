@@ -5,7 +5,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 from .. import exceptions
-from .. import utilities
+from .. import helpers
 from . import base
 
 
@@ -16,7 +16,7 @@ class NullType(base.JTSType):
     # Public
 
     name = 'null'
-    null_values = utilities.NULL_VALUES
+    null_values = helpers.NULL_VALUES
     supported_constraints = [
         'required',
         'pattern',

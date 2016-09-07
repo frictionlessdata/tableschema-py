@@ -4,7 +4,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from .. import utilities
+from .. import helpers
 from . import base
 
 
@@ -15,7 +15,7 @@ class AnyType(base.JTSType):
     # Public
 
     name = 'any'
-    null_values = utilities.NULL_VALUES
+    null_values = helpers.NULL_VALUES
     supported_constraints = [
         'required',
         'pattern',

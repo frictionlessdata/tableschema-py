@@ -11,7 +11,7 @@ from importlib import import_module
 from .schema import Schema
 from .infer import infer
 from . import exceptions
-from . import utilities
+from . import helpers
 from . import compat
 
 
@@ -143,7 +143,7 @@ class Table(object):
         if backend is None:
             # It's temporal for now supporting only csv
             # https://github.com/frictionlessdata/tabulator-py/issues/36
-            utilities.ensure_dir(target)
+            helpers.ensure_dir(target)
             with io.open(target, 'wb') as file:
                 writer = unicodecsv.writer(file, encoding='utf-8')
                 writer.writerow(self.schema.headers)

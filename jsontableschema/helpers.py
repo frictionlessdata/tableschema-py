@@ -11,9 +11,8 @@ import json
 import requests
 from copy import deepcopy
 from importlib import import_module
-
-from . import compat
 from . import exceptions
+from . import compat
 
 
 REMOTE_SCHEMES = ('http', 'https', 'ftp', 'ftps')
@@ -24,25 +23,29 @@ FALSE_VALUES = ['no', 'n', 'false', 'f', '0', 0]
 
 def load_json_source(source):
     """Load a JSON source, from string, URL or buffer, into a Python type.
+
+    Args:
+        source (mixed): source in various forms
+
+    Returns:
+        dict: loaded source
+
     """
 
+    # Return or load
     if source is None:
         return None
-
     elif isinstance(source, (dict, list)):
-        # the source has already been loaded
         return deepcopy(source)
-
-    if compat.parse.urlparse(source).scheme in REMOTE_SCHEMES:
+    elif compat.parse.urlparse(source).scheme in REMOTE_SCHEMES:
         source = requests.get(source).text
-
     elif isinstance(source, compat.str) and not os.path.exists(source):
         pass
-
     else:
         with io.open(source, encoding='utf-8') as stream:
             source = stream.read()
 
+    # Parse
     try:
         return json.loads(source)
     except ValueError:
@@ -52,9 +55,8 @@ def load_json_source(source):
 def ensure_dir(path):
     """Ensure directory exists.
 
-    Parameters
-    ----------
-    path: str
+    Args:
+        path(str): dir path
 
     """
     dirpath = os.path.dirname(path)
@@ -65,13 +67,14 @@ def ensure_dir(path):
 class PluginImporter(object):
     """Plugin importer.
 
-    Example
-    -------
-    Add to myapp.plugins something like that::
+    Example:
+        Add to myapp.plugins something like this:
+        ```
         importer = PluginImporter(virtual='myapp.plugins.', actual='myapp_')
         importer.register()
         del PluginImporter
         del importer
+        ```
 
     """
 
