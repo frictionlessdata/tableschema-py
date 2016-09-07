@@ -14,22 +14,35 @@ from . import compat, exceptions
 
 # Module API
 
-def validate(schema):
+def validate(schema, fail_fast=True):
     """Validate JSON Table Schema schema.
 
     Args:
         schema (dict): schema to validate
+            fail_fast (bool): raise first occured error
 
     Raises:
-        SchemaValidationError
+        exceptions.SchemaValidationError
+        exceptions.MultipleInvalid (fail_fast=False)
 
     Returns:
         bool: True
 
     """
-    jsonschema.validate(
-        schema, _json_table_schema,
-        cls=_JSONTableSchemaValidator)
+
+    # Fail fast
+    if fail_fast:
+        jsonschema.validate(
+            schema, _json_table_schema,
+            cls=_JSONTableSchemaValidator)
+
+    # Multiple errors
+    else:
+        validator = _JSONTableSchemaValidator(_json_table_schema)
+        errors = list(validator.iter_errors(schema))
+        if errors:
+            raise exceptions.MultipleInvalid(errors=errors)
+
     return True
 
 
