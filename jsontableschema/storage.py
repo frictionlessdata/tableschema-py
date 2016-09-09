@@ -32,6 +32,10 @@ class Storage(object):
     @property
     def buckets(self):
         """str[]: list of buckets.
+
+        This list should be sorted in order of foreign key dependency.
+        (direct order for creation and reverse order for deletion)
+
         """
         pass
 
