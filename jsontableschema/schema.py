@@ -45,16 +45,16 @@ class Schema(object):
         """
         return self.__descriptor
 
-    def convert_row(self, row, fail_fast=True):
+    def convert_row(self, row, no_fail_fast=False):
         """Convert row to schema types.
 
         Args:
             row (mixed[]): array of values
-            fail_fast (bool): raise first occured error
+            no_fail_fast (bool): collect all error
 
         Raises:
             exceptions.InvalidCastError
-            exceptions.MultipleInvalid (fail_fast=False)
+            exceptions.MultipleInvalid (no_fail_fast=True)
 
         Returns:
             mixed[]: converted row tuple
@@ -69,7 +69,7 @@ class Schema(object):
             message = 'Row length (%s) doesn\'t match fields count (%s)'
             message = message % (len(row), len(self.fields))
             exception = exceptions.InvalidCastError(message)
-            if fail_fast:
+            if not no_fail_fast:
                 raise exception
             errors.append(exception)
 
@@ -80,7 +80,7 @@ class Schema(object):
                 try:
                     result.append(field.convert_value(value))
                 except exceptions.InvalidCastError as exception:
-                    if fail_fast:
+                    if not no_fail_fast:
                         raise
                     errors.append(exception)
 

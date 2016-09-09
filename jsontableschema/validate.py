@@ -14,16 +14,16 @@ from . import compat, exceptions
 
 # Module API
 
-def validate(descriptor, fail_fast=True):
+def validate(descriptor, no_fail_fast=False):
     """Validate JSON Table Schema schema descriptor.
 
     Args:
         descriptor (dict): schema descriptor to validate
-        fail_fast (bool): raise first occured error
+        no_fail_fast (bool): collect all errors
 
     Raises:
         exceptions.SchemaValidationError
-        exceptions.MultipleInvalid (fail_fast=False)
+        exceptions.MultipleInvalid (no_fail_fast=True)
 
     Returns:
         bool: True
@@ -31,7 +31,7 @@ def validate(descriptor, fail_fast=True):
     """
 
     # Fail fast
-    if fail_fast:
+    if not no_fail_fast:
         jsonschema.validate(
             descriptor, _json_table_schema,
             cls=_JSONTableSchemaValidator)
