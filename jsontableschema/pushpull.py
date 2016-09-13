@@ -8,7 +8,7 @@ import io
 import json
 import warnings
 import unicodecsv as csv
-from tabulator import topen
+from tabulator import Stream
 from importlib import import_module
 from .model import SchemaModel
 from . import compat
@@ -53,8 +53,8 @@ def push_resource(table, schema, data, backend, **backend_options):
     storage.create(table, schema)
 
     # Write data
-    with topen(data, with_headers=True) as data:
-        storage.write(table, data)
+    with Stream(data, with_headers=True) as stream:
+        storage.write(table, stream)
 
 
 def pull_resource(table, schema, data, backend, **backend_options):

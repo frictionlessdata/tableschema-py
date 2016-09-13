@@ -20,7 +20,7 @@ class TestResource(unittest.TestCase):
         self.addCleanup(patch.stopall)
         self.csv = patch.object(module, 'csv').start()
         self.json = patch.object(module, 'json').start()
-        self.topen = patch.object(module, 'topen').start()
+        self.Stream = patch.object(module, 'Stream').start()
         self.open = patch.object(module.io, 'open').start()
         self.ensure_dir = patch.object(module.helpers, 'ensure_dir').start()
         self.SchemaModel = patch.object(module, 'SchemaModel').start()
@@ -44,9 +44,9 @@ class TestResource(unittest.TestCase):
         self.storage.check.assert_called_with('table')
         self.storage.create.assert_called_with(
                 'table', self.SchemaModel.return_value.as_python)
-        self.topen.assert_called_with('data', with_headers=True)
+        self.Stream.assert_called_with('data', with_headers=True)
         self.storage.write.assert_called_with(
-                'table', self.topen.return_value.__enter__.return_value)
+                'table', self.Stream.return_value.__enter__.return_value)
 
     def test_pull_resource(self):
 
