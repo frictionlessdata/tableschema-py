@@ -28,7 +28,7 @@ INSTALL_REQUIRES = [
     'jsonschema>=2.5,<3.0a',
     'future>=0.15,<0.16a',
     'unicodecsv>=0.14,<0.15a',
-    'tabulator>=0.6.2,<0.7a',
+    'tabulator>=0.7,<0.8a',
 ]
 TESTS_REQUIRE = [
     'pylama',

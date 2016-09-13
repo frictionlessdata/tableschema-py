@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 import io
 import unicodecsv
 from tabulator import Stream
+from functools import partial
 from importlib import import_module
 from .schema import Schema
 from .infer import infer
@@ -41,8 +42,7 @@ class Table(object):
         if isinstance(schema, (compat.str, dict)):
             self.__schema = Schema(schema)
 
-        # Stream
-        self.__stream = None
+        # Tabulator
         if backend is None:
             options.setdefault('headers', 1)
             self.__stream = Stream(source,  **options)
@@ -52,22 +52,34 @@ class Table(object):
                     self.__stream.headers, self.__stream.sample))
 
         # Storage
-        self.__storage = None
-        if backend is not None:
+        else:
             module = 'jsontableschema.plugins.%s' % backend
-            self.__storage = import_module(module).Storage(**options)
+            storage = import_module(module).Storage(**options)
+            generator = partial(storage.iter, source)
             if self.__schema is None:
-                self.__schema = Schema(self.__storage.describe(source))
-            else:
-                self.__storage.describe(source, self.__schema.descriptor)
+                self.__schema = Schema(storage.describe(source))
+            storage.describe(source, self.__schema.descriptor)
+            self.__stream = Stream(generator, headers=self.__schema.headers)
+            self.__stream.open()
 
-        # Attributes
-        self.__source = source
-        self.__post_convert = post_convert
+        # Processors
+        def builtin_processor(extended_rows):
+            for number, headers, row in extended_rows:
+                headers = self.__schema.headers
+                row = self.__schema.convert_row(row)
+                yield (number, headers, row)
+        self.__stream.post_parse.append(builtin_processor)
+        self.__stream.post_parse.extend(post_convert)
+
+    @property
+    def post_convert(self):
+        """func[]: processors
+        """
+        return self.__post_convert
 
     @property
     def stream(self):
-        """tabulator.Stream/None: stream instance
+        """tabulator.Stream: stream instance
         """
         return self.__stream
 
@@ -88,16 +100,9 @@ class Table(object):
             mixed[]/mixed{}: row or keyed row or extended row
 
         """
-        extended_rows = self.__iter_extended_rows()
-        for processor in self.__post_convert:
-            extended_rows = processor(extended_rows)
-        for number, headers, row in extended_rows:
-            if extended:
-                yield (number, headers, row)
-            elif keyed:
-                yield dict(zip(headers, row))
-            else:
-                yield row
+        self.__stream.reset()
+        return self.__stream.iter(
+            keyed=keyed, extended=extended)
 
     def read(self, keyed=False, extended=False, limit=None):
         """Read table rows.
@@ -109,13 +114,9 @@ class Table(object):
             tuple[]: table rows
 
         """
-        result = []
-        rows = self.iter(keyed=keyed, extended=extended)
-        for count, row in enumerate(rows, start=1):
-            result.append(row)
-            if count == limit:
-                break
-        return result
+        self.__stream.reset()
+        return self.__stream.read(
+            keyed=keyed, extended=extended, limit=limit)
 
     def save(self, target, backend=None, **options):
         """Save table rows.
@@ -132,35 +133,16 @@ class Table(object):
 
         """
 
-        # Stream
+        # Tabulator
         if backend is None:
-            self.stream.reset()
-            self.stream.save(target, **options)
+            self.__stream.reset()
+            self.__stream.save(target, **options)
 
         # Storage
         else:
+            self.__stream.reset()
             module = 'jsontableschema.plugins.%s' % backend
             storage = import_module(module).Storage(**options)
-            if storage.check(target):
-                storage.delete(target)
-            storage.create(target, self.schema.descriptor)
+            storage.create(target, self.schema.descriptor, force=True)
             storage.write(target, self.iter())
             return storage
-
-    # Private
-
-    def __iter_extended_rows(self):
-
-        # Stream
-        if self.stream is not None:
-            self.stream.reset()
-            for number, headers, row in self.stream.iter(extended=True):
-                row = self.schema.convert_row(row)
-                yield (number, self.schema.headers, row)
-
-        # Storage
-        else:
-            rows = self.__storage.iter(self.__source)
-            for number, row in enumerate(rows, start=1):
-                row = self.schema.convert_row(row)
-                yield (number, self.schema.headers, row)

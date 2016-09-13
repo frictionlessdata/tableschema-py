@@ -37,6 +37,7 @@ def test_schema_infer_storage(import_module):
     # Mocks
     import_module.return_value = Mock(Storage=Mock(return_value=Mock(
         describe = Mock(return_value=SCHEMA_MIN),
+        iter = Mock(return_value=DATA_MIN[1:]),
     )))
     assert Table('table', backend='storage').schema.descriptor == SCHEMA_MIN
 
