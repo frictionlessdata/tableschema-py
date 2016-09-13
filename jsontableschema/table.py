@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 
 import io
 import unicodecsv
-from tabulator import topen
+from tabulator import Stream
 from importlib import import_module
 from .schema import Schema
 from .infer import infer
@@ -32,36 +32,49 @@ class Table(object):
     def __init__(self, source, schema=None, post_convert=None,
                  backend=None, **options):
 
-        # Initiate if None
+        # Defaults
         if post_convert is None:
             post_convert = []
 
-        # Instantiate schema
+        # Schema
+        self.__schema = None
         if isinstance(schema, (compat.str, dict)):
-            schema = Schema(schema)
+            self.__schema = Schema(schema)
 
-        # Instantiate storage
-        storage = None
+        # Stream
+        self.__stream = None
+        if backend is None:
+            options.setdefault('headers', 1)
+            self.__stream = Stream(source,  **options)
+            self.__stream.open()
+            if self.__schema is None:
+                self.__schema = Schema(infer(
+                    self.__stream.headers, self.__stream.sample))
+
+        # Storage
+        self.__storage = None
         if backend is not None:
             module = 'jsontableschema.plugins.%s' % backend
-            storage = import_module(module).Storage(**options)
-            # https://github.com/frictionlessdata/jsontableschema-py/issues/70
-            # if schema is not None:
-            #     storage.describe(source, schema)
+            self.__storage = import_module(module).Storage(**options)
+            if self.__schema is None:
+                self.__schema = Schema(self.__storage.describe(source))
+            else:
+                self.__storage.describe(source, self.__schema.descriptor)
 
-        # Set attributes
+        # Attributes
         self.__source = source
-        self.__schema = schema
-        self.__storage = storage
-        self.__options = options
         self.__post_convert = post_convert
+
+    @property
+    def stream(self):
+        """tabulator.Stream/None: stream instance
+        """
+        return self.__stream
 
     @property
     def schema(self):
         """Schema: schema instance
         """
-        if self.__schema is None:
-            self.__schema = self.__infer_schema()
         return self.__schema
 
     def iter(self, keyed=False, extended=False):
@@ -119,19 +132,13 @@ class Table(object):
 
         """
 
-        # Tabulator
+        # Stream
         if backend is None:
-            # It's temporal for now supporting only csv
-            # https://github.com/frictionlessdata/tabulator-py/issues/36
-            helpers.ensure_dir(target)
-            with io.open(target, 'wb') as file:
-                writer = unicodecsv.writer(file, encoding='utf-8')
-                writer.writerow(self.schema.headers)
-                for row in self.iter():
-                    writer.writerow(row)
+            self.stream.reset()
+            self.stream.save(target, **options)
 
         # Storage
-        if backend is not None:
+        else:
             module = 'jsontableschema.plugins.%s' % backend
             storage = import_module(module).Storage(**options)
             if storage.check(target):
@@ -142,36 +149,18 @@ class Table(object):
 
     # Private
 
-    def __infer_schema(self):
-
-        # Tabulator
-        if self.__storage is None:
-            options = {}
-            options.update(headers='row1')
-            options.update(self.__options)
-            with topen(self.__source, **options) as table:
-                descriptor = infer(table.headers, table.sample)
-            return Schema(descriptor)
-
-        # Storage
-        else:
-            return Schema(self.__storage.describe(self.__source))
-
     def __iter_extended_rows(self):
 
-        # Tabulator
-        if self.__storage is None:
-            options = {}
-            options.update(headers='row1')
-            options.update(self.__options)
-            with topen(self.__source, **options) as table:
-                for number, headers, row in table.iter(extended=True):
-                    row = self.schema.convert_row(row)
-                    yield (number, self.schema.headers, row)
+        # Stream
+        if self.stream is not None:
+            self.stream.reset()
+            for number, headers, row in self.stream.iter(extended=True):
+                row = self.schema.convert_row(row)
+                yield (number, self.schema.headers, row)
 
         # Storage
         else:
-            rows = self.__storage.read(self.__source)
+            rows = self.__storage.iter(self.__source)
             for number, row in enumerate(rows, start=1):
                 row = self.schema.convert_row(row)
                 yield (number, self.schema.headers, row)

@@ -87,7 +87,7 @@ def test_read_storage(import_module):
     # Mocks
     import_module.return_value = Mock(Storage=Mock(return_value=Mock(
         describe = Mock(return_value=SCHEMA_MIN),
-        read = Mock(return_value=DATA_MIN[1:]),
+        iter = Mock(return_value=DATA_MIN[1:]),
     )))
     # Tests
     table = Table('table', backend='storage')
