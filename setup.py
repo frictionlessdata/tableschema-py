@@ -21,14 +21,14 @@ def read(*paths):
 PACKAGE = 'jsontableschema'
 NAME = PACKAGE.replace('_', '-')
 INSTALL_REQUIRES = [
-    'click>=3.3',
-    'requests>=2.5.1',
-    'python-dateutil>=2.4.0',
-    'rfc3986>=0.3.0',
-    'jsonschema>=2.5.1',
-    'future>=0.15.2',
-    'tabulator>=0.5',
-    'unicodecsv>=0.14',
+    'click>=3.3,<4.0',
+    'requests>=2.5,<3.0',
+    'python-dateutil>=2.4,<3.0',
+    'rfc3986>=0.4,<0.5',
+    'jsonschema>=2.5,<3.0',
+    'future>=0.15,<0.16',
+    'unicodecsv>=0.14,<0.15',
+    'tabulator>=0.6,<0.7',
 ]
 TESTS_REQUIRE = [
     'pylama',
