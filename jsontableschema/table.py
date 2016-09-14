@@ -4,6 +4,8 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
+import os
+import six
 from tabulator import Stream
 from functools import partial
 from importlib import import_module
@@ -27,7 +29,7 @@ class Table(object):
 
     # Public
 
-    def __init__(self, source, schema=None, post_cast=None,
+    def __init__(self, source, schema=None, name=None, post_cast=None,
                  backend=None, **options):
 
         # Defaults
@@ -38,6 +40,13 @@ class Table(object):
         self.__schema = None
         if isinstance(schema, (compat.str, dict)):
             self.__schema = Schema(schema)
+
+        # Name
+        self.__name = name
+        if name is None:
+            self.__name = 'table'
+            if isinstance(source, six.string_types):
+                self.__name = os.path.splitext(source.rsplit('/')[-1])[0]
 
         # Tabulator
         if backend is None:
@@ -73,6 +82,12 @@ class Table(object):
         """Schema: schema instance
         """
         return self.__schema
+
+    @property
+    def name(self):
+        """str: table name
+        """
+        return self.__name
 
     def iter(self, keyed=False, extended=False):
         """Yields table rows.

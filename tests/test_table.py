@@ -42,6 +42,12 @@ def test_schema_infer_storage(import_module):
     assert Table('table', backend='storage').schema.descriptor == SCHEMA_MIN
 
 
+def test_name():
+    assert Table('data/data_infer.csv', name='name').name == 'name'
+    assert Table('data/data_infer.csv').name == 'data_infer'
+    assert Table([['a', 'b'], [1, 2]]).name == 'table'
+
+
 def test_iter():
     table = Table(DATA_MIN, schema=SCHEMA_MIN)
     expect = [['one', 1], ['two', 2]]
