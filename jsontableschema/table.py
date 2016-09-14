@@ -27,12 +27,12 @@ class Table(object):
 
     # Public
 
-    def __init__(self, source, schema=None, post_convert=None,
+    def __init__(self, source, schema=None, post_cast=None,
                  backend=None, **options):
 
         # Defaults
-        if post_convert is None:
-            post_convert = []
+        if post_cast is None:
+            post_cast = []
 
         # Schema
         self.__schema = None
@@ -63,16 +63,16 @@ class Table(object):
         def builtin_processor(extended_rows):
             for number, headers, row in extended_rows:
                 headers = self.__schema.headers
-                row = self.__schema.convert_row(row)
+                row = self.__schema.cast_row(row)
                 yield (number, headers, row)
         self.__stream.post_parse.append(builtin_processor)
-        self.__stream.post_parse.extend(post_convert)
+        self.__stream.post_parse.extend(post_cast)
 
     @property
-    def post_convert(self):
+    def post_cast(self):
         """func[]: processors
         """
-        return self.__post_convert
+        return self.__post_cast
 
     @property
     def stream(self):

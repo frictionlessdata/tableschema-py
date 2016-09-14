@@ -59,46 +59,46 @@ def test_descriptor():
     assert expect == actual
 
 
-def test_convert_row():
+def test_cast_row():
     schema = Schema(DESCRIPTOR_MAX)
     source = ('string', '10.0', '1', 'string', 'string')
     target = ('string', Decimal(10.0), 1, 'string', 'string')
-    assert schema.convert_row(source) == target
+    assert schema.cast_row(source) == target
 
 
-def test_convert_row_null_values():
+def test_cast_row_null_values():
     schema = Schema(DESCRIPTOR_MAX)
     source = ('string', '', '-', 'string', 'null')
     target = ('string', None, None, 'string', None)
-    assert schema.convert_row(source) == target
+    assert schema.cast_row(source) == target
 
 
-def test_convert_row_too_short():
+def test_cast_row_too_short():
     schema = Schema(DESCRIPTOR_MAX)
     source = ('string', '10.0', '1', 'string')
     with pytest.raises(exceptions.InvalidCastError):
-        schema.convert_row(source)
+        schema.cast_row(source)
 
 
-def test_convert_row_too_long():
+def test_cast_row_too_long():
     schema = Schema(DESCRIPTOR_MAX)
     source = ('string', '10.0', '1', 'string', 'string', 'string')
     with pytest.raises(exceptions.InvalidCastError):
-        schema.convert_row(source)
+        schema.cast_row(source)
 
 
-def test_convert_row_wrong_type_no_fail_fast_true():
+def test_cast_row_wrong_type_no_fail_fast_true():
     schema = Schema(DESCRIPTOR_MAX)
     source = ('string', 'notdecimal', '10.6', 'string', 'string')
     with pytest.raises(exceptions.MultipleInvalid):
-        schema.convert_row(source, no_fail_fast=True)
+        schema.cast_row(source, no_fail_fast=True)
 
 
-def test_convert_row_wrong_type_multiple_errors():
+def test_cast_row_wrong_type_multiple_errors():
     schema = Schema(DESCRIPTOR_MAX)
     source = ('string', 'notdecimal', '10.6', 'string', 'string')
     with pytest.raises(exceptions.MultipleInvalid) as excinfo:
-        schema.convert_row(source, no_fail_fast=True)
+        schema.cast_row(source, no_fail_fast=True)
     assert len(excinfo.value.errors) == 2
 
 

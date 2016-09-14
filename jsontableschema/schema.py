@@ -45,8 +45,8 @@ class Schema(object):
         """
         return self.__descriptor
 
-    def convert_row(self, row, no_fail_fast=False):
-        """Convert row to schema types.
+    def cast_row(self, row, no_fail_fast=False):
+        """Cast row to schema types.
 
         Args:
             row (mixed[]): array of values
@@ -57,7 +57,7 @@ class Schema(object):
             exceptions.MultipleInvalid (no_fail_fast=True)
 
         Returns:
-            mixed[]: converted row tuple
+            mixed[]: casted row tuple
 
         """
 
@@ -73,12 +73,12 @@ class Schema(object):
                 raise exception
             errors.append(exception)
 
-        # Convert
+        # Cast
         result = []
         if not errors:
             for field, value in zip(self.fields, row):
                 try:
-                    result.append(field.convert_value(value))
+                    result.append(field.cast_value(value))
                 except exceptions.InvalidCastError as exception:
                     if not no_fail_fast:
                         raise

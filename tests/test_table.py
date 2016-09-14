@@ -103,7 +103,7 @@ def test_processors():
             krow = dict(zip(headers, row))
             if krow['age'] >= 30:
                 yield (number, headers, row)
-    table = Table('data/data_infer.csv', post_convert=[skip_under_30])
+    table = Table('data/data_infer.csv', post_cast=[skip_under_30])
     expect = [(1, 39, 'Paul'), (3, 36, 'Jane')]
     actual = table.read()
     assert actual == expect

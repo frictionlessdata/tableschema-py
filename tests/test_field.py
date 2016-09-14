@@ -46,5 +46,5 @@ def test_constraints():
     assert Field(DESCRIPTOR_MAX).constraints == {'required': True}
 
 
-def test_convert_value():
-    assert Field(DESCRIPTOR_MIN).convert_value('test') == 'test'
+def test_cast_value():
+    assert Field(DESCRIPTOR_MIN).cast_value('test') == 'test'
