@@ -43,7 +43,7 @@ class SchemaValidationError(
     pass
 
 
-# Convert
+# Cast
 
 class InvalidCastError(JsonTableSchemaException):
     pass
