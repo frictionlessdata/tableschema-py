@@ -63,12 +63,6 @@ class Table(object):
         self.__post_cast = post_cast
 
     @property
-    def post_cast(self):
-        """func[]: processors
-        """
-        return self.__post_cast
-
-    @property
     def stream(self):
         """tabulator.Stream: stream instance
         """
