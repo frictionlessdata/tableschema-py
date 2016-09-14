@@ -3,6 +3,7 @@
 [![Travis](https://travis-ci.org/frictionlessdata/jsontableschema-py.svg?branch=master)](https://travis-ci.org/frictionlessdata/jsontableschema-py)
 [![Coveralls](http://img.shields.io/coveralls/frictionlessdata/jsontableschema-py.svg?branch=master)](https://coveralls.io/r/frictionlessdata/jsontableschema-py?branch=master)
 [![PyPi](https://img.shields.io/pypi/v/jsontableschema.svg)](https://pypi.python.org/pypi/jsontableschema)
+[![SemVer](https://img.shields.io/badge/versioning-SemVer-brightgreen.svg)](http://semver.org/)
 [![Gitter](https://img.shields.io/gitter/room/frictionlessdata/chat.svg)](https://gitter.im/frictionlessdata/chat)
 
 A utility library for working with [JSON Table Schema](http://dataprotocols.org/json-table-schema/) in Python.
@@ -23,8 +24,6 @@ A utility library for working with [JSON Table Schema](http://dataprotocols.org/
 ```bash
 pip install jsontableschema
 ```
-> This package follow SemVer versioning
-
 ## Example
 
 ```python
