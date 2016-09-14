@@ -113,6 +113,7 @@ def test_processors():
     # Create table
     table = Table('data/data_infer.csv', post_cast=[skip_under_30])
     # Test stream
+    table.stream.open()
     expect = [
         ['1', '39', 'Paul'],
         ['2', '23', 'Jimmy'],
