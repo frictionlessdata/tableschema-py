@@ -57,7 +57,7 @@ class Schema(object):
             exceptions.MultipleInvalid (no_fail_fast=True)
 
         Returns:
-            mixed[]: casted row tuple
+            mixed[]: cast row
 
         """
 
@@ -88,7 +88,7 @@ class Schema(object):
         if errors:
             raise exceptions.MultipleInvalid(errors=errors)
 
-        return tuple(result)
+        return result
 
     @property
     def fields(self):
