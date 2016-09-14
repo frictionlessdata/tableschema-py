@@ -3,7 +3,7 @@
 [![Travis](https://travis-ci.org/frictionlessdata/jsontableschema-py.svg?branch=master)](https://travis-ci.org/frictionlessdata/jsontableschema-py)
 [![Coveralls](http://img.shields.io/coveralls/frictionlessdata/jsontableschema-py.svg?branch=master)](https://coveralls.io/r/frictionlessdata/jsontableschema-py?branch=master)
 [![PyPi](https://img.shields.io/pypi/v/jsontableschema.svg)](https://pypi.python.org/pypi/jsontableschema)
-[![SemVer](https://img.shields.io/badge/versioning-SemVer-brightgreen.svg)](http://semver.org/)
+[![SemVer](https://img.shields.io/badge/versions-SemVer-brightgreen.svg)](http://semver.org/)
 [![Gitter](https://img.shields.io/gitter/room/frictionlessdata/chat.svg)](https://gitter.im/frictionlessdata/chat)
 
 A utility library for working with [JSON Table Schema](http://dataprotocols.org/json-table-schema/) in Python.
@@ -14,8 +14,8 @@ A utility library for working with [JSON Table Schema](http://dataprotocols.org/
 - `Schema` representing JSON Table Schema
 - `Field` representing JSON Table Schema field
 - `Storage` to connect your tables to different storage backends like SQL Database
-- `validate` to validate JSON Table Schema
-- `infer` to infer JSON Table Schema from data
+- `validate` to validate JSON Table Schema (also in CLI)
+- `infer` to infer JSON Table Schema from data (also in CLI)
 
 ## Gettings Started
 
@@ -226,9 +226,7 @@ Example of `infer` usage:
 $ jsontableschema infer path/to/data.csv
 ```
 
-The optional argument `--encoding` allows a character encoding to be specified for the data file. The default is utf-8.
-
-The response is a schema as JSON.
+The response is a schema as JSON. The optional argument `--encoding` allows a character encoding to be specified for the data file. The default is utf-8.
 
 ## Read more
 
