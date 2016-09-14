@@ -44,20 +44,20 @@ def test_schema_infer_storage(import_module):
 
 def test_iter():
     table = Table(DATA_MIN, schema=SCHEMA_MIN)
-    expect = [('one', 1), ('two', 2)]
+    expect = [['one', 1], ['two', 2]]
     actual = list(table.iter())
 
 
 def test_iter_csv():
     table = Table('data/data_infer.csv', schema=SCHEMA_CSV)
-    expect = [(1, 39, 'Paul'), (2, 23, 'Jimmy'), (3, 36, 'Jane'), (4, 28, 'Judy')]
+    expect = [[1, 39, 'Paul'], [2, 23, 'Jimmy'], [3, 36, 'Jane'], [4, 28, 'Judy']]
     actual = list(table.iter())
     assert actual == expect
 
 
 def test_iter_web_csv():
     table = Table(BASE_URL % 'data/data_infer.csv', schema=SCHEMA_CSV)
-    expect = [(1, 39, 'Paul'), (2, 23, 'Jimmy'), (3, 36, 'Jane'), (4, 28, 'Judy')]
+    expect = [[1, 39, 'Paul'], [2, 23, 'Jimmy'], [3, 36, 'Jane'], [4, 28, 'Judy']]
     actual = list(table.iter())
     assert actual == expect
 
@@ -78,7 +78,7 @@ def test_read_keyed():
 
 def test_read_limit():
     table = Table(DATA_MIN, schema=SCHEMA_MIN)
-    expect = [('one', 1)]
+    expect = [['one', 1]]
     actual = table.read(limit=1)
     assert actual == expect
 
@@ -92,18 +92,31 @@ def test_read_storage(import_module):
     )))
     # Tests
     table = Table('table', backend='storage')
-    expect = [('one', 1), ('two', 2)]
+    expect = [['one', 1], ['two', 2]]
     actual = table.read()
     assert actual == expect
 
 
 def test_processors():
+    # Processor
     def skip_under_30(erows):
         for number, headers, row in erows:
             krow = dict(zip(headers, row))
             if krow['age'] >= 30:
                 yield (number, headers, row)
+    # Create table
     table = Table('data/data_infer.csv', post_cast=[skip_under_30])
-    expect = [(1, 39, 'Paul'), (3, 36, 'Jane')]
+    # Test stream
+    expect = [
+        ['1', '39', 'Paul'],
+        ['2', '23', 'Jimmy'],
+        ['3', '36', 'Jane'],
+        ['4', '28', 'Judy']]
+    actual = table.stream.read()
+    assert actual == expect
+    # Test table
+    expect = [
+        [1, 39, 'Paul'],
+        [3, 36, 'Jane']]
     actual = table.read()
     assert actual == expect
