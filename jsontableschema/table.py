@@ -4,14 +4,11 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
-import io
-import unicodecsv
 from tabulator import Stream
 from functools import partial
 from importlib import import_module
 from .schema import Schema
 from .infer import infer
-from . import helpers
 from . import compat
 
 
