@@ -20,11 +20,10 @@ A utility library for working with [JSON Table Schema](http://dataprotocols.org/
 
 ### Installation
 
-> This package follow SemVer versioning.
-
 ```bash
 pip install jsontableschema
 ```
+> This package follow SemVer versioning
 
 ## Example
 
@@ -210,6 +209,9 @@ A list of officially supported plugins:
 - SQL Storage - https://github.com/frictionlessdata/jsontableschema-sql-py
 
 ### CLI
+
+> CLI is not a part of SemVer versionning. If you use it programatically
+please pin concrete `goodtables` version to your requirements file.
 
 JSON Table Schema features a CLI called `jsontableschema`. This CLI exposes the `infer` and `validate` functions for command line use.
 
