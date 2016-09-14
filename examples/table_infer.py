@@ -17,7 +17,7 @@ def skip_under_30(erows):
             yield (number, headers, row)
 
 # Work with table
-table = Table(SOURCE, post_convert=[skip_under_30])
+table = Table(SOURCE, post_cast=[skip_under_30])
 table.schema.save('tmp/persons.json') # Save INFERRED schema
 table.save('persons', backend='sql', engine=db) # Save data to SQL
 table.save('tmp/persons.csv')  # Save data to DRIVE
