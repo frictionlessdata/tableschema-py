@@ -68,7 +68,7 @@ def infer(headers, values, row_limit=None, explicit=False, primary_key=None):
             if row_length < headers_length:
                 diff = headers_length - row_length
                 fill = [''] * diff
-                row = row.extend(fill)
+                row = row + fill
 
             # build a column-wise lookup of type matches
             for index, value in enumerate(row):
