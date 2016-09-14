@@ -63,7 +63,7 @@ class JTSType(object):
         if field:
             self.__field = field
             self.__field_name = field['name']
-            self.__format = field['format']
+            self.__format = field.get('format', 'default')
             self.__constraints = field.get('constraints', {})
 
         # Set parsed format (fmt feature)

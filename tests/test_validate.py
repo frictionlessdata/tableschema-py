@@ -8,6 +8,7 @@ import os
 import io
 import json
 import jsontableschema
+from jsontableschema import exceptions
 from . import base
 
 
@@ -162,6 +163,15 @@ class TestValidateSchema(base.BaseTestCase):
             errors = [i for i in jsontableschema.validator.iter_errors(schema)]
         self.assertEquals(2, len(errors))
 
+    def test_schema_multiple_errors_no_fail_fast_true(self):
+        filepath = os.path.join(self.data_dir,
+                                'schema_invalid_multiple_errors.json')
+        with io.open(filepath) as stream:
+            schema = json.load(stream)
+            try:
+                jsontableschema.validate(schema, no_fail_fast=True)
+            except exceptions.MultipleInvalid as exception:
+                self.assertEquals(5, len(exception.errors))
 
 
 class TestValidator(base.BaseTestCase):

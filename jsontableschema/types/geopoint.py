@@ -8,7 +8,7 @@ import json
 import decimal
 from future.utils import raise_with_traceback
 from .. import exceptions
-from .. import utilities
+from .. import helpers
 from .. import compat
 from . import base
 
@@ -20,7 +20,7 @@ class GeoPointType(base.JTSType):
     # Public
 
     name = 'geopoint'
-    null_values = utilities.NULL_VALUES
+    null_values = helpers.NULL_VALUES
     supported_constraints = [
         'required',
         'pattern',

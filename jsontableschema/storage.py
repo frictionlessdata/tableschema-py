@@ -12,14 +12,14 @@ from abc import ABCMeta, abstractmethod
 
 @add_metaclass(ABCMeta)
 class Storage(object):
-    """Tabular Storage Interface.
+    """Tabular Storage interface.
 
-    Parameters
-    ----------
-    prefix: str
-        Prefix for all tables.
-    options: dict
-        Concrete implementations options.
+    Concrete backends shouldn't inherit from this base class
+    to simplify maintenance. Just use as a reference.
+
+    Args:
+        prefix (str): prefix for all buckets
+        options (dict): concrete backend options
 
     """
 
@@ -27,109 +27,100 @@ class Storage(object):
 
     @abstractmethod
     def __init__(self, prefix='', **options):
-        pass  # pragma: no cover
+        pass
 
     @property
-    def tables(self):
-        """Return list of storage's table names.
+    def buckets(self):
+        """str[]: list of buckets.
 
-        Returns
-        -------
-        str[]
-            List of table names.
+        This list should be sorted in order of foreign key dependency.
+        (direct order for creation and reverse order for deletion)
 
         """
-        pass  # pragma: no cover
+        pass
 
     @abstractmethod
-    def check(self, table):
-        """Return true if table exists.
+    def create(self, bucket, descriptor, force=False):
+        """Create one/few buckets.
 
-        Parameters
-        ----------
-        table: str
-            Table name.
+        Args:
+            bucket (str/list): bucket name or list of bucket names
+            descriptor (dict/dict[]): schema descriptor or list of descriptors
+            force (bool): delete and re-create already existent buckets
 
-        Returns
-        -------
-        bool
-            Table existence.
+        Raises:
+            StorageError: if table already exists.
 
         """
-        pass  # pragma: no cover
+        pass
 
-    @abstractmethod
-    def create(self, table, schema):
-        """Create table by schema.
+    def delete(self, bucket=None, ignore=False):
+        """Delete one/few/all bucket(s).
 
-        Parameters
-        ----------
-        table: str/list
-            Table name or list of table names.
-        schema: dict/list
-            JSONTableSchema schema or list of schemas.
+        Args:
+            bucket (str/list/None): bucket name or list of bucket
+                names to delete. If None all buckets will be deleted.
+            ignore (bool): don't raise an error on non-existent bucket
+                deletion from storage
 
-        Raises
-        ------
-        RuntimeError
-            If table already exists.
+        Raises:
+            StorageError: if table doesn't exist and ignore is False
 
         """
-        pass  # pragma: no cover
+        pass
 
-    def delete(self, table):
-        """Delete table.
+    def describe(self, bucket, descriptor=None):
+        """Get/set bucket's schema descriptor.
 
-        Parameters
-        ----------
-        table: str/list
-            Table name or list of table names.
+        Args:
+            table (str): bucket name
+            schema (dict): schema descriptor to set
 
-        Raises
-        ------
-        RuntimeError
-            If table doesn't exist.
+        Returns:
+            dict: bucket's schema descriptor
 
         """
+        pass
 
-    def describe(self, table):
-        """Return table's JSONTableSchema schema.
+    def iter(self, bucket):
+        """Yields bucket rows.
 
-        Parameters
-        ----------
-        table: str
-            Table name.
+        This method should return typed values
+        based on the schema of this buckets.
 
-        Returns
-        -------
-        dict
-            JSONTableSchema schema.
+        Args:
+            bucket (str): bucket name
 
-        """
-
-    def read(self, table):
-        """Read data from table.
-
-        Parameters
-        ----------
-        table: str
-            Table name.
-
-        Returns
-        -------
-        iterable
-            Data tuples iterable.
+        Yields:
+            list: bucket row
 
         """
+        pass
 
-    def write(self, table, data):
-        """Write data to table.
+    def read(self, bucket):
+        """Read rows from bucket.
 
-        Parameters
-        ----------
-        table: str
-            Table name.
-        data: iterable
-            Iterable of data tuples.
+        This method should return typed values
+        based on the schema of this buckets.
+
+        Args:
+            bucket (str): bucket name
+
+        Returns:
+            list[]: bucket rows
 
         """
+        pass
+
+    def write(self, bucket, rows):
+        """Write rows to bucket.
+
+        This method should store values of unsupported
+        types as strings internally (like csv does).
+
+        Args:
+            bucket (str): bucket name
+            rows (list[]): rows to write
+
+        """
+        pass

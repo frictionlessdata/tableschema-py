@@ -5,7 +5,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 from .. import exceptions
-from .. import utilities
+from .. import helpers
 from . import base
 
 
@@ -16,7 +16,7 @@ class BooleanType(base.JTSType):
     # Public
 
     name = 'boolean'
-    null_values = utilities.NULL_VALUES
+    null_values = helpers.NULL_VALUES
     supported_constraints = [
         'required',
         'pattern',
@@ -24,8 +24,8 @@ class BooleanType(base.JTSType):
     ]
     # ---
     python_type = bool
-    true_values = utilities.TRUE_VALUES
-    false_values = utilities.FALSE_VALUES
+    true_values = helpers.TRUE_VALUES
+    false_values = helpers.FALSE_VALUES
 
     def cast_default(self, value, fmt=None):
 

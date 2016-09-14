@@ -5,13 +5,10 @@ from __future__ import print_function
 
 import os
 import ast
-
 from click.testing import CliRunner
-
 from . import base
 from jsontableschema import cli
 from jsontableschema import model
-
 os.environ['LC_ALL'] = 'en_US.UTF-8'
 
 

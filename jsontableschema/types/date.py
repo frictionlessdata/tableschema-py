@@ -8,7 +8,7 @@ import datetime
 from future.utils import raise_with_traceback
 from dateutil.parser import parse as date_parse
 from .. import exceptions
-from .. import utilities
+from .. import helpers
 from . import base
 
 
@@ -19,7 +19,7 @@ class DateType(base.JTSType):
     # Public
 
     name = 'date'
-    null_values = utilities.NULL_VALUES
+    null_values = helpers.NULL_VALUES
     supported_constraints = [
         'required',
         'pattern',

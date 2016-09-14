@@ -5,13 +5,13 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import re
+import six
 import decimal
 import unicodedata
-import six
 from future.utils import raise_with_traceback
 from .. import exceptions
+from .. import helpers
 from .. import compat
-from .. import utilities
 from . import base
 
 
@@ -22,7 +22,7 @@ class NumberType(base.JTSType):
     # Public
 
     name = 'number'
-    null_values = utilities.NULL_VALUES
+    null_values = helpers.NULL_VALUES
     supported_constraints = [
         'required',
         'pattern',

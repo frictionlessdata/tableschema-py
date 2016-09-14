@@ -57,6 +57,7 @@ docs/_build/
 target/
 
 # Extras
+tmp
 .DS_Store
 .idea
 .projectile
@@ -65,3 +66,8 @@ target/
 shippable/*
 /docs/site
 .python-version
+tabulator
+jsontableschema_sql
+jsontableschema_bigquery
+jsontableschema_pandas
+README.rst

@@ -4,7 +4,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from ..utilities import PluginImporter
+from ..helpers import PluginImporter
 
 
 # Register importer

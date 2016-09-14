@@ -6,9 +6,7 @@ from __future__ import print_function
 import os
 import io
 import json
-
 import click
-
 import jsontableschema
 
 
