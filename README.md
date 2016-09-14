@@ -169,7 +169,7 @@ except jsontableschema.exceptions.MultipleInvalid as exception:
 
 Given headers and data, `infer` will return a JSON Table Schema as a Python dict based on the data values. Given the data file, data_to_infer.csv:
 
-```csv
+```
 id,age,name
 1,39,Paul
 2,23,Jimmy
@@ -244,8 +244,7 @@ A list of officially supported plugins:
 
 ### CLI
 
-> CLI is not a part of SemVer versionning. If you use it programatically
-please pin concrete `goodtables` version to your requirements file.
+> CLI is not a part of SemVer versionning. If you use it programatically please pin concrete `goodtables` version to your requirements file.
 
 JSON Table Schema features a CLI called `jsontableschema`. This CLI exposes the `infer` and `validate` functions for command line use.
 
