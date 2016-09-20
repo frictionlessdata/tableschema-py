@@ -76,7 +76,7 @@ class Table(object):
     def schema(self):
         """Schema: schema instance
         """
-        self.__ensure_ready()
+        self.__ensure_schema()
         return self.__schema
 
     @property
@@ -96,7 +96,7 @@ class Table(object):
             mixed[]/mixed{}: row or keyed row or extended row
 
         """
-        self.__ensure_ready()
+        self.__ensure_opened()
         self.__stream.reset()
         iterator = self.__stream.iter(extended=True)
         iterator = self.__apply_processors(iterator)
@@ -143,11 +143,13 @@ class Table(object):
 
         # Tabulator
         if backend is None:
+            self.__ensure_schema()
             with Stream(self.iter, headers=self.__schema.headers) as stream:
                 stream.save(target, **options)
 
         # Storage
         else:
+            self.__ensure_schema()
             module = 'jsontableschema.plugins.%s' % backend
             storage = import_module(module).Storage(**options)
             storage.create(target, self.__schema.descriptor, force=True)
@@ -156,18 +158,24 @@ class Table(object):
 
     # Internal
 
-    def __ensure_ready(self):
+    def __ensure_opened(self):
 
-        # Ensure table is ready to work
+        # Ensure stream is opened
         if self.__stream.closed:
             self.__stream.open()
+
+    def __ensure_schema(self):
+
+        # Ensure schema is ready
         if self.__schema is None:
+            self.__ensure_opened()
             descriptor = infer(self.__stream.headers, self.__stream.sample)
             self.__schema = Schema(descriptor)
 
     def __apply_processors(self, iterator):
 
         # Apply processors to iterator
+        self.__ensure_schema()
         def builtin_processor(extended_rows):
             for number, headers, row in extended_rows:
                 headers = self.__schema.headers
