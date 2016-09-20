@@ -52,10 +52,6 @@ class Table(object):
         if backend is None:
             options.setdefault('headers', 1)
             self.__stream = Stream(source,  **options)
-            self.__stream.open()
-            if self.__schema is None:
-                self.__schema = Schema(infer(
-                    self.__stream.headers, self.__stream.sample))
 
         # Storage
         else:
@@ -66,7 +62,6 @@ class Table(object):
                 self.__schema = Schema(storage.describe(source))
             storage.describe(source, self.__schema.descriptor)
             self.__stream = Stream(generator, headers=self.__schema.headers)
-            self.__stream.open()
 
         # Attributes
         self.__post_cast = post_cast
@@ -81,6 +76,7 @@ class Table(object):
     def schema(self):
         """Schema: schema instance
         """
+        self.__ensure_schema()
         return self.__schema
 
     @property
@@ -100,6 +96,7 @@ class Table(object):
             mixed[]/mixed{}: row or keyed row or extended row
 
         """
+        self.__ensure_opened()
         self.__stream.reset()
         iterator = self.__stream.iter(extended=True)
         iterator = self.__apply_processors(iterator)
@@ -146,22 +143,39 @@ class Table(object):
 
         # Tabulator
         if backend is None:
+            self.__ensure_schema()
             with Stream(self.iter, headers=self.__schema.headers) as stream:
                 stream.save(target, **options)
 
         # Storage
         else:
+            self.__ensure_schema()
             module = 'jsontableschema.plugins.%s' % backend
             storage = import_module(module).Storage(**options)
-            storage.create(target, self.schema.descriptor, force=True)
+            storage.create(target, self.__schema.descriptor, force=True)
             storage.write(target, self.iter())
             return storage
 
     # Internal
 
+    def __ensure_opened(self):
+
+        # Ensure stream is opened
+        if self.__stream.closed:
+            self.__stream.open()
+
+    def __ensure_schema(self):
+
+        # Ensure schema is ready
+        if self.__schema is None:
+            self.__ensure_opened()
+            descriptor = infer(self.__stream.headers, self.__stream.sample)
+            self.__schema = Schema(descriptor)
+
     def __apply_processors(self, iterator):
 
         # Apply processors to iterator
+        self.__ensure_schema()
         def builtin_processor(extended_rows):
             for number, headers, row in extended_rows:
                 headers = self.__schema.headers
