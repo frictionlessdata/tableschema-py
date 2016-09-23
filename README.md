@@ -265,7 +265,7 @@ The response is a schema as JSON. The optional argument `--encoding` allows a ch
 ## Read more
 
 - [Docstrings](https://github.com/frictionlessdata/jsontableschema-py/tree/master/jsontableschema)
-- [Changelog](https://github.com/frictionlessdata/jsontableschema-py/releases)
+- [Changelog](https://github.com/frictionlessdata/jsontableschema-py/commits/master)
 - [Contribute](CONTRIBUTING.md)
 
 Thanks!
