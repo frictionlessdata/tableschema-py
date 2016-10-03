@@ -8,7 +8,7 @@
 
 A utility library for working with [JSON Table Schema](http://dataprotocols.org/json-table-schema/) in Python.
 
-> With v0.7 renewed API has been introduced in backward-compatibility manner. Documentation for deprecated API could be found here - https://github.com/frictionlessdata/jsontableschema-py/tree/0.6.5#json-table-schema. Deprecated API will be removed with v1 release.
+> With v0.7 renewed API has been introduced in backward-compatibility manner. Documentation for deprecated API could be found [here](https://github.com/frictionlessdata/jsontableschema-py/tree/0.6.5#json-table-schema). Deprecated API will be removed with v1 release.
 
 ## Features
 
