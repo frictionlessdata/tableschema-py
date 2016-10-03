@@ -8,6 +8,8 @@
 
 A utility library for working with [JSON Table Schema](http://dataprotocols.org/json-table-schema/) in Python.
 
+> With v0.7 renewed API has been introduced in backward-compatibility manner. Documentation for deprecated API could be found [here](https://github.com/frictionlessdata/jsontableschema-py/tree/0.6.5#json-table-schema). Deprecated API will be removed with v1 release.
+
 ## Features
 
 - `Table` to work with data tables described by JSON Table Schema
@@ -265,7 +267,7 @@ The response is a schema as JSON. The optional argument `--encoding` allows a ch
 ## Read more
 
 - [Docstrings](https://github.com/frictionlessdata/jsontableschema-py/tree/master/jsontableschema)
-- [Changelog](https://github.com/frictionlessdata/jsontableschema-py/releases)
+- [Changelog](https://github.com/frictionlessdata/jsontableschema-py/commits/master)
 - [Contribute](CONTRIBUTING.md)
 
 Thanks!
