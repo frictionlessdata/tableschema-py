@@ -221,10 +221,6 @@ schema = infer(headers, values)
 
 The number of rows used by `infer` can be limited with the `row_limit` argument.
 
-### exceptions
-
-The library provides various of exceptions. Please consult with docstrings.
-
 ### plugins
 
 JSON Table Schema has a plugin system.  Any package with the name like `jsontableschema_<name>` could be imported as:
