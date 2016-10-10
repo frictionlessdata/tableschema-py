@@ -21,7 +21,7 @@ def read(*paths):
 PACKAGE = 'jsontableschema'
 NAME = PACKAGE.replace('_', '-')
 INSTALL_REQUIRES = [
-    'click>=3.3,<4.0a',
+    'click>=3.3,<7.0a',
     'requests>=2.5,<3.0a',
     'python-dateutil>=2.4,<3.0a',
     'rfc3986>=0.4,<0.5a',
