@@ -42,10 +42,6 @@ for keyed_row in table.iter(keyed=True):
     print(keyed_row)
 ```
 
-## Documentation
-
-Let's look at each of the components in more detail.
-
 ### Table
 
 Table represents data described by JSON Table Schema:
@@ -225,10 +221,6 @@ schema = infer(headers, values)
 
 The number of rows used by `infer` can be limited with the `row_limit` argument.
 
-### exceptions
-
-The library provides various of exceptions. Please consult with docstrings.
-
 ### plugins
 
 JSON Table Schema has a plugin system.  Any package with the name like `jsontableschema_<name>` could be imported as:
@@ -246,7 +238,7 @@ A list of officially supported plugins:
 
 ### CLI
 
-> CLI is not a part of SemVer versionning. If you use it programatically please pin concrete `goodtables` version to your requirements file.
+> It's a provisional API excluded from SemVer. If you use it as a part of other program please pin concrete `goodtables` version to your requirements file.
 
 JSON Table Schema features a CLI called `jsontableschema`. This CLI exposes the `infer` and `validate` functions for command line use.
 
@@ -264,10 +256,60 @@ $ jsontableschema infer path/to/data.csv
 
 The response is a schema as JSON. The optional argument `--encoding` allows a character encoding to be specified for the data file. The default is utf-8.
 
-## Read more
+## API Reference
+
+### Snapshot
+
+```
+Table(source, schema=None, name=None, post_cast=None, backend=None, **options)
+    stream -> tabulator.Stream
+    schema -> Schema
+    name -> str
+    iter(keyed/extended=False) -> (generator) (keyed/extended)row[]
+    read(keyed/extended=False, limit=None) -> (keyed/extended)row[]
+    save(target, backend=None, **options)
+Schema(descriptor)
+    descriptor -> dict
+    fields -> Field[]
+    headers -> str[]
+    primary_key -> str[]
+    foreign_keys -> str[]
+    get_field(name) -> Field
+    has_field(name) -> bool
+    cast_row(row, no_fail_fast=False) -> row
+    save(target)
+Field(descriptor)
+    descriptor -> dict
+    name -> str
+    type -> str
+    format -> str
+    constraints -> dict
+    cast_value(value) -> value
+    test_value(value, constraint=None)
+Storage(prefix=None, **options)
+    buckets -> str[]
+    create(bucket, descriptor, force=False)
+    delete(bucket=None, ignore=False)
+    describe(bucket, descriptor=None) -> descriptor
+    iter(bucket) -> (generator) row[]
+    read(bucket) -> row[]
+    write(bucket, rows)
+validate(descriptor, no_fail_fast=False) -> bool
+infer(headers, values) -> descriptor
+exceptions
+plugins
+~cli
+```
+
+### Detailed
 
 - [Docstrings](https://github.com/frictionlessdata/jsontableschema-py/tree/master/jsontableschema)
 - [Changelog](https://github.com/frictionlessdata/jsontableschema-py/commits/master)
-- [Contribute](CONTRIBUTING.md)
+
+## Contributing
+
+Please read the contribution guideline:
+
+[How to Contribute](CONTRIBUTING.md)
 
 Thanks!
