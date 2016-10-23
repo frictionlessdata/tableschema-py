@@ -14,10 +14,11 @@ A utility library for working with [JSON Table Schema](http://dataprotocols.org/
 
 - `Table` to work with data tables described by JSON Table Schema
 - `Schema` representing JSON Table Schema
-- `Field` representing JSON Table Schema field
-- `Storage` to connect your tables to different storage backends like SQL Database
-- `validate` to validate JSON Table Schema (also in CLI)
-- `infer` to infer JSON Table Schema from data (also in CLI)
+- `Field` representing JSON Table Schema field 
+- `validate` to validate JSON Table Schema
+- `infer` to infer JSON Table Schema from data
+- built-in command-line interface to validate and infer schemas
+- storage/plugins system to connect tables to different storage backends like SQL Database
 
 ## Gettings Started
 
