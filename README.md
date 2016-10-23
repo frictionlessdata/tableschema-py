@@ -235,9 +235,9 @@ The response is a schema as JSON. The optional argument `--encoding` allows a ch
 
 ### Storage
 
-The library includes interface declaration to implement `Tabular Storage`:
+The library includes interface declaration to implement tabular `Storage`:
 
-![Tabular Storage](files/storage.png)
+![Storage](files/storage.png)
 
 An implementor should follow `jsontableschema.Storage` interface to write his
 own storage backend. This backend could be used with `Table` class. See `plugins`
