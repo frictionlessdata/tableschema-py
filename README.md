@@ -125,14 +125,6 @@ Casting a value will check the value is of the expected type, is in the correct 
 
 Casting a value that doesn't meet the constraints will raise a `ConstraintError` exception.
 
-### Storage
-
-On level between the high-level interface and low-level driver package uses **Tabular Storage** concept:
-
-![Tabular Storage](files/storage.png)
-
-To write you own storage driver implement `jsontableschema.Storage` interface.
-
 ### validate
 
 Given a schema as JSON file, url to JSON file, or a Python dict, `validate` returns `True` for a valid JSON Table Schema, or raises an exception, `SchemaValidationError`. It validates only **schema**, not data against schema!
@@ -221,21 +213,6 @@ schema = infer(headers, values)
 
 The number of rows used by `infer` can be limited with the `row_limit` argument.
 
-### plugins
-
-JSON Table Schema has a plugin system.  Any package with the name like `jsontableschema_<name>` could be imported as:
-
-```python
-from jsontableschema.plugins import <name>
-```
-
-If a plugin is not installed `ImportError` will be raised with a message describing how to install the plugin.
-
-A list of officially supported plugins:
-- BigQuery Storage - https://github.com/frictionlessdata/jsontableschema-bigquery-py
-- Pandas Storage - https://github.com/frictionlessdata/jsontableschema-pandas-py
-- SQL Storage - https://github.com/frictionlessdata/jsontableschema-sql-py
-
 ### CLI
 
 > It's a provisional API excluded from SemVer. If you use it as a part of other program please pin concrete `goodtables` version to your requirements file.
@@ -255,6 +232,31 @@ $ jsontableschema infer path/to/data.csv
 ```
 
 The response is a schema as JSON. The optional argument `--encoding` allows a character encoding to be specified for the data file. The default is utf-8.
+
+### Storage
+
+The library includes interface declaration to implement `Tabular Storage`:
+
+![Tabular Storage](files/storage.png)
+
+An implementor should follow `jsontableschema.Storage` interface to write his
+own storage backend. This backend could be used with `Table` class. See `plugins`
+system below to know how to integrate custom storage plugin.
+
+### plugins
+
+JSON Table Schema has a plugin system.  Any package with the name like `jsontableschema_<name>` could be imported as:
+
+```python
+from jsontableschema.plugins import <name>
+```
+
+If a plugin is not installed `ImportError` will be raised with a message describing how to install the plugin.
+
+A list of officially supported plugins:
+- BigQuery Storage - https://github.com/frictionlessdata/jsontableschema-bigquery-py
+- Pandas Storage - https://github.com/frictionlessdata/jsontableschema-pandas-py
+- SQL Storage - https://github.com/frictionlessdata/jsontableschema-sql-py
 
 ## API Reference
 
@@ -286,6 +288,11 @@ Field(descriptor)
     constraints -> dict
     cast_value(value) -> value
     test_value(value, constraint=None)
+validate(descriptor, no_fail_fast=False) -> bool
+infer(headers, values) -> descriptor
+exceptions
+~cli
+---
 Storage(**options)
     buckets -> str[]
     create(bucket, descriptor, force=False)
@@ -294,11 +301,7 @@ Storage(**options)
     iter(bucket) -> (generator) row[]
     read(bucket) -> row[]
     write(bucket, rows)
-validate(descriptor, no_fail_fast=False) -> bool
-infer(headers, values) -> descriptor
-exceptions
 plugins
-~cli
 ```
 
 ### Detailed
