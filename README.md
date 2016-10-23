@@ -286,7 +286,7 @@ Field(descriptor)
     constraints -> dict
     cast_value(value) -> value
     test_value(value, constraint=None)
-Storage(prefix=None, **options)
+Storage(**options)
     buckets -> str[]
     create(bucket, descriptor, force=False)
     delete(bucket=None, ignore=False)

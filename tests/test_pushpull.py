@@ -26,7 +26,7 @@ class TestResource(unittest.TestCase):
         self.SchemaModel = patch.object(module, 'SchemaModel').start()
         self.import_module = patch.object(module, 'import_module').start()
         self.storage = self.import_module.return_value.Storage.return_value
-        self.backend_options = {'prefix': 'prefix_'}
+        self.backend_options = {}
 
     # Tests
 

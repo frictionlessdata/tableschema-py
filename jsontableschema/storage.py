@@ -18,7 +18,6 @@ class Storage(object):
     to simplify maintenance. Just use as a reference.
 
     Args:
-        prefix (str): prefix for all buckets
         options (dict): concrete backend options
 
     """
@@ -26,7 +25,7 @@ class Storage(object):
     # Public
 
     @abstractmethod
-    def __init__(self, prefix='', **options):
+    def __init__(self, **options):
         pass
 
     @property
