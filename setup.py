@@ -24,11 +24,11 @@ INSTALL_REQUIRES = [
     'click>=3.3,<7.0a',
     'requests>=2.5,<3.0a',
     'python-dateutil>=2.4,<3.0a',
-    'rfc3986>=0.4,<0.5a',
     'jsonschema>=2.5,<3.0a',
-    'future>=0.15,<0.16a',
-    'unicodecsv>=0.14,<0.15a',
-    'tabulator>=0.7,<0.8a',
+    'rfc3986>=0.4,<1.0a',
+    'future>=0.15,<1.0a',
+    'unicodecsv>=0.14,<1.0a',
+    'tabulator>=0.7,<1.0a',
 ]
 TESTS_REQUIRE = [
     'pylama',
