@@ -23,25 +23,42 @@ class Field(object):
 
     @property
     def descriptor(self):
+        """dict: field descriptor
+        """
         return self.__descriptor
 
     @property
     def name(self):
+        """str: field name
+        """
         return self.__descriptor['name']
 
     @property
     def type(self):
+        """str: field type
+        """
         return self.__descriptor.get('type', 'string')
 
     @property
     def format(self):
+        """str: field format
+        """
         return self.__descriptor.get('format', 'default')
 
     @property
     def constraints(self):
+        """dict: field constraints
+        """
         return self.__descriptor.get('constraints', {})
 
     def cast_value(self, value, skip_constraints=False):
+        """Cast value against field.
+
+        Args:
+            value (mixed): value to cast
+            skip_constraints (bool): skip constraints if true
+
+        """
         return self.__type.cast(value, skip_constraints=skip_constraints)
 
 
