@@ -6,8 +6,9 @@ from __future__ import unicode_literals
 
 import io
 import json
+import pytest
 import requests
-from jsontableschema import Field
+from jsontableschema import Field, exceptions
 
 
 # Constants
@@ -47,4 +48,13 @@ def test_constraints():
 
 
 def test_cast_value():
-    assert Field(DESCRIPTOR_MIN).cast_value('test') == 'test'
+    assert Field(DESCRIPTOR_MAX).cast_value('1') == 1
+
+
+def test_cast_value_required():
+    with pytest.raises(exceptions.ConstraintError):
+        Field(DESCRIPTOR_MAX).cast_value('')
+
+
+def test_cast_value_required_skip_constraints():
+    assert Field(DESCRIPTOR_MIN).cast_value('', skip_constraints=True) == ''

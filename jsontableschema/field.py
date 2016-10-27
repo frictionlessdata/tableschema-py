@@ -41,8 +41,8 @@ class Field(object):
     def constraints(self):
         return self.__descriptor.get('constraints', {})
 
-    def cast_value(self, value):
-        return self.__type.cast(value)
+    def cast_value(self, value, skip_constraints=False):
+        return self.__type.cast(value, skip_constraints=skip_constraints)
 
 
 # Internal
