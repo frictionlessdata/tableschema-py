@@ -48,13 +48,22 @@ def test_constraints():
 
 
 def test_cast_value():
+    # Success
     assert Field(DESCRIPTOR_MAX).cast_value('1') == 1
-
-
-def test_cast_value_required():
+    # Constraint error
     with pytest.raises(exceptions.ConstraintError):
         Field(DESCRIPTOR_MAX).cast_value('')
 
 
-def test_cast_value_required_skip_constraints():
+def test_cast_value_skip_constraints():
     assert Field(DESCRIPTOR_MIN).cast_value('', skip_constraints=True) == ''
+
+
+def test_test_value():
+    assert Field(DESCRIPTOR_MAX).test_value('1') == True
+    assert Field(DESCRIPTOR_MAX).test_value('string') == False
+    assert Field(DESCRIPTOR_MAX).test_value('') == False
+
+
+def test_test_value_skip_constraints():
+    assert Field(DESCRIPTOR_MIN).test_value('', skip_constraints=True) == True

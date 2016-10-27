@@ -5,6 +5,7 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 
 from copy import deepcopy
+from . import exceptions
 from . import types
 
 
@@ -58,8 +59,40 @@ class Field(object):
             value (mixed): value to cast
             skip_constraints (bool): skip constraints if true
 
+        Return:
+            mixed: cast value
+
         """
         return self.__type.cast(value, skip_constraints=skip_constraints)
+
+    def test_value(self, value, skip_constraints=False, constraint=None):
+        """Cast value against field.
+
+        Args:
+            value (mixed): value to test
+            skip_constraints (bool): skip constraints if true
+            constraint (str): constraint to test against
+                - enum
+                - maximum
+                - maxLength
+                - minimum
+                - minLenght
+                - pattern
+                - required
+
+        """
+
+        # General approach
+        if constraint is None:
+            try:
+                self.__type.cast(value, skip_constraints=skip_constraints)
+                return True
+            except (exceptions.InvalidCastError, exceptions.ConstraintError):
+                return False
+
+        # Granular constraint
+        else:
+            raise NotImplementedError()
 
 
 # Internal
