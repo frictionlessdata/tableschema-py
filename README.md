@@ -14,7 +14,7 @@ A utility library for working with [JSON Table Schema](http://dataprotocols.org/
 
 - `Table` to work with data tables described by JSON Table Schema
 - `Schema` representing JSON Table Schema
-- `Field` representing JSON Table Schema field 
+- `Field` representing JSON Table Schema field
 - `validate` to validate JSON Table Schema
 - `infer` to infer JSON Table Schema from data
 - built-in command-line interface to validate and infer schemas
@@ -264,7 +264,7 @@ A list of officially supported plugins:
 ### Snapshot
 
 ```
-Table(source, schema=None, name=None, post_cast=None, backend=None, **options)
+Table(source, schema=None, post_cast=None, backend=None, **options)
     stream -> tabulator.Stream
     schema -> Schema
     name -> str
@@ -287,8 +287,8 @@ Field(descriptor)
     type -> str
     format -> str
     constraints -> dict
-    cast_value(value) -> value
-    test_value(value, constraint=None)
+    cast_value(value, skip_constraints=False) -> value
+    test_value(value, skip_constraints=False, constraint=None) -> bool
 validate(descriptor, no_fail_fast=False) -> bool
 infer(headers, values) -> descriptor
 exceptions
