@@ -48,6 +48,11 @@ def test_constraints():
     assert Field(DESCRIPTOR_MAX).constraints == {'required': True}
 
 
+def test_required():
+    assert Field(DESCRIPTOR_MIN).required == False
+    assert Field(DESCRIPTOR_MAX).required == True
+
+
 def test_cast_value():
     # Success
     assert Field(DESCRIPTOR_MAX).cast_value('1') == 1

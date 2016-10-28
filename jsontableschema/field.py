@@ -55,6 +55,12 @@ class Field(object):
         """
         return self.__descriptor.get('constraints', {})
 
+    @property
+    def required(self):
+        """bool: true if field is required
+        """
+        return self.constraints.get('required', False)
+
     def cast_value(self, value, skip_constraints=False):
         """Cast value against field.
 
@@ -131,8 +137,7 @@ class Field(object):
     def __validate_required(self, value):
         """Validate value against required constraint.
         """
-        required = self.constraints.get('required', False)
-        if required and value in (self.__type.null_values + ['', None]):
+        if self.required and value in (self.__type.null_values + ['', None]):
             message = 'The field "%s" requires a value' % self.name
             raise exceptions.ConstraintError(message)
         return True
@@ -153,7 +158,6 @@ class Field(object):
     def __validate_unique(self, value):
         """Validate CAST value against unique constraint.
         """
-        # On Field level it's always valid
         return True
 
     def __validate_enum(self, value):
