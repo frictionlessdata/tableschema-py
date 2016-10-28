@@ -76,7 +76,7 @@ class Field(object):
         Args:
             value (mixed): value to test
             skip_constraints (bool): skip constraints if true
-            constraint (str): constraint to test against
+            constraint (str): constraint to test against (priority over skip)
                 - required
                 - pattern
                 - unique
