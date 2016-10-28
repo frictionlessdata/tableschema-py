@@ -264,7 +264,7 @@ A list of officially supported plugins:
 ### Snapshot
 
 ```
-Table(source, schema=None, name=None, post_cast=None, backend=None, **options)
+Table(source, schema=None, post_cast=None, backend=None, **options)
     stream -> tabulator.Stream
     schema -> Schema
     name -> str
