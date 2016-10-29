@@ -76,8 +76,7 @@ def test_test_value_skip_constraints():
 
 
 def test_test_value_not_supported_constraint():
-    with pytest.raises(exceptions.ConstraintNotSupported):
-        assert Field(DESCRIPTOR_MIN).test_value('', constraint='bad')
+    assert Field(DESCRIPTOR_MIN).test_value('', constraint='bad') == True
 
 
 # Tests [constraints]
