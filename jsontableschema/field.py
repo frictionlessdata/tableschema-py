@@ -105,22 +105,12 @@ class Field(object):
                 return False
 
         # Granular test
-        else:
-
-            # Not supported constraint
-            if constraint not in self.__type.supported_constraints+['unique']:
-                message = 'Field type "%s" does not support "%s" constraint'
-                message = message % (self.type, constraint)
-                raise exceptions.ConstraintNotSupported(message)
-
-            # Cast value if needed
+        if constraint in self.__type.supported_constraints + ['unique']:
             if constraint not in ['required', 'pattern']:
                 try:
                     value = self.__type.cast(value, skip_constraints=True)
                 except exceptions.InvalidCastError:
                     return False
-
-            # Validate value
             validator = getattr(self, '_Field__validate_%s' % constraint)
             try:
                 validator(value)
