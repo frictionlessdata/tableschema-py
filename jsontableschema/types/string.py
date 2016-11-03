@@ -51,6 +51,9 @@ class StringType(base.JTSType):
 
     def cast_email(self, value, fmt=None):
 
+        if value == '':
+            return value
+
         if not isinstance(value, self.python_type):
             raise exceptions.InvalidStringType(
                 '{0} is not of type {1}'.format(value, self.python_type))
@@ -62,6 +65,9 @@ class StringType(base.JTSType):
         return value
 
     def cast_uri(self, value, fmt=None):
+
+        if value == '':
+            return value
 
         if not isinstance(value, self.python_type):
             raise exceptions.InvalidStringType(
@@ -75,6 +81,9 @@ class StringType(base.JTSType):
 
     def cast_binary(self, value, fmt=None):
 
+        if value == '':
+            return value
+
         if not isinstance(value, self.python_type):
             raise exceptions.InvalidStringType(
                 '{0} is not of type {1}'.format(value, self.python_type))
@@ -86,6 +95,9 @@ class StringType(base.JTSType):
         return value
 
     def cast_uuid(self, value, fmt=None):
+
+        if value == '':
+            return value
 
         if not isinstance(value, self.python_type):
             raise exceptions.InvalidStringType(
