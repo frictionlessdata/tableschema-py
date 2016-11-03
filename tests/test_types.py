@@ -98,6 +98,11 @@ class TestString(base.BaseTestCase):
         value = 'X23e4567-e89b-12d3-a456-426655440000'
         self.assertRaises(exceptions.InvalidUUID, _type.cast, value)
 
+    def test_uri_empty_skip_constraints(self):
+        self.field['format'] = 'uri'
+        _type = types.StringType(self.field)
+        assert _type.cast('', skip_constraints=True) == ''
+
 
 class TestNumber(base.BaseTestCase):
     def setUp(self):
