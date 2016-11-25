@@ -77,10 +77,11 @@ class NumberType(base.JTSType):
         if isinstance(value, (int, float)):
             return self.python_type(value)
 
+        pattern = '[{0}]'.format(self.currencies)
+        value = re.sub(pattern, '', value).strip()
+        value = self.__preprocess_value(value)
+
         try:
-            pattern = '[{0}]'.format(self.currencies)
-            value = re.sub(pattern, '', value).strip()
-            value = self.__preprocess_value(value)
             return self.python_type(value)
         except (ValueError, TypeError, decimal.InvalidOperation):
             raise exceptions.InvalidCurrency(
