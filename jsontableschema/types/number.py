@@ -69,8 +69,6 @@ class NumberType(base.JTSType):
         except (ValueError, TypeError, decimal.InvalidOperation) as e:
             raise_with_traceback(exceptions.InvalidCastError(e))
 
-        raise exceptions.InvalidCastError('Could not cast value')
-
     def cast_currency(self, value, fmt=None):
 
         if isinstance(value, self.python_type):
@@ -87,5 +85,3 @@ class NumberType(base.JTSType):
         except (ValueError, TypeError, decimal.InvalidOperation):
             raise exceptions.InvalidCurrency(
                 '{0} is not a valid currency'.format(value))
-
-        raise exceptions.InvalidCastError('Could not cast value')
