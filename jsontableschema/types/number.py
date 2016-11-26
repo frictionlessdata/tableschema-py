@@ -43,8 +43,15 @@ class NumberType(base.JTSType):
             group_char = self.field.get('groupChar', ',')
             decimal_char = self.field.get('decimalChar', '.')
             percent_char = '%‰‱％﹪٪'
+
+            if decimal_char in value:
+                if value.find(decimal_char) < value.find(group_char):
+                    message = 'decimalChar cannot precede groupChar'
+                    raise exceptions.InvalidCastError(message)
+
             value = value.replace(group_char, '').replace(decimal_char, '.')
             value = re.sub('['+percent_char+']', '', value)
+
         return value
 
     def cast_default(self, value, fmt=None):
@@ -62,8 +69,6 @@ class NumberType(base.JTSType):
         except (ValueError, TypeError, decimal.InvalidOperation) as e:
             raise_with_traceback(exceptions.InvalidCastError(e))
 
-        raise exceptions.InvalidCastError('Could not cast value')
-
     def cast_currency(self, value, fmt=None):
 
         if isinstance(value, self.python_type):
@@ -72,14 +77,12 @@ class NumberType(base.JTSType):
         if isinstance(value, (int, float)):
             return self.python_type(value)
 
+        pattern = '[{0}]'.format(self.currencies)
+        value = re.sub(pattern, '', value).strip()
         value = self.__preprocess_value(value)
 
         try:
-            pattern = '[{0}]'.format(self.currencies)
-            value = re.sub(pattern, '', value)
             return self.python_type(value)
         except (ValueError, TypeError, decimal.InvalidOperation):
             raise exceptions.InvalidCurrency(
                 '{0} is not a valid currency'.format(value))
-
-        raise exceptions.InvalidCastError('Could not cast value')

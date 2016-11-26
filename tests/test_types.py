@@ -160,6 +160,13 @@ class TestNumber(base.BaseTestCase):
         ]:
             self.assertTrue(_type.cast(value))
 
+    def test_decimal_char_and_group_char_in_invalid_positions(self):
+        self.field['decimalChar'] = '.'
+        self.field['groupChar'] = ','
+        _type = types.NumberType(self.field)
+        self.assertRaises(exceptions.InvalidCastError,
+                          _type.cast, '1.234.567,89')
+
     def test_number_type_with_currency_format_true(self):
         self.field['format'] = 'currency'
         _type = types.NumberType(self.field)
@@ -182,7 +189,6 @@ class TestNumber(base.BaseTestCase):
             '  10 000,00 £',
         ]:
             self.assertTrue(_type.cast(value))
-
 
     def test_number_type_with_currency_format_false(self):
         value1 = '10,000a.00'
