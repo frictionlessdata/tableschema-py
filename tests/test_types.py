@@ -4,6 +4,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import pytest
 from datetime import datetime, date, time
 from decimal import Decimal
 from jsontableschema import types, exceptions
