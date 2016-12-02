@@ -65,6 +65,10 @@ def test_cast_value_skip_constraints():
     assert Field(DESCRIPTOR_MIN).cast_value('', skip_constraints=True) == ''
 
 
+def test_cast_value_null_case_insensitive():
+    assert Field({'name': 'name', 'type': 'number'}).cast_value('Null') == None
+
+
 def test_test_value():
     assert Field(DESCRIPTOR_MAX).test_value('1') == True
     assert Field(DESCRIPTOR_MAX).test_value('string') == False
