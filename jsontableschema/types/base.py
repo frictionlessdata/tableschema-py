@@ -4,11 +4,11 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import six
 from six import add_metaclass
 from functools import partial
 from abc import ABCMeta, abstractmethod
 from .. import compat
+from .. import helpers
 from .. import exceptions
 from .. import constraints
 
@@ -181,6 +181,5 @@ class JTSType(object):
             true if a null value
 
         """
-        if type(value) in six.string_types or type(value) is six.text_type:
-            value = value.strip()
-        return value in self.null_values + [None]
+        null_values = map(helpers.normalize_value, self.null_values)
+        return helpers.normalize_value(value) in null_values

@@ -4,6 +4,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+from .. import helpers
 from .. import exceptions
 
 
@@ -24,7 +25,8 @@ def check_required(name, value, required, null_values):
         ConstraintError: if check is failed
 
     """
-    if required and value in null_values:
+    null_values = map(helpers.normalize_value, null_values)
+    if required and helpers.normalize_value(value) in null_values:
         message = 'The field "{0}" requires a value'
         message = message.format(name)
         raise exceptions.ConstraintError(message)
