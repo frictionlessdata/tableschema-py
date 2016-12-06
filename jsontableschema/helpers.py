@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 import os
 import io
 import sys
+import six
 import json
 import requests
 from copy import deepcopy
@@ -123,3 +124,12 @@ class PluginImporter(object):
         sys.modules[realname] = module
         sys.modules[fullname] = module
         return module
+
+
+def normalize_value(value):
+    """Conver value to string and lower case.
+    """
+    cast = str
+    if six.PY2:
+        cast = unicode  # noqa
+    return cast(value).lower()
