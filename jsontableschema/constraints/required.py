@@ -24,7 +24,8 @@ def check_required(name, value, required, null_values):
         ConstraintError: if check is failed
 
     """
-    if required and value in null_values:
+    null_values = map(lambda value: str(value).lower(), null_values)
+    if required and str(value).lower() in null_values:
         message = 'The field "{0}" requires a value'
         message = message.format(name)
         raise exceptions.ConstraintError(message)

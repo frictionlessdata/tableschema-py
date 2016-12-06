@@ -183,4 +183,5 @@ class JTSType(object):
         """
         if type(value) in six.string_types or type(value) is six.text_type:
             value = value.strip()
-        return value in self.null_values + [None]
+        null_values = map(lambda value: str(value).lower(), self.null_values)
+        return str(value).lower() in null_values
