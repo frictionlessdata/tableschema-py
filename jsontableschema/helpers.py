@@ -127,7 +127,7 @@ class PluginImporter(object):
 
 
 def normalize_value(value):
-    """Conver value to string and lower case.
+    """Convert value to string and make it lower cased.
     """
     cast = str
     if six.PY2:
