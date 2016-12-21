@@ -136,7 +136,8 @@ class TestNumber(base.BaseTestCase):
             '10.23',
             '1,000',
             '100%',
-            '1000‰'
+            '1000‰',
+            '- 1000'
         ]:
             self.assertTrue(_type.cast(value))
 
