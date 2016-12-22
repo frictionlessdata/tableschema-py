@@ -45,6 +45,7 @@ class NumberType(base.JTSType):
             percent_char = '%‰‱％﹪٪'
             value = value.replace(group_char, '').replace(decimal_char, '.')
             value = re.sub('['+percent_char+']', '', value)
+            value = re.sub('\s', '', value)
         return value
 
     def cast_default(self, value, fmt=None):
