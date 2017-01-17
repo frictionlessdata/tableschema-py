@@ -129,7 +129,7 @@ class Field(object):
         """Validate value against required constraint.
         """
         missing_values = self.descriptor.get('missingValues', [])
-        null_values = self.__type.null_values + missing_values + ['', None]
+        null_values = self.__type.null_values + missing_values
         null_values = map(helpers.normalize_value, null_values)
         if self.required and (helpers.normalize_value(value) in null_values):
             message = 'The field "%s" requires a value' % self.name
