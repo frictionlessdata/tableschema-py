@@ -9,6 +9,7 @@ import six
 from copy import deepcopy
 from functools import partial
 from . import exceptions
+from . import helpers
 from . import types
 
 
@@ -127,7 +128,10 @@ class Field(object):
     def __validate_required(self, value):
         """Validate value against required constraint.
         """
-        if self.required and value in (self.__type.null_values + ['', None]):
+        missing_values = self.descriptor.get('missingValues', [])
+        null_values = self.__type.null_values + missing_values + ['', None]
+        null_values = map(helpers.normalize_value, null_values)
+        if self.required and (helpers.normalize_value(value) in null_values):
             message = 'The field "%s" requires a value' % self.name
             raise exceptions.ConstraintError(message)
         return True
