@@ -112,6 +112,8 @@ class Field(object):
                     value = self.__type.cast(value, skip_constraints=True)
                 except exceptions.InvalidCastError:
                     return False
+                if value is None:
+                    return True
             validator = getattr(self, '_Field__validate_%s' % constraint)
             try:
                 validator(value)
