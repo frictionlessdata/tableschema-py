@@ -83,12 +83,39 @@ def test_test_value_not_supported_constraint():
     assert Field(DESCRIPTOR_MIN).test_value('', constraint='bad') == True
 
 
+# Tests [missingValues]
+
+def test_string_missingValues():
+    field = Field({
+        'name': 'name',
+        'type': 'string',
+        'missingValues': ['NA', 'N/A']
+    })
+    cast = field.cast_value
+    assert cast('') == ''
+    assert cast('NA') == None
+    assert cast('N/A') == None
+
+
+def test_number_missingValues():
+    field = Field({
+        'name': 'name',
+        'type': 'number',
+        'missingValues': ['NA', 'N/A']
+    })
+    cast = field.cast_value
+    assert cast('') == None
+    assert cast('NA') == None
+    assert cast('N/A') == None
+
+
 # Tests [constraints]
 
 def test_test_value_required():
     field = Field({
         'name': 'name',
         'type': 'string',
+        'missingValues': ['NA', 'N/A'],
         'constraints': {'required': True}
     })
     test = partial(field.test_value, constraint='required')
@@ -97,8 +124,10 @@ def test_test_value_required():
     assert test('none') == False
     assert test('nil') == False
     assert test('nan') == False
+    assert test('NA') == False
+    assert test('N/A') == False
     assert test('-') == False
-    assert test('') == False
+    assert test('') == True
     assert test(None) == False
 
 

@@ -9,6 +9,7 @@ import six
 from copy import deepcopy
 from functools import partial
 from . import exceptions
+from . import helpers
 from . import types
 
 
@@ -111,6 +112,8 @@ class Field(object):
                     value = self.__type.cast(value, skip_constraints=True)
                 except exceptions.InvalidCastError:
                     return False
+                if value is None:
+                    return True
             validator = getattr(self, '_Field__validate_%s' % constraint)
             try:
                 validator(value)
@@ -127,7 +130,10 @@ class Field(object):
     def __validate_required(self, value):
         """Validate value against required constraint.
         """
-        if self.required and value in (self.__type.null_values + ['', None]):
+        missing_values = self.descriptor.get('missingValues', [])
+        null_values = self.__type.null_values + missing_values
+        null_values = map(helpers.normalize_value, null_values)
+        if self.required and (helpers.normalize_value(value) in null_values):
             message = 'The field "%s" requires a value' % self.name
             raise exceptions.ConstraintError(message)
         return True

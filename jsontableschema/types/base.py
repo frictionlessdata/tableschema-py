@@ -97,10 +97,11 @@ class JTSType(object):
 
             # Check required constraint
             if not skip_constraints:
+                missing_values = self.field.get('missingValues', [])
                 required = self.__constraints.get('required', False)
                 constraints.check_required(
                     self.__field_name, value, required,
-                    self.null_values+[None])
+                    self.null_values + missing_values + [None])
 
             return None
 
@@ -181,5 +182,7 @@ class JTSType(object):
             true if a null value
 
         """
-        null_values = map(helpers.normalize_value, self.null_values)
+        missing_values = self.field.get('missingValues', [])
+        null_values = self.null_values + missing_values
+        null_values = map(helpers.normalize_value, null_values)
         return helpers.normalize_value(value) in null_values
