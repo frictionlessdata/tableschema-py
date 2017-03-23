@@ -105,6 +105,18 @@ class InvalidDateTimeType(InvalidCastError):
     pass
 
 
+class InvalidYearType(InvalidCastError):
+    pass
+
+
+class InvalidYearMonthType(InvalidCastError):
+    pass
+
+
+class InvalidDurationType(InvalidCastError):
+    pass
+
+
 class InvalidTimeType(InvalidCastError):
     pass
 

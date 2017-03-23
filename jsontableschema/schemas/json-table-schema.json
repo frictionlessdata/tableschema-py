@@ -20,7 +20,7 @@
                         "type": "string"
                     },
                     "type": {
-                        "enum": [ "string", "number", "integer", "date", "time", "datetime", "boolean", "binary", "object", "geopoint", "geojson", "array", "any" ]
+                        "enum": [ "string", "number", "integer", "date", "time", "datetime", "year", "yearmonth", "boolean", "binary", "object", "geopoint", "geojson", "array", "duration", "any" ]
                     },
                     "format": {
                         "type": "string"

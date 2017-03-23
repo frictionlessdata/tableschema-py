@@ -228,7 +228,10 @@ _TYPES = {
     'date': types.DateType,
     'time': types.TimeType,
     'datetime': types.DateTimeType,
+    'year': types.YearType,
+    'yearmonth': types.YearMonthType,
     'geopoint': types.GeoPointType,
     'geojson': types.GeoJSONType,
+    'duration': types.DurationType,
     'any': types.AnyType,
 }

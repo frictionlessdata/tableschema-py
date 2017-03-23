@@ -165,4 +165,5 @@ def _get_available_types():
         types.ObjectType,
         types.GeoPointType,
         types.GeoJSONType,
+        types.DurationType,
     ]
