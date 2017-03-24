@@ -4,9 +4,7 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import datetime
 import isodate
-from dateutil.parser import parse as date_parse
 from future.utils import raise_with_traceback
 
 from . import base

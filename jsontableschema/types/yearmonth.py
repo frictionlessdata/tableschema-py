@@ -4,11 +4,8 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import datetime
-
 import decimal
-import isodate
-from dateutil.parser import parse as date_parse
+
 from future.utils import raise_with_traceback
 
 from . import base
@@ -42,7 +39,7 @@ class YearMonthType(base.JTSType):
 
         try:
             cast_value = self.python_type(value)
-            if not(1 <= cast_value <= 12):
+            if not (1 <= cast_value <= 12):
                 raise exceptions.InvalidYearMonthType(
                     '{0} is not a valid yearmonth value'.format(value))
             return cast_value

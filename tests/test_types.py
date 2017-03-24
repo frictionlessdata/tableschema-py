@@ -205,6 +205,38 @@ class TestNumber(base.BaseTestCase):
                 self.assertEqual(_type.cast(value), value)
 
 
+class TestInteger(base.BaseTestCase):
+    def setUp(self):
+        super(TestInteger, self).setUp()
+        self.field = {
+            'name': 'Name',
+            'type': 'integer',
+            'format': 'default',
+            'constraints': {
+                'required': True
+            }
+        }
+
+    def test_integer_type_simple(self):
+        value = 1
+        _type = types.IntegerType(self.field)
+
+        self.assertEquals(_type.cast(value), value)
+
+    def test_integer_type_simple_raises(self):
+        value = 'string'
+        _type = types.IntegerType(self.field)
+
+        self.assertRaises(exceptions.InvalidCastError, _type.cast, value)
+
+    def test_integer_type_with_already_cast_value(self):
+        for value in [1]:
+            for format in ['default']:
+                self.field['format'] = format
+                _type = types.IntegerType(self.field)
+                self.assertEqual(_type.cast(value), value)
+
+
 class TestBoolean(base.BaseTestCase):
     def setUp(self):
         super(TestBoolean, self).setUp()
