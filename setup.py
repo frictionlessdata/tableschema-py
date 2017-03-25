@@ -29,6 +29,7 @@ INSTALL_REQUIRES = [
     'future>=0.15,<1.0a',
     'unicodecsv>=0.14,<1.0a',
     'tabulator>=0.7,<1.0a',
+    'isodate>=0.5.4,<1.0a',
 ]
 TESTS_REQUIRE = [
     'pylama',

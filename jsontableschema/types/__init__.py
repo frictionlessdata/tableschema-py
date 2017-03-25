@@ -10,6 +10,7 @@ from .base import JTSType
 from .boolean import BooleanType
 from .date import DateType
 from .datetime import DateTimeType
+from .duration import DurationType
 from .geojson import GeoJSONType
 from .geopoint import GeoPointType
 from .integer import IntegerType
@@ -18,3 +19,5 @@ from .number import NumberType
 from .object import ObjectType
 from .string import StringType
 from .time import TimeType
+from .year import YearType
+from .yearmonth import YearMonthType

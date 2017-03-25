@@ -4,8 +4,9 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import isodate
 import pytest
-from datetime import datetime, date, time
+from datetime import datetime, date, time, timedelta
 from decimal import Decimal
 from jsontableschema import types, exceptions
 from . import base
@@ -601,6 +602,96 @@ class TestDateTime(base.BaseTestCase):
                 self.field['format'] = format
                 _type = types.DateTimeType(self.field)
                 self.assertEqual(_type.cast(value), value)
+
+
+class TestYear(base.BaseTestCase):
+    def setUp(self):
+        super(TestYear, self).setUp()
+        self.field = {
+            'name': 'Name',
+            'type': 'year',
+            'format': 'default',
+            'constraints': {
+                'required': True
+            }
+        }
+
+    def test_year_type_simple(self):
+        value = '2008'
+        _type = types.YearType(self.field)
+
+        self.assertEquals(_type.cast(value), int(value))
+
+    def test_year_type_simple_raises(self):
+        value = '202020'
+        _type = types.YearType(self.field)
+
+        self.assertRaises(exceptions.InvalidYearType, _type.cast, value)
+
+    def test_year_type_with_already_cast_value(self):
+        value = 2008
+        _type = types.YearType(self.field)
+        self.assertEqual(_type.cast(value), value)
+
+
+class TestYearMonth(base.BaseTestCase):
+    def setUp(self):
+        super(TestYearMonth, self).setUp()
+        self.field = {
+            'name': 'Name',
+            'type': 'yearmonth',
+            'format': 'default',
+            'constraints': {
+                'required': True
+            }
+        }
+
+    def test_yearmonth_type_simple(self):
+        value = '4'
+        _type = types.YearMonthType(self.field)
+
+        self.assertEquals(_type.cast(value), int(value))
+
+    def test_yearmonth_type_simple_raises(self):
+        value = '13'
+        _type = types.YearMonthType(self.field)
+
+        self.assertRaises(exceptions.InvalidYearMonthType, _type.cast, value)
+
+    def test_yearmonth_type_with_already_cast_value(self):
+        for value in range(1, 13):
+            _type = types.YearMonthType(self.field)
+            self.assertEqual(_type.cast(value), value)
+
+
+class TestDuration(base.BaseTestCase):
+    def setUp(self):
+        super(TestDuration, self).setUp()
+        self.field = {
+            'name': 'Name',
+            'type': 'duration',
+            'format': 'default',
+            'constraints': {
+                'required': True
+            }
+        }
+
+    def test_duration_type_simple(self):
+        value = 'P1Y'
+        _type = types.DurationType(self.field)
+
+        self.assertEquals(_type.cast(value), isodate.Duration(years=1))
+
+    def test_duration_type_simple_raises(self):
+        value = '1Y'
+        _type = types.DurationType(self.field)
+
+        self.assertRaises(exceptions.InvalidDurationType, _type.cast, value)
+
+    def test_yearmonth_type_with_already_cast_value(self):
+        for value in [isodate.Duration(years=1)]:
+            _type = types.DurationType(self.field)
+            self.assertEqual(_type.cast(value), value)
 
 
 class TestGeoPoint(base.BaseTestCase):
