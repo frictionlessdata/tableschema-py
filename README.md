@@ -23,6 +23,7 @@ A library for working with [Table Schema](http://specs.frictionlessdata.io/table
 - There are BREAKING changes in `v1` (pre-release):
   - package on PyPi has been renamed to `tableschema`
   - other changes could be introduced before final release
+  - documentation for previous release (`v0.10`) could be found [here](https://github.com/frictionlessdata/tableschema-py/tree/v0.10.0)
 - There are deprecating changes in `v0.7`:
   - renewed API has been introduced in non breaking manner
   - documentation for deprecated API could be found [here](https://github.com/frictionlessdata/tableschema-py/tree/0.6.5#json-table-schema)
