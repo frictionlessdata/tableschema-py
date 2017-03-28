@@ -119,7 +119,7 @@ Where the option `no_fail_fast` is given, it will collect all errors it encouter
 ### Field
 
 ```python
-from tableschemal import Field
+from tableschema import Field
 
 # Init field
 field = Field({'type': 'number'})
