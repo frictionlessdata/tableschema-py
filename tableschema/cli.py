@@ -7,7 +7,7 @@ import os
 import io
 import json
 import click
-import jsontableschema
+import tableschema
 
 
 DIR = os.path.abspath(os.path.dirname(__file__))
@@ -22,7 +22,7 @@ def main():
 
 @main.command()
 def info():
-    """Return info on this version of JSON Table Schema"""
+    """Return info on this version of Table Schema"""
     click.echo(json.dumps({'version': VERSION}, ensure_ascii=False, indent=4))
 
 
@@ -50,14 +50,14 @@ def infer(data, row_limit, encoding, to_file):
     with io.open(data, mode='r+t', encoding=encoding) as stream:
         try:
             headers = stream.readline().rstrip('\n').split(',')
-            values = jsontableschema.compat.csv_reader(stream)
+            values = tableschema.compat.csv_reader(stream)
         except UnicodeDecodeError:
             response = "Could not decode the data file as {0}. " \
                 "Please specify an encoding to use with the " \
                 "--encoding argument.".format(encoding)
         else:
-            response = jsontableschema.infer(headers, values,
-                                             row_limit=row_limit)
+            response = tableschema.infer(
+                headers, values, row_limit=row_limit)
 
         if to_file:
             with io.open(to_file, mode='w+t', encoding='utf-8') as dest:
@@ -70,9 +70,9 @@ def infer(data, row_limit, encoding, to_file):
 @click.argument('schema')
 def validate(schema):
 
-    """Validate that a supposed schema is in fact a JSON Table Schema."""
+    """Validate that a supposed schema is in fact a Table Schema."""
 
-    errors = [e.message for e in jsontableschema.validator.iter_errors(schema)]
+    errors = [e.message for e in tableschema.validator.iter_errors(schema)]
     if not errors:
         click.echo(False)
     else:

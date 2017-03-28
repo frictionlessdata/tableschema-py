@@ -9,8 +9,7 @@ from ..helpers import PluginImporter
 
 # Register importer
 importer = PluginImporter(
-    virtual='jsontableschema.plugins.',
-    actual='jsontableschema_')
+    virtual='tableschema.plugins.', actual='tableschema_')
 importer.register()
 
 # Delete variables

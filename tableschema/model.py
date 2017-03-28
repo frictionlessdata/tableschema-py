@@ -1,4 +1,4 @@
-"""useful model for JSON Table Schema."""
+"""useful model for Table Schema."""
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 from __future__ import division
@@ -15,10 +15,10 @@ from .validate import validate
 
 class SchemaModel(object):
 
-    """Model for a JSON Table Schema.
+    """Model for a Table Schema.
 
     Providers handy helpers for ingesting, validating and outputting
-    JSON Table Schemas: http://dataprotocols.org/json-table-schema/
+    Table Schemas: http://dataprotocols.org/json-table-schema/
 
     Args:
         * schema_source (string or dict): A filepath, url or dictionary
@@ -158,7 +158,7 @@ class SchemaModel(object):
 
     @staticmethod
     def _type_map():
-        """Map a JSON Table Schema type to a JTSKit type class."""
+        """Map a Table Schema type to a JTSKit type class."""
 
         return {
             'string': types.StringType,

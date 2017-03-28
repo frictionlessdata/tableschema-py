@@ -9,7 +9,7 @@ import time
 import decimal
 import datetime
 import pytest
-from jsontableschema import types, exceptions
+from tableschema import types, exceptions
 from . import base
 
 

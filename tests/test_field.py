@@ -9,7 +9,7 @@ import json
 import pytest
 import requests
 from functools import partial
-from jsontableschema import Field, exceptions
+from tableschema import Field, exceptions
 
 
 # Constants

@@ -20,7 +20,7 @@ def infer(headers, values, row_limit=None, explicit=False, primary_key=None):
         primary_key: pass in a primary key or iterable of keys.
 
     Returns:
-        A JSON Table Schema as a Python dict.
+        A Table Schema as a Python dict.
 
     """
 

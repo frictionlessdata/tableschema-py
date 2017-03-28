@@ -1,10 +1,10 @@
-# pip install sqlalchemy jsontableschema-sql
+# pip install sqlalchemy tableschema-sql
 import sqlalchemy as sa
 from pprint import pprint
-from jsontableschema import Table
+from tableschema import Table
 
 # Data source
-SOURCE = 'https://raw.githubusercontent.com/okfn/jsontableschema-py/master/data/data_infer.csv'
+SOURCE = 'https://raw.githubusercontent.com/frictionlessdata/tableschema-py/master/data/data_infer.csv'
 
 # Create SQL database
 db = sa.create_engine('sqlite://')

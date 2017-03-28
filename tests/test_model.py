@@ -7,8 +7,8 @@ from __future__ import unicode_literals
 import os
 import copy
 from decimal import Decimal
-from jsontableschema import model
-from jsontableschema import exceptions
+from tableschema import model
+from tableschema import exceptions
 from . import base
 
 

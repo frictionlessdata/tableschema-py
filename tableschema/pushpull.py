@@ -18,7 +18,7 @@ from . import helpers
 # Module API
 
 def push_resource(table, schema, data, backend, **backend_options):
-    """Push JSONTableSchema resource to storage's table.
+    """Push TableSchema resource to storage's table.
 
     All parameters should be used as keyword arguments.
 
@@ -42,7 +42,7 @@ def push_resource(table, schema, data, backend, **backend_options):
     warnings.warn(message, UserWarning)
 
     # Get storage
-    plugin = import_module('jsontableschema.plugins.%s' % backend)
+    plugin = import_module('tableschema.plugins.%s' % backend)
     storage = plugin.Storage(**backend_options)
 
     # Create table
@@ -58,7 +58,7 @@ def push_resource(table, schema, data, backend, **backend_options):
 
 
 def pull_resource(table, schema, data, backend, **backend_options):
-    """Pull JSONTableSchema resource from storage's table.
+    """Pull TableSchema resource from storage's table.
 
     All parameters should be used as keyword arguments.
 
@@ -82,7 +82,7 @@ def pull_resource(table, schema, data, backend, **backend_options):
     warnings.warn(message, UserWarning)
 
     # Get storage
-    plugin = import_module('jsontableschema.plugins.%s' % backend)
+    plugin = import_module('tableschema.plugins.%s' % backend)
     storage = plugin.Storage(**backend_options)
 
     # Save schema

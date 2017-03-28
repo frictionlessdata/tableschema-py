@@ -16,7 +16,7 @@ from . import types
 # Module API
 
 class Field(object):
-    """JSON Table Schema field representation.
+    """Table Schema field representation.
     """
 
     # Public

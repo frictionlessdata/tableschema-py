@@ -17,7 +17,7 @@ from .. import constraints
 
 @add_metaclass(ABCMeta)
 class JTSType(object):
-    """Base class for all JSON Table Schema types.
+    """Base class for all Table Schema types.
 
     Args:
         field (dict): field schema

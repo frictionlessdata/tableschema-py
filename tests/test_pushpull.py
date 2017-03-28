@@ -9,7 +9,7 @@ import pytest
 import unittest
 from mock import MagicMock, patch, mock_open, call, ANY
 from importlib import import_module
-module = import_module('jsontableschema.pushpull')
+module = import_module('tableschema.pushpull')
 
 
 class TestResource(unittest.TestCase):
@@ -38,7 +38,7 @@ class TestResource(unittest.TestCase):
             backend='backend', **self.backend_options)
 
         # Assert calls
-        self.import_module.assert_called_with('jsontableschema.plugins.backend')
+        self.import_module.assert_called_with('tableschema.plugins.backend')
         self.import_module.return_value.Storage.assert_called_with(**self.backend_options)
         self.SchemaModel.assert_called_with('schema')
         self.storage.check.assert_called_with('table')
@@ -56,7 +56,7 @@ class TestResource(unittest.TestCase):
             backend='backend', **self.backend_options)
 
         # Assert calls
-        self.import_module.assert_called_with('jsontableschema.plugins.backend')
+        self.import_module.assert_called_with('tableschema.plugins.backend')
         self.import_module.return_value.Storage.assert_called_with(**self.backend_options)
         self.ensure_dir.assert_has_calls([call('schema'), call('data')])
         self.open.assert_has_calls([

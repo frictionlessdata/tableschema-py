@@ -10,12 +10,12 @@ import json
 import pytest
 import requests
 from decimal import Decimal
-from jsontableschema import Schema, exceptions
+from tableschema import Schema, exceptions
 
 
 # Constants
 
-BASE_URL = 'https://raw.githubusercontent.com/okfn/jsontableschema-py/master/%s'
+BASE_URL = 'https://raw.githubusercontent.com/frictionlessdata/tableschema-py/master/%s'
 DESCRIPTOR_MIN = {'fields': [{'name': 'id'}, {'name': 'height'}]}
 DESCRIPTOR_MAX = {
     'fields': [

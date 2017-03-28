@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 
 import os
 import io
-import jsontableschema
+import tableschema
 from . import base
 
 
@@ -16,9 +16,9 @@ class TestInferSchema(base.BaseTestCase):
         filepath = os.path.join(self.data_dir, 'data_infer.csv')
         with io.open(filepath) as stream:
             headers = stream.readline().rstrip('\n').split(',')
-            values = jsontableschema.compat.csv_reader(stream)
-            schema = jsontableschema.infer(headers, values)
-        schema_model = jsontableschema.model.SchemaModel(schema)
+            values = tableschema.compat.csv_reader(stream)
+            schema = tableschema.infer(headers, values)
+        schema_model = tableschema.model.SchemaModel(schema)
 
         self.assertEqual(schema_model.get_field('id')['type'], 'integer')
         self.assertEqual(schema_model.get_field('age')['type'], 'integer')
@@ -28,9 +28,9 @@ class TestInferSchema(base.BaseTestCase):
         filepath = os.path.join(self.data_dir, 'data_infer_utf8.csv')
         with io.open(filepath, encoding='utf8') as stream:
             headers = stream.readline().rstrip('\n').split(',')
-            values = jsontableschema.compat.csv_reader(stream)
-            schema = jsontableschema.infer(headers, values)
-        schema_model = jsontableschema.model.SchemaModel(schema)
+            values = tableschema.compat.csv_reader(stream)
+            schema = tableschema.infer(headers, values)
+        schema_model = tableschema.model.SchemaModel(schema)
 
         self.assertEqual(schema_model.get_field('id')['type'], 'integer')
         self.assertEqual(schema_model.get_field('age')['type'], 'integer')
@@ -40,9 +40,9 @@ class TestInferSchema(base.BaseTestCase):
         filepath = os.path.join(self.data_dir, 'data_infer_row_limit.csv')
         with io.open(filepath) as stream:
             headers = stream.readline().rstrip('\n').split(',')
-            values = jsontableschema.compat.csv_reader(stream)
-            schema = jsontableschema.infer(headers, values, row_limit=4)
-        schema_model = jsontableschema.model.SchemaModel(schema)
+            values = tableschema.compat.csv_reader(stream)
+            schema = tableschema.infer(headers, values, row_limit=4)
+        schema_model = tableschema.model.SchemaModel(schema)
 
         self.assertEqual(schema_model.get_field('id')['type'], 'integer')
         self.assertEqual(schema_model.get_field('age')['type'], 'integer')
@@ -53,9 +53,9 @@ class TestInferSchema(base.BaseTestCase):
         filepath = os.path.join(self.data_dir, 'data_infer.csv')
         with io.open(filepath) as stream:
             headers = stream.readline().rstrip('\n').split(',')
-            values = jsontableschema.compat.csv_reader(stream)
-            schema = jsontableschema.infer(headers, values, primary_key=primary_key)
-        schema_model = jsontableschema.model.SchemaModel(schema)
+            values = tableschema.compat.csv_reader(stream)
+            schema = tableschema.infer(headers, values, primary_key=primary_key)
+        schema_model = tableschema.model.SchemaModel(schema)
 
         self.assertTrue(schema_model.primaryKey, primary_key)
 
@@ -64,9 +64,9 @@ class TestInferSchema(base.BaseTestCase):
         filepath = os.path.join(self.data_dir, 'data_infer.csv')
         with io.open(filepath) as stream:
             headers = stream.readline().rstrip('\n').split(',')
-            values = jsontableschema.compat.csv_reader(stream)
-            schema = jsontableschema.infer(headers, values, primary_key=primary_key)
-        schema_model = jsontableschema.model.SchemaModel(schema)
+            values = tableschema.compat.csv_reader(stream)
+            schema = tableschema.infer(headers, values, primary_key=primary_key)
+        schema_model = tableschema.model.SchemaModel(schema)
 
         self.assertTrue(schema_model.primaryKey, primary_key)
 
@@ -74,8 +74,8 @@ class TestInferSchema(base.BaseTestCase):
         filepath = os.path.join(self.data_dir, 'data_infer.csv')
         with io.open(filepath) as stream:
             headers = stream.readline().rstrip('\n').split(',')
-            values = jsontableschema.compat.csv_reader(stream)
-            schema = jsontableschema.infer(headers, values, explicit=False)
+            values = tableschema.compat.csv_reader(stream)
+            schema = tableschema.infer(headers, values, explicit=False)
 
         self.assertIsNone(schema['fields'][0].get('constraints'))
 
@@ -83,7 +83,7 @@ class TestInferSchema(base.BaseTestCase):
         filepath = os.path.join(self.data_dir, 'data_infer.csv')
         with io.open(filepath) as stream:
             headers = stream.readline().rstrip('\n').split(',')
-            values = jsontableschema.compat.csv_reader(stream)
-            schema = jsontableschema.infer(headers, values, explicit=True)
+            values = tableschema.compat.csv_reader(stream)
+            schema = tableschema.infer(headers, values, explicit=True)
 
         self.assertTrue(schema['fields'][0].get('constraints'))

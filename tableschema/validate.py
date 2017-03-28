@@ -15,7 +15,7 @@ from . import compat, exceptions
 # Module API
 
 def validate(descriptor, no_fail_fast=False):
-    """Validate JSON Table Schema schema descriptor.
+    """Validate Table Schema schema descriptor.
 
     Args:
         descriptor (dict): schema descriptor to validate
@@ -34,11 +34,11 @@ def validate(descriptor, no_fail_fast=False):
     if not no_fail_fast:
         jsonschema.validate(
             descriptor, _json_table_schema,
-            cls=_JSONTableSchemaValidator)
+            cls=_TableSchemaValidator)
 
     # Multiple errors
     else:
-        validator = _JSONTableSchemaValidator(_json_table_schema)
+        validator = _TableSchemaValidator(_json_table_schema)
         errors = list(validator.iter_errors(descriptor))
         if errors:
             raise exceptions.MultipleInvalid(errors=errors)
@@ -53,7 +53,7 @@ class Validator(object):
         # DEPRECATED [v0.7-v1)
         message = 'validator is deprecated [v0.7-v1)'
         warnings.warn(message, UserWarning)
-        validator = _JSONTableSchemaValidator(_json_table_schema)
+        validator = _TableSchemaValidator(_json_table_schema)
         return validator.iter_errors(schema)
 validator = Validator()
 
@@ -71,7 +71,7 @@ def _load_schema_and_validator():
 _json_table_schema, _BaseValidator = _load_schema_and_validator()
 
 
-class _JSONTableSchemaValidator(_BaseValidator):
+class _TableSchemaValidator(_BaseValidator):
     @classmethod
     def check_schema(cls, schema):
         # When checking against the metaschema, we do not want to run the
@@ -82,7 +82,7 @@ class _JSONTableSchemaValidator(_BaseValidator):
 
     def iter_errors(self, instance, _schema=None):
 
-        for e in super(_JSONTableSchemaValidator, self).iter_errors(
+        for e in super(_TableSchemaValidator, self).iter_errors(
                 instance, _schema):
             yield exceptions.SchemaValidationError(
                 e.message, e.validator, e.path, e.cause, e.context,
@@ -100,13 +100,13 @@ class _JSONTableSchemaValidator(_BaseValidator):
             if isinstance(instance['primaryKey'], compat.str):
                 if not instance['primaryKey'] in field_names:
                     yield exceptions.SchemaValidationError(
-                        'A JSON Table Schema primaryKey value must be found in'
+                        'A Table Schema primaryKey value must be found in'
                         ' the schema field names')
             elif isinstance(instance['primaryKey'], list):
                 for k in instance['primaryKey']:
                     if k not in field_names:
                         yield exceptions.SchemaValidationError(
-                            'A JSON Table Schema primaryKey value must be '
+                            'A Table Schema primaryKey value must be '
                             'found in the schema field names')
 
         # the hash may contain a key `foreignKeys`
@@ -116,13 +116,13 @@ class _JSONTableSchemaValidator(_BaseValidator):
                 if isinstance(fk.get('fields'), compat.str):
                     if fk.get('fields') not in field_names:
                         yield exceptions.SchemaValidationError(
-                            'A JSON Table Schema foreignKey.fields value must '
+                            'A Table Schema foreignKey.fields value must '
                             'correspond with field names.')
                 elif isinstance(fk.get('fields', []), list):
                     for field in fk.get('fields'):
                         if field not in field_names:
                             yield exceptions.SchemaValidationError(
-                                'A JSON Table Schema foreignKey.fields value '
+                                'A Table Schema foreignKey.fields value '
                                 'must correspond with field names.')
 
                 # ensure that `foreignKey.reference.fields`
@@ -130,17 +130,17 @@ class _JSONTableSchemaValidator(_BaseValidator):
                 if isinstance(fk.get('fields'), compat.str):
                     if not isinstance(fk['reference']['fields'], compat.str):
                         yield exceptions.SchemaValidationError(
-                            'A JSON Table Schema foreignKey.reference.fields '
+                            'A Table Schema foreignKey.reference.fields '
                             'must match field names.')
                 else:
                     if isinstance(fk['reference']['fields'], compat.str):
                         yield exceptions.SchemaValidationError(
-                            'A JSON Table Schema foreignKey.fields cannot '
+                            'A Table Schema foreignKey.fields cannot '
                             'be a string when foreignKey.reference.fields.'
                             'is a string')
                     if not (len(fk.get('fields')) ==
                             len(fk['reference']['fields'])):
                         yield exceptions.SchemaValidationError(
-                            'A JSON Table Schema foreignKey.fields must '
+                            'A Table Schema foreignKey.fields must '
                             'contain the same number entries as '
                             'foreignKey.reference.fields.')

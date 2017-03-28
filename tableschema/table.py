@@ -15,7 +15,7 @@ from . import compat
 # Module API
 
 class Table(object):
-    """JSON Table Schema table representation.
+    """Table Schema table representation.
 
     Args:
         source (mixed): data source
@@ -50,7 +50,7 @@ class Table(object):
 
         # Storage
         else:
-            module = 'jsontableschema.plugins.%s' % backend
+            module = 'tableschema.plugins.%s' % backend
             storage = import_module(module).Storage(**options)
             generator = partial(storage.iter, source)
             if self.__schema is None:
@@ -136,7 +136,7 @@ class Table(object):
 
         # Storage
         else:
-            module = 'jsontableschema.plugins.%s' % backend
+            module = 'tableschema.plugins.%s' % backend
             storage = import_module(module).Storage(**options)
             storage.create(target, self.__schema.descriptor, force=True)
             storage.write(target, self.iter())
