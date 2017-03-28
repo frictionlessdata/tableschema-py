@@ -6,8 +6,8 @@ from __future__ import unicode_literals
 
 import os
 import io
-from jsontableschema import helpers
-from jsontableschema import exceptions
+from tableschema import helpers
+from tableschema import exceptions
 from . import base
 
 

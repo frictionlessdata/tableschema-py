@@ -9,11 +9,11 @@ import jsonschema.exceptions
 
 # Base
 
-class JsonTableSchemaException(Exception):
+class TableSchemaException(Exception):
     pass
 
 
-class MultipleInvalid(JsonTableSchemaException):
+class MultipleInvalid(TableSchemaException):
     def __init__(self, msg='Multiple errors found', errors=None):
         self.msg = msg
         if errors:
@@ -34,18 +34,18 @@ class InvalidJSONError(Exception):
 
 class InvalidSchemaError(Exception):
     def __init__(self, msg=None):
-        self.msg = msg or 'The obj is not a valid JSON Table Schema.'
+        self.msg = msg or 'The obj is not a valid Table Schema.'
 
 
 class SchemaValidationError(
-        JsonTableSchemaException,
+        TableSchemaException,
         jsonschema.exceptions.ValidationError):
     pass
 
 
 # Cast
 
-class InvalidCastError(JsonTableSchemaException):
+class InvalidCastError(TableSchemaException):
     pass
 
 
@@ -131,13 +131,13 @@ class InvalidGeoJSONType(InvalidCastError):
 
 # Constraints
 
-class ConstraintError(JsonTableSchemaException):
+class ConstraintError(TableSchemaException):
     def __init__(self, msg=None):
         self.msg = msg or 'The value didn\'t validate against a constraint.'
         super(ConstraintError, self).__init__(msg)
 
 
-class ConstraintNotSupported(JsonTableSchemaException):
+class ConstraintNotSupported(TableSchemaException):
     def __init__(self, msg=None):
         self.msg = msg or 'The field does not support the constraint.'
         super(ConstraintNotSupported, self).__init__(msg)
@@ -145,13 +145,13 @@ class ConstraintNotSupported(JsonTableSchemaException):
 
 # Storage
 
-class StorageError(JsonTableSchemaException):
+class StorageError(TableSchemaException):
     pass
 
 
 # Deprecated
 
-class ConversionError(JsonTableSchemaException):
+class ConversionError(TableSchemaException):
     def __init__(self, msg=None):
         self.msg = msg or 'Error converting a row or field.'
         super(ConversionError, self).__init__(msg)

@@ -1,12 +1,12 @@
-# pip install sqlalchemy jsontableschema-sql
+# pip install sqlalchemy tableschema-sql
 import sqlalchemy as sa
-from jsontableschema import Table
+from tableschema import Table
 
 # Create SQL database
 db = sa.create_engine('sqlite://')
 
 # Data from WEB, schema from MEMORY
-SOURCE = 'https://raw.githubusercontent.com/okfn/jsontableschema-py/master/data/data_infer.csv'
+SOURCE = 'https://raw.githubusercontent.com/frictionlessdata/tableschema-py/master/data/data_infer.csv'
 SCHEMA = {'fields': [{'name': 'id', 'type': 'integer'}, {'name': 'age', 'type': 'integer'}, {'name': 'name', 'type': 'string'}] }
 
 # Open from WEB save to SQL database

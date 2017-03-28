@@ -5,12 +5,12 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 
 from mock import Mock, patch
-from jsontableschema import Schema, Table
+from tableschema import Schema, Table
 
 
 # Constants
 
-BASE_URL = 'https://raw.githubusercontent.com/okfn/jsontableschema-py/master/%s'
+BASE_URL = 'https://raw.githubusercontent.com/frictionlessdata/tableschema-py/master/%s'
 DATA_MIN = [('key', 'value'), ('one', '1'), ('two', '2')]
 SCHEMA_MIN = {'fields': [{'name': 'key'}, {'name': 'value', 'type': 'integer'}]}
 SCHEMA_CSV = {
@@ -32,7 +32,7 @@ def test_schema_infer_tabulator():
     assert Table('data/data_infer.csv').schema.descriptor == SCHEMA_CSV
 
 
-@patch('jsontableschema.table.import_module')
+@patch('tableschema.table.import_module')
 def test_schema_infer_storage(import_module):
     # Mocks
     import_module.return_value = Mock(Storage=Mock(return_value=Mock(
@@ -83,7 +83,7 @@ def test_read_limit():
     assert actual == expect
 
 
-@patch('jsontableschema.table.import_module')
+@patch('tableschema.table.import_module')
 def test_read_storage(import_module):
     # Mocks
     import_module.return_value = Mock(Storage=Mock(return_value=Mock(

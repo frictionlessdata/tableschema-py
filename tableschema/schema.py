@@ -17,7 +17,7 @@ from . import exceptions
 # Module API
 
 class Schema(object):
-    """JSON Table Schema schema representation.
+    """Table Schema schema representation.
 
     Raises:
         exceptions.InvalidJSONError

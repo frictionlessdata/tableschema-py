@@ -1,9 +1,9 @@
-# pip install jsontableschema-pandas
+# pip install tableschema-pandas
 from pprint import pprint
-from jsontableschema import Table
+from tableschema import Table
 
 # Data source
-SOURCE = 'https://raw.githubusercontent.com/okfn/jsontableschema-py/master/data/data_infer.csv'
+SOURCE = 'https://raw.githubusercontent.com/frictionlessdata/tableschema-py/master/data/data_infer.csv'
 
 # Data processor
 def skip_under_30(erows):

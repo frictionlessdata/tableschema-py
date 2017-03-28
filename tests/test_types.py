@@ -8,7 +8,7 @@ import isodate
 import pytest
 from datetime import datetime, date, time, timedelta
 from decimal import Decimal
-from jsontableschema import types, exceptions
+from tableschema import types, exceptions
 from . import base
 
 

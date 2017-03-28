@@ -18,7 +18,7 @@ def read(*paths):
 
 
 # Prepare
-PACKAGE = 'jsontableschema'
+PACKAGE = 'tableschema'
 NAME = PACKAGE.replace('_', '-')
 INSTALL_REQUIRES = [
     'click>=3.3,<7.0a',
@@ -51,21 +51,21 @@ setup(
     extras_require={'develop': TESTS_REQUIRE},
     entry_points={
         'console_scripts': [
-            'jsontableschema = jsontableschema.cli:main',
+            'tableschema = tableschema.cli:main',
         ]
     },
     zip_safe=False,
     long_description=README,
-    description='A utility library for working with JSON Table Schema in Python',
+    description='A utility library for working with Table Schema in Python',
     author='Open Knowledge Foundation',
     author_email='info@okfn.org',
-    url='https://github.com/frictionlessdata/jsontableschema-py',
+    url='https://github.com/frictionlessdata/tableschema-py',
     license='MIT',
     keywords=[
         'frictionless data',
         'open data',
         'json schema',
-        'json table schema',
+        'table schema',
         'data package',
         'tabular data package',
     ],

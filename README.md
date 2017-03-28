@@ -1,36 +1,44 @@
-# JSON Table Schema
+# tableschema-py
 
-[![Travis](https://travis-ci.org/frictionlessdata/jsontableschema-py.svg?branch=master)](https://travis-ci.org/frictionlessdata/jsontableschema-py)
-[![Coveralls](http://img.shields.io/coveralls/frictionlessdata/jsontableschema-py.svg?branch=master)](https://coveralls.io/r/frictionlessdata/jsontableschema-py?branch=master)
-[![PyPi](https://img.shields.io/pypi/v/jsontableschema.svg)](https://pypi.python.org/pypi/jsontableschema)
+[![Travis](https://travis-ci.org/frictionlessdata/tableschema-py.svg?branch=master)](https://travis-ci.org/frictionlessdata/tableschema-py)
+[![Coveralls](http://img.shields.io/coveralls/frictionlessdata/tableschema-py.svg?branch=master)](https://coveralls.io/r/frictionlessdata/tableschema-py?branch=master)
+[![PyPi](https://img.shields.io/pypi/v/tableschema.svg)](https://pypi.python.org/pypi/tableschema)
 [![SemVer](https://img.shields.io/badge/versions-SemVer-brightgreen.svg)](http://semver.org/)
 [![Gitter](https://img.shields.io/gitter/room/frictionlessdata/chat.svg)](https://gitter.im/frictionlessdata/chat)
 
-A utility library for working with [JSON Table Schema](http://dataprotocols.org/json-table-schema/) in Python.
-
-> With v0.7 renewed API has been introduced in backward-compatibility manner. Documentation for deprecated API could be found [here](https://github.com/frictionlessdata/jsontableschema-py/tree/0.6.5#json-table-schema). Deprecated API will be removed with v1 release.
+A library for working with [Table Schema](http://specs.frictionlessdata.io/table-schema/) in Python.
 
 ## Features
 
-- `Table` to work with data tables described by JSON Table Schema
-- `Schema` representing JSON Table Schema
-- `Field` representing JSON Table Schema field
-- `validate` to validate JSON Table Schema
-- `infer` to infer JSON Table Schema from data
+- `Table` to work with data tables described by Table Schema
+- `Schema` representing Table Schema
+- `Field` representing Table Schema field
+- `validate` to validate Table Schema
+- `infer` to infer Table Schema from data
 - built-in command-line interface to validate and infer schemas
 - storage/plugins system to connect tables to different storage backends like SQL Database
+
+## Important Notes
+
+- There are BREAKING changes in `v1` (pre-release):
+  - package on PyPi has been renamed to `tableschema`
+  - other changes could be introduced before final release
+- There are deprecating changes in `v0.7`:
+  - renewed API has been introduced in non breaking manner
+  - documentation for deprecated API could be found [here](https://github.com/frictionlessdata/tableschema-py/tree/0.6.5#json-table-schema)
 
 ## Gettings Started
 
 ### Installation
 
 ```bash
-pip install jsontableschema
+$ pip install jsontableschema # v0.10
+$ pip install tableschema --pre # v1.0-alpha
 ```
 ### Example
 
 ```python
-from jsontableschema import Table
+from tableschema import Table
 
 # Create table
 table = Table('path.csv', schema='schema.json')
@@ -45,16 +53,16 @@ for keyed_row in table.iter(keyed=True):
 
 ### Table
 
-Table represents data described by JSON Table Schema:
+Table represents data described by Table Schema:
 
 ```python
-# pip install sqlalchemy jsontableschema-sql
+# pip install sqlalchemy tableschema-sql
 import sqlalchemy as sa
 from pprint import pprint
-from jsontableschema import Table
+from tableschema import Table
 
 # Data source
-SOURCE = 'https://raw.githubusercontent.com/okfn/jsontableschema-py/master/data/data_infer.csv'
+SOURCE = 'https://raw.githubusercontent.com/frictionlessdata/tableschema-py/master/data/data_infer.csv'
 
 # Create SQL database
 db = sa.create_engine('sqlite://')
@@ -82,10 +90,10 @@ pprint(Table('tmp/persons.csv').read(keyed=True))
 
 ### Schema
 
-A model of a schema with helpful methods for working with the schema and supported data. Schema instances can be initialized with a schema source as a filepath or url to a JSON file, or a Python dict. The schema is initially validated (see [validate](#validate) below), and will raise an exception if not a valid JSON Table Schema.
+A model of a schema with helpful methods for working with the schema and supported data. Schema instances can be initialized with a schema source as a filepath or url to a JSON file, or a Python dict. The schema is initially validated (see [validate](#validate) below), and will raise an exception if not a valid Table Schema.
 
 ```python
-from jsontableschema import Schema
+from tableschema import Schema
 
 # Init schema
 schema = Schema('path.json')
@@ -111,7 +119,7 @@ Where the option `no_fail_fast` is given, it will collect all errors it encouter
 ### Field
 
 ```python
-from jsontableschemal import Field
+from tableschemal import Field
 
 # Init field
 field = Field({'type': 'number'})
@@ -128,20 +136,20 @@ Casting a value that doesn't meet the constraints will raise a `ConstraintError`
 
 ### validate
 
-Given a schema as JSON file, url to JSON file, or a Python dict, `validate` returns `True` for a valid JSON Table Schema, or raises an exception, `SchemaValidationError`. It validates only **schema**, not data against schema!
+Given a schema as JSON file, url to JSON file, or a Python dict, `validate` returns `True` for a valid Table Schema, or raises an exception, `SchemaValidationError`. It validates only **schema**, not data against schema!
 
 ```python
 import io
 import json
 
-from jsontableschema import validate
+from tableschema import validate
 
 with io.open('schema_to_validate.json') as stream:
     descriptor = json.load(stream)
 
 try:
-    jsontableschema.validate(descriptor)
-except jsontableschema.exceptions.SchemaValidationError as exception:
+    tableschema.validate(descriptor)
+except tableschema.exceptions.SchemaValidationError as exception:
    # handle error
 
 ```
@@ -150,15 +158,15 @@ It may be useful to report multiple errors when validating a schema. This can be
 
 ```python
 try:
-    jsontableschema.validate(descriptor, no_fail_fast=True)
-except jsontableschema.exceptions.MultipleInvalid as exception:
+    tableschema.validate(descriptor, no_fail_fast=True)
+except tableschema.exceptions.MultipleInvalid as exception:
     for error in exception.errors:
         # handle error
 ```
 
 ### infer
 
-Given headers and data, `infer` will return a JSON Table Schema as a Python dict based on the data values. Given the data file, data_to_infer.csv:
+Given headers and data, `infer` will return a Table Schema as a Python dict based on the data values. Given the data file, data_to_infer.csv:
 
 ```
 id,age,name
@@ -174,7 +182,7 @@ Call `infer` with headers and values from the datafile:
 import io
 import csv
 
-from jsontableschema import infer
+from tableschema import infer
 
 filepath = 'data_to_infer.csv'
 with io.open(filepath) as stream:
@@ -218,18 +226,18 @@ The number of rows used by `infer` can be limited with the `row_limit` argument.
 
 > It's a provisional API excluded from SemVer. If you use it as a part of other program please pin concrete `goodtables` version to your requirements file.
 
-JSON Table Schema features a CLI called `jsontableschema`. This CLI exposes the `infer` and `validate` functions for command line use.
+Table Schema features a CLI called `tableschema`. This CLI exposes the `infer` and `validate` functions for command line use.
 
 Example of `validate` usage:
 
 ```
-$ jsontableschema validate path/to-schema.json
+$ tableschema validate path/to-schema.json
 ```
 
 Example of `infer` usage:
 
 ```
-$ jsontableschema infer path/to/data.csv
+$ tableschema infer path/to/data.csv
 ```
 
 The response is a schema as JSON. The optional argument `--encoding` allows a character encoding to be specified for the data file. The default is utf-8.
@@ -240,24 +248,24 @@ The library includes interface declaration to implement tabular `Storage`:
 
 ![Storage](data/storage.png)
 
-An implementor should follow `jsontableschema.Storage` interface to write his
+An implementor should follow `tableschema.Storage` interface to write his
 own storage backend. This backend could be used with `Table` class. See `plugins`
 system below to know how to integrate custom storage plugin.
 
 ### plugins
 
-JSON Table Schema has a plugin system.  Any package with the name like `jsontableschema_<name>` could be imported as:
+Table Schema has a plugin system.  Any package with the name like `tableschema_<name>` could be imported as:
 
 ```python
-from jsontableschema.plugins import <name>
+from tableschema.plugins import <name>
 ```
 
 If a plugin is not installed `ImportError` will be raised with a message describing how to install the plugin.
 
 A list of officially supported plugins:
-- BigQuery Storage - https://github.com/frictionlessdata/jsontableschema-bigquery-py
-- Pandas Storage - https://github.com/frictionlessdata/jsontableschema-pandas-py
-- SQL Storage - https://github.com/frictionlessdata/jsontableschema-sql-py
+- BigQuery Storage - https://github.com/frictionlessdata/tableschema-bigquery-py
+- Pandas Storage - https://github.com/frictionlessdata/tableschema-pandas-py
+- SQL Storage - https://github.com/frictionlessdata/tableschema-sql-py
 
 ## API Reference
 
@@ -307,8 +315,8 @@ plugins
 
 ### Detailed
 
-- [Docstrings](https://github.com/frictionlessdata/jsontableschema-py/tree/master/jsontableschema)
-- [Changelog](https://github.com/frictionlessdata/jsontableschema-py/commits/master)
+- [Docstrings](https://github.com/frictionlessdata/tableschema-py/tree/master/tableschema)
+- [Changelog](https://github.com/frictionlessdata/tableschema-py/commits/master)
 
 ## Contributing
 

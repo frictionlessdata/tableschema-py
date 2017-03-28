@@ -1,7 +1,7 @@
-from jsontableschema import Table
+from tableschema import Table
 
 # Data from WEB, schema from MEMORY
-SOURCE = 'https://raw.githubusercontent.com/okfn/jsontableschema-py/master/data/data_infer.csv'
+SOURCE = 'https://raw.githubusercontent.com/frictionlessdata/tableschema-py/master/data/data_infer.csv'
 SCHEMA = {'fields': [{'name': 'id', 'type': 'integer'}, {'name': 'age', 'type': 'integer'}, {'name': 'name', 'type': 'string'}] }
 
 # If schema is not passed it will be inferred
