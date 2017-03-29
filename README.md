@@ -32,7 +32,7 @@ A library for working with [Table Schema](http://specs.frictionlessdata.io/table
   - documentation for previous release (`v0.10`) could be found [here](https://github.com/frictionlessdata/tableschema-py/tree/v0.10.0)
 - There are deprecating changes in `v0.7`:
   - renewed API has been introduced in non breaking manner
-  - documentation for deprecated API could be found [here](https://github.com/frictionlessdata/tableschema-py/tree/0.6.5#json-table-schema)
+  - documentation for deprecated API could be found [here](https://github.com/frictionlessdata/tableschema-py/tree/0.6.5)
 
 ## Gettings Started
 
@@ -135,7 +135,7 @@ field = Field({'type': 'number'})
 field.cast_value('12345') # -> 12345
 ```
 
-Data values can be cast to native Python objects with a Field instance. Type instances can be initialized with [field descriptors](http://dataprotocols.org/json-table-schema/#field-descriptors). This allows formats and constraints to be defined.
+Data values can be cast to native Python objects with a Field instance. Type instances can be initialized with [field descriptors](https://specs.frictionlessdata.io/table-schema/). This allows formats and constraints to be defined.
 
 Casting a value will check the value is of the expected type, is in the correct format, and complies with any constraints imposed by a schema. E.g. a date value (in ISO 8601 format) can be cast with a DateType instance. Values that can't be cast will raise an `InvalidCastError` exception.
 
