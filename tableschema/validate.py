@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 
 import os
 import json
-import warnings
 import jsonschema
 from jsonschema.validators import validator_for
 from . import compat, exceptions
@@ -44,18 +43,6 @@ def validate(descriptor, no_fail_fast=False):
             raise exceptions.MultipleInvalid(errors=errors)
 
     return True
-
-
-# Deprecated
-class Validator(object):
-    @staticmethod
-    def iter_errors(schema):
-        # DEPRECATED [v0.7-v1)
-        message = 'validator is deprecated [v0.7-v1)'
-        warnings.warn(message, UserWarning)
-        validator = _TableSchemaValidator(_json_table_schema)
-        return validator.iter_errors(schema)
-validator = Validator()
 
 
 # Internal

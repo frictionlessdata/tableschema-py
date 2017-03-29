@@ -160,8 +160,10 @@ class TestValidateSchema(base.BaseTestCase):
                                 'schema_invalid_pk_is_wrong_type.json')
         with io.open(filepath) as stream:
             schema = json.load(stream)
-            errors = [i for i in tableschema.validator.iter_errors(schema)]
-        self.assertEquals(2, len(errors))
+            try:
+                errors = [i for i in tableschema.validate(schema, no_fail_fast=True)]
+            except exceptions.MultipleInvalid as error:
+                self.assertEquals(2, len(error.errors))
 
     def test_schema_multiple_errors_no_fail_fast_true(self):
         filepath = os.path.join(self.data_dir,
@@ -172,21 +174,3 @@ class TestValidateSchema(base.BaseTestCase):
                 tableschema.validate(schema, no_fail_fast=True)
             except exceptions.MultipleInvalid as exception:
                 self.assertEquals(5, len(exception.errors))
-
-
-class TestValidator(base.BaseTestCase):
-    def test_schema_multiple_errors(self):
-        filepath = os.path.join(self.data_dir,
-                                'schema_invalid_multiple_errors.json')
-        with io.open(filepath) as stream:
-            schema = json.load(stream)
-            errors = [i for i in tableschema.validator.iter_errors(schema)]
-        self.assertEquals(5, len(errors))
-
-    def test_schema_no_fields(self):
-        filepath = os.path.join(self.data_dir,
-                                'schema_invalid_pk_no_fields.json')
-        with io.open(filepath) as stream:
-            schema = json.load(stream)
-            errors = [i for i in tableschema.validator.iter_errors(schema)]
-        self.assertEquals(3, len(errors))
