@@ -18,11 +18,11 @@ class TestInferSchema(base.BaseTestCase):
             headers = stream.readline().rstrip('\n').split(',')
             values = tableschema.compat.csv_reader(stream)
             schema = tableschema.infer(headers, values)
-        schema_model = tableschema.model.SchemaModel(schema)
+        schema_model = tableschema.Schema(schema)
 
-        self.assertEqual(schema_model.get_field('id')['type'], 'integer')
-        self.assertEqual(schema_model.get_field('age')['type'], 'integer')
-        self.assertEqual(schema_model.get_field('name')['type'], 'string')
+        self.assertEqual(schema_model.get_field('id').type, 'integer')
+        self.assertEqual(schema_model.get_field('age').type, 'integer')
+        self.assertEqual(schema_model.get_field('name').type, 'string')
 
     def test_infer_schema_utf8(self):
         filepath = os.path.join(self.data_dir, 'data_infer_utf8.csv')
@@ -30,11 +30,11 @@ class TestInferSchema(base.BaseTestCase):
             headers = stream.readline().rstrip('\n').split(',')
             values = tableschema.compat.csv_reader(stream)
             schema = tableschema.infer(headers, values)
-        schema_model = tableschema.model.SchemaModel(schema)
+        schema_model = tableschema.Schema(schema)
 
-        self.assertEqual(schema_model.get_field('id')['type'], 'integer')
-        self.assertEqual(schema_model.get_field('age')['type'], 'integer')
-        self.assertEqual(schema_model.get_field('name')['type'], 'string')
+        self.assertEqual(schema_model.get_field('id').type, 'integer')
+        self.assertEqual(schema_model.get_field('age').type, 'integer')
+        self.assertEqual(schema_model.get_field('name').type, 'string')
 
     def test_infer_schema_row_limit(self):
         filepath = os.path.join(self.data_dir, 'data_infer_row_limit.csv')
@@ -42,11 +42,11 @@ class TestInferSchema(base.BaseTestCase):
             headers = stream.readline().rstrip('\n').split(',')
             values = tableschema.compat.csv_reader(stream)
             schema = tableschema.infer(headers, values, row_limit=4)
-        schema_model = tableschema.model.SchemaModel(schema)
+        schema_model = tableschema.Schema(schema)
 
-        self.assertEqual(schema_model.get_field('id')['type'], 'integer')
-        self.assertEqual(schema_model.get_field('age')['type'], 'integer')
-        self.assertEqual(schema_model.get_field('name')['type'], 'string')
+        self.assertEqual(schema_model.get_field('id').type, 'integer')
+        self.assertEqual(schema_model.get_field('age').type, 'integer')
+        self.assertEqual(schema_model.get_field('name').type, 'string')
 
     def test_infer_schema_primary_key_string(self):
         primary_key = 'id'
@@ -55,9 +55,9 @@ class TestInferSchema(base.BaseTestCase):
             headers = stream.readline().rstrip('\n').split(',')
             values = tableschema.compat.csv_reader(stream)
             schema = tableschema.infer(headers, values, primary_key=primary_key)
-        schema_model = tableschema.model.SchemaModel(schema)
+        schema_model = tableschema.Schema(schema)
 
-        self.assertTrue(schema_model.primaryKey, primary_key)
+        self.assertTrue(schema_model.primary_key, primary_key)
 
     def test_infer_schema_primary_key_list(self):
         primary_key = ['id', 'age']
@@ -66,9 +66,9 @@ class TestInferSchema(base.BaseTestCase):
             headers = stream.readline().rstrip('\n').split(',')
             values = tableschema.compat.csv_reader(stream)
             schema = tableschema.infer(headers, values, primary_key=primary_key)
-        schema_model = tableschema.model.SchemaModel(schema)
+        schema_model = tableschema.Schema(schema)
 
-        self.assertTrue(schema_model.primaryKey, primary_key)
+        self.assertTrue(schema_model.primary_key, primary_key)
 
     def test_infer_explicit_false(self):
         filepath = os.path.join(self.data_dir, 'data_infer.csv')

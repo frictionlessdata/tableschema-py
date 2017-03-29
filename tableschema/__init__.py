@@ -12,6 +12,3 @@ from .validate import validate
 from .infer import infer
 from . import exceptions
 from . import types
-
-# Deprecated
-from . import model

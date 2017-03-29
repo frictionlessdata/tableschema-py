@@ -7,8 +7,7 @@ import os
 import ast
 from click.testing import CliRunner
 from . import base
-from tableschema import cli
-from tableschema import model
+from tableschema import Schema, cli
 os.environ['LC_ALL'] = 'en_US.UTF-8'
 
 
@@ -21,11 +20,11 @@ class TestCliInfer(base.BaseTestCase):
         # output is a string, evaluate to a dict
         schema = ast.literal_eval(result.output)
 
-        schema_model = model.SchemaModel(schema)
+        schema_model = Schema(schema)
 
-        self.assertEqual(schema_model.get_field('id')['type'], 'integer')
-        self.assertEqual(schema_model.get_field('age')['type'], 'integer')
-        self.assertEqual(schema_model.get_field('name')['type'], 'string')
+        self.assertEqual(schema_model.get_field('id').type, 'integer')
+        self.assertEqual(schema_model.get_field('age').type, 'integer')
+        self.assertEqual(schema_model.get_field('name').type, 'string')
 
     def test_infer_schema_utf8(self):
         '''UTF8 encoded data containing non-ascii characters.'''
@@ -34,11 +33,11 @@ class TestCliInfer(base.BaseTestCase):
         # output is a string, evaluate to a dict
         schema = ast.literal_eval(result.output)
 
-        schema_model = model.SchemaModel(schema)
+        schema_model = Schema(schema)
 
-        self.assertEqual(schema_model.get_field('id')['type'], 'integer')
-        self.assertEqual(schema_model.get_field('age')['type'], 'integer')
-        self.assertEqual(schema_model.get_field('name')['type'], 'string')
+        self.assertEqual(schema_model.get_field('id').type, 'integer')
+        self.assertEqual(schema_model.get_field('age').type, 'integer')
+        self.assertEqual(schema_model.get_field('name').type, 'string')
 
     def test_infer_schema_greek(self):
         '''iso-8859-7 (greek) encoded data containing non-ascii characters.'''
@@ -50,11 +49,11 @@ class TestCliInfer(base.BaseTestCase):
         # output is a string, evaluate to a dict
         schema = ast.literal_eval(result.output)
 
-        schema_model = model.SchemaModel(schema)
+        schema_model = Schema(schema)
 
-        self.assertEqual(schema_model.get_field('id')['type'], 'integer')
-        self.assertEqual(schema_model.get_field('age')['type'], 'integer')
-        self.assertEqual(schema_model.get_field('name')['type'], 'string')
+        self.assertEqual(schema_model.get_field('id').type, 'integer')
+        self.assertEqual(schema_model.get_field('age').type, 'integer')
+        self.assertEqual(schema_model.get_field('name').type, 'string')
 
     def test_infer_schema_greek_no_encoding_defined(self):
         '''iso-8859-7 (greek) encoded data containing non-ascii characters,
