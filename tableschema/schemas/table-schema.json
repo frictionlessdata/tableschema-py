@@ -78,7 +78,7 @@
                   },
                   "unique": {
                     "type": "boolean",
-                    "description": "When true, each value for the property `MUST` be unique."
+                    "description": "When `true`, each value for the property `MUST` be unique."
                   },
                   "pattern": {
                     "type": "string",
@@ -116,7 +116,7 @@
             "type": "object",
             "title": "Number Field",
             "description": "The field contains numbers of any kind including decimals.",
-            "context": "The lexical formatting follows that of decimal in [XMLSchema][xsd-decimal]: a non-empty finite-length sequence of decimal digits separated by a period as a decimal indicator. An optional leading sign is allowed. If the sign is omitted, '+' is assumed. Leading and trailing zeroes are optional. If the fractional part is zero, the period and following zero(es) can be omitted. For example: '-1.23', '12678967.543233', '+100000.00', '210'.\n\nThe following special string values are permitted (case need not be respected):\n  - NaN: not a number\n  - INF: positive infinity\n  - -INF: negative infinity\n\nA number MAY also have a trailing:\n  - exponent: this MUST consist of an E followed by an optional + or - sign followed by one or more decimal digits (0-9)\n  - percentage: the percentage sign: `%`. In conversion percentages should be divided by 100.\n\nIf both exponent and percentages are present the percentage MUST follow the exponent e.g. '53E10%' (equals 5.3).",
+            "context": "The lexical formatting follows that of decimal in [XMLSchema](https://www.w3.org/TR/xmlschema-2/#decimal): a non-empty finite-length sequence of decimal digits separated by a period as a decimal indicator. An optional leading sign is allowed. If the sign is omitted, '+' is assumed. Leading and trailing zeroes are optional. If the fractional part is zero, the period and following zero(es) can be omitted. For example: '-1.23', '12678967.543233', '+100000.00', '210'.\n\nThe following special string values are permitted (case does not need to be respected):\n  - NaN: not a number\n  - INF: positive infinity\n  - -INF: negative infinity\n\nA number `MAY` also have a trailing:\n  - exponent: this `MUST` consist of an E followed by an optional + or - sign followed by one or more decimal digits (0-9)\n  - percentage: the percentage sign: `%`. In conversion percentages should be divided by 100.\n\nIf both exponent and percentages are present the percentage `MUST` follow the exponent e.g. '53E10%' (equals 5.3).",
             "required": [
               "name"
             ],
@@ -162,11 +162,11 @@
               },
               "decimalChar": {
                 "type": "string",
-                "description": "A string whose value is used to represent a decimal point within the number. The default value is '.'."
+                "description": "A string whose value is used to represent a decimal point within the number. The default value is `.`."
               },
               "groupChar": {
                 "type": "string",
-                "description": "A string whose value is used to group digits within the number. The default value is null. A common value is ',' e.g. '100,000'."
+                "description": "A string whose value is used to group digits within the number. The default value is `null`. A common value is `,` e.g. '100,000'."
               },
               "currency": {
                 "type": "string",
@@ -184,7 +184,7 @@
                   },
                   "unique": {
                     "type": "boolean",
-                    "description": "When true, each value for the property `MUST` be unique."
+                    "description": "When `true`, each value for the property `MUST` be unique."
                   },
                   "pattern": {
                     "type": "string",
@@ -200,12 +200,12 @@
                   "minimum": {
                     "type": "string",
                     "description": "A minimum value for the property, context specific for the property type, and conforming with the format for the property.",
-                    "context": "This is different to minLength which checks the number of items in the value. A minimum value constraint checks whether a field value is greater than or equal to the specified value."
+                    "context": "This is different to `minLength`, which checks the number of items in the value. A `minimum` value constraint checks whether a field value is greater than or equal to the specified value."
                   },
                   "maximum": {
                     "type": "string",
-                    "description": "A minimum value for the property, context specific for the property type, and conforming with the format for the property.",
-                    "context": "This is different to minLength which checks the number of items in the value. A minimum value constraint checks whether a field value is greater than or equal to the specified value."
+                    "description": "A maximum value for the property, context specific for the property type, and conforming with the format for the property.",
+                    "context": "This is different to `maxLength`, which checks the number of items in the value. A `maximum` value constraint checks whether a field value is smaller than or equal to the specified value."
                   }
                 }
               },
@@ -280,7 +280,7 @@
                   },
                   "unique": {
                     "type": "boolean",
-                    "description": "When true, each value for the property `MUST` be unique."
+                    "description": "When `true`, each value for the property `MUST` be unique."
                   },
                   "pattern": {
                     "type": "string",
@@ -296,12 +296,12 @@
                   "minimum": {
                     "type": "string",
                     "description": "A minimum value for the property, context specific for the property type, and conforming with the format for the property.",
-                    "context": "This is different to minLength which checks the number of items in the value. A minimum value constraint checks whether a field value is greater than or equal to the specified value."
+                    "context": "This is different to `minLength`, which checks the number of items in the value. A `minimum` value constraint checks whether a field value is greater than or equal to the specified value."
                   },
                   "maximum": {
                     "type": "string",
-                    "description": "A minimum value for the property, context specific for the property type, and conforming with the format for the property.",
-                    "context": "This is different to minLength which checks the number of items in the value. A minimum value constraint checks whether a field value is greater than or equal to the specified value."
+                    "description": "A maximum value for the property, context specific for the property type, and conforming with the format for the property.",
+                    "context": "This is different to `maxLength`, which checks the number of items in the value. A `maximum` value constraint checks whether a field value is smaller than or equal to the specified value."
                   }
                 }
               },
@@ -376,7 +376,7 @@
                   },
                   "unique": {
                     "type": "boolean",
-                    "description": "When true, each value for the property `MUST` be unique."
+                    "description": "When `true`, each value for the property `MUST` be unique."
                   },
                   "enum": {
                     "type": "array",
@@ -387,12 +387,12 @@
                   "minimum": {
                     "type": "string",
                     "description": "A minimum value for the property, context specific for the property type, and conforming with the format for the property.",
-                    "context": "This is different to minLength which checks the number of items in the value. A minimum value constraint checks whether a field value is greater than or equal to the specified value."
+                    "context": "This is different to `minLength`, which checks the number of items in the value. A `minimum` value constraint checks whether a field value is greater than or equal to the specified value."
                   },
                   "maximum": {
                     "type": "string",
-                    "description": "A minimum value for the property, context specific for the property type, and conforming with the format for the property.",
-                    "context": "This is different to minLength which checks the number of items in the value. A minimum value constraint checks whether a field value is greater than or equal to the specified value."
+                    "description": "A maximum value for the property, context specific for the property type, and conforming with the format for the property.",
+                    "context": "This is different to `maxLength`, which checks the number of items in the value. A `maximum` value constraint checks whether a field value is smaller than or equal to the specified value."
                   }
                 }
               },
@@ -469,7 +469,7 @@
                   },
                   "unique": {
                     "type": "boolean",
-                    "description": "When true, each value for the property `MUST` be unique."
+                    "description": "When `true`, each value for the property `MUST` be unique."
                   },
                   "enum": {
                     "type": "array",
@@ -480,12 +480,12 @@
                   "minimum": {
                     "type": "string",
                     "description": "A minimum value for the property, context specific for the property type, and conforming with the format for the property.",
-                    "context": "This is different to minLength which checks the number of items in the value. A minimum value constraint checks whether a field value is greater than or equal to the specified value."
+                    "context": "This is different to `minLength`, which checks the number of items in the value. A `minimum` value constraint checks whether a field value is greater than or equal to the specified value."
                   },
                   "maximum": {
                     "type": "string",
-                    "description": "A minimum value for the property, context specific for the property type, and conforming with the format for the property.",
-                    "context": "This is different to minLength which checks the number of items in the value. A minimum value constraint checks whether a field value is greater than or equal to the specified value."
+                    "description": "A maximum value for the property, context specific for the property type, and conforming with the format for the property.",
+                    "context": "This is different to `maxLength`, which checks the number of items in the value. A `maximum` value constraint checks whether a field value is smaller than or equal to the specified value."
                   }
                 }
               },
@@ -561,7 +561,7 @@
                   },
                   "unique": {
                     "type": "boolean",
-                    "description": "When true, each value for the property `MUST` be unique."
+                    "description": "When `true`, each value for the property `MUST` be unique."
                   },
                   "enum": {
                     "type": "array",
@@ -572,12 +572,12 @@
                   "minimum": {
                     "type": "string",
                     "description": "A minimum value for the property, context specific for the property type, and conforming with the format for the property.",
-                    "context": "This is different to minLength which checks the number of items in the value. A minimum value constraint checks whether a field value is greater than or equal to the specified value."
+                    "context": "This is different to `minLength`, which checks the number of items in the value. A `minimum` value constraint checks whether a field value is greater than or equal to the specified value."
                   },
                   "maximum": {
                     "type": "string",
-                    "description": "A minimum value for the property, context specific for the property type, and conforming with the format for the property.",
-                    "context": "This is different to minLength which checks the number of items in the value. A minimum value constraint checks whether a field value is greater than or equal to the specified value."
+                    "description": "A maximum value for the property, context specific for the property type, and conforming with the format for the property.",
+                    "context": "This is different to `maxLength`, which checks the number of items in the value. A `maximum` value constraint checks whether a field value is smaller than or equal to the specified value."
                   }
                 }
               },
@@ -651,7 +651,7 @@
                   },
                   "unique": {
                     "type": "boolean",
-                    "description": "When true, each value for the property `MUST` be unique."
+                    "description": "When `true`, each value for the property `MUST` be unique."
                   },
                   "enum": {
                     "type": "array",
@@ -662,12 +662,12 @@
                   "minimum": {
                     "type": "string",
                     "description": "A minimum value for the property, context specific for the property type, and conforming with the format for the property.",
-                    "context": "This is different to minLength which checks the number of items in the value. A minimum value constraint checks whether a field value is greater than or equal to the specified value."
+                    "context": "This is different to `minLength`, which checks the number of items in the value. A `minimum` value constraint checks whether a field value is greater than or equal to the specified value."
                   },
                   "maximum": {
                     "type": "string",
-                    "description": "A minimum value for the property, context specific for the property type, and conforming with the format for the property.",
-                    "context": "This is different to minLength which checks the number of items in the value. A minimum value constraint checks whether a field value is greater than or equal to the specified value."
+                    "description": "A maximum value for the property, context specific for the property type, and conforming with the format for the property.",
+                    "context": "This is different to `maxLength`, which checks the number of items in the value. A `maximum` value constraint checks whether a field value is smaller than or equal to the specified value."
                   }
                 }
               },
@@ -741,7 +741,7 @@
                   },
                   "unique": {
                     "type": "boolean",
-                    "description": "When true, each value for the property `MUST` be unique."
+                    "description": "When `true`, each value for the property `MUST` be unique."
                   },
                   "pattern": {
                     "type": "string",
@@ -757,12 +757,12 @@
                   "minimum": {
                     "type": "string",
                     "description": "A minimum value for the property, context specific for the property type, and conforming with the format for the property.",
-                    "context": "This is different to minLength which checks the number of items in the value. A minimum value constraint checks whether a field value is greater than or equal to the specified value."
+                    "context": "This is different to `minLength`, which checks the number of items in the value. A `minimum` value constraint checks whether a field value is greater than or equal to the specified value."
                   },
                   "maximum": {
                     "type": "string",
-                    "description": "A minimum value for the property, context specific for the property type, and conforming with the format for the property.",
-                    "context": "This is different to minLength which checks the number of items in the value. A minimum value constraint checks whether a field value is greater than or equal to the specified value."
+                    "description": "A maximum value for the property, context specific for the property type, and conforming with the format for the property.",
+                    "context": "This is different to `maxLength`, which checks the number of items in the value. A `maximum` value constraint checks whether a field value is smaller than or equal to the specified value."
                   }
                 }
               },
@@ -905,7 +905,7 @@
                   },
                   "unique": {
                     "type": "boolean",
-                    "description": "When true, each value for the property `MUST` be unique."
+                    "description": "When `true`, each value for the property `MUST` be unique."
                   },
                   "enum": {
                     "type": "array",
@@ -998,7 +998,7 @@
                   },
                   "unique": {
                     "type": "boolean",
-                    "description": "When true, each value for the property `MUST` be unique."
+                    "description": "When `true`, each value for the property `MUST` be unique."
                   },
                   "enum": {
                     "type": "array",
@@ -1014,8 +1014,8 @@
               }
             },
             "examples": [
-              "{\n  \"name\": \"post_office\",\n  \"type\": \"geojson\"\n}\n",
-              "{\n  \"name\": \"post_office\",\n  \"type\": \"geojson\",\n  \"format\": \"array\"\n}\n"
+              "{\n  \"name\": \"post_office\",\n  \"type\": \"geopoint\"\n}\n",
+              "{\n  \"name\": \"post_office\",\n  \"type\": \"geopoint\",\n  \"format\": \"array\"\n}\n"
             ]
           },
           {
@@ -1080,7 +1080,7 @@
                   },
                   "unique": {
                     "type": "boolean",
-                    "description": "When true, each value for the property `MUST` be unique."
+                    "description": "When `true`, each value for the property `MUST` be unique."
                   },
                   "enum": {
                     "type": "array",
@@ -1168,7 +1168,7 @@
                   },
                   "unique": {
                     "type": "boolean",
-                    "description": "When true, each value for the property `MUST` be unique."
+                    "description": "When `true`, each value for the property `MUST` be unique."
                   },
                   "enum": {
                     "type": "array",
@@ -1256,7 +1256,7 @@
                   },
                   "unique": {
                     "type": "boolean",
-                    "description": "When true, each value for the property `MUST` be unique."
+                    "description": "When `true`, each value for the property `MUST` be unique."
                   },
                   "enum": {
                     "type": "array",
@@ -1267,12 +1267,12 @@
                   "minimum": {
                     "type": "string",
                     "description": "A minimum value for the property, context specific for the property type, and conforming with the format for the property.",
-                    "context": "This is different to minLength which checks the number of items in the value. A minimum value constraint checks whether a field value is greater than or equal to the specified value."
+                    "context": "This is different to `minLength`, which checks the number of items in the value. A `minimum` value constraint checks whether a field value is greater than or equal to the specified value."
                   },
                   "maximum": {
                     "type": "string",
-                    "description": "A minimum value for the property, context specific for the property type, and conforming with the format for the property.",
-                    "context": "This is different to minLength which checks the number of items in the value. A minimum value constraint checks whether a field value is greater than or equal to the specified value."
+                    "description": "A maximum value for the property, context specific for the property type, and conforming with the format for the property.",
+                    "context": "This is different to `maxLength`, which checks the number of items in the value. A `maximum` value constraint checks whether a field value is smaller than or equal to the specified value."
                   }
                 }
               },
@@ -1338,7 +1338,7 @@
                   },
                   "unique": {
                     "type": "boolean",
-                    "description": "When true, each value for the property `MUST` be unique."
+                    "description": "When `true`, each value for the property `MUST` be unique."
                   },
                   "enum": {
                     "type": "array",
