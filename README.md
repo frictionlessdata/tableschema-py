@@ -27,6 +27,7 @@ A library for working with [Table Schema](http://specs.frictionlessdata.io/table
     - `tableschema.Validator` (use `tableschema.validate`)
     - `tableschema.storage` (use `tableschema.Storage`)
     - `tableschema.model` (use `tableschema.Schema`)
+    - `tableschema.types` (use `tableschema.Field`)
   - other changes could be introduced before final release
   - documentation for previous release (`v0.10`) could be found [here](https://github.com/frictionlessdata/tableschema-py/tree/v0.10.0)
 - There are deprecating changes in `v0.7`:
