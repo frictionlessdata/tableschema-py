@@ -50,7 +50,7 @@ def validate(descriptor, no_fail_fast=False):
 # Get schema and validator
 def _load_schema_and_validator():
     basepath = os.path.dirname(__file__)
-    filepath = os.path.join(basepath, 'schemas/json-table-schema.json')
+    filepath = os.path.join(basepath, 'schemas/table-schema.json')
     with open(filepath) as file:
         json_table_schema = json.load(file)
     BaseValidator = validator_for(json_table_schema)
