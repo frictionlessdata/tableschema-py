@@ -151,4 +151,4 @@ class TestValidateSchema(base.BaseTestCase):
             try:
                 tableschema.validate(schema, no_fail_fast=True)
             except exceptions.MultipleInvalid as exception:
-                self.assertEquals(7, len(exception.errors))
+                self.assertEquals(5, len(exception.errors))

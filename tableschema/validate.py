@@ -8,7 +8,7 @@ import os
 import json
 import jsonschema
 from jsonschema.validators import validator_for
-from . import compat, exceptions
+from . import exceptions
 
 
 # Module API
@@ -79,16 +79,12 @@ class _TableSchemaValidator(_BaseValidator):
             field_names = [f['name'] for f in instance['fields']]
         except (TypeError, KeyError):
             field_names = []
+
         # the hash MAY contain a key `primaryKey`
         if isinstance(instance, dict) and instance.get('primaryKey'):
-            # ensure that the primary key matches field names
 
-            if isinstance(instance['primaryKey'], compat.str):
-                if not instance['primaryKey'] in field_names:
-                    yield exceptions.SchemaValidationError(
-                        'A Table Schema primaryKey value must be found in'
-                        ' the schema field names')
-            elif isinstance(instance['primaryKey'], list):
+            # ensure that the primary key matches field names
+            if isinstance(instance['primaryKey'], list):
                 for k in instance['primaryKey']:
                     if k not in field_names:
                         yield exceptions.SchemaValidationError(
@@ -98,32 +94,14 @@ class _TableSchemaValidator(_BaseValidator):
         # the hash may contain a key `foreignKeys`
         if isinstance(instance, dict) and instance.get('foreignKeys'):
             for fk in instance['foreignKeys']:
+
                 # ensure that `foreignKey.fields` match field names
-                if isinstance(fk.get('fields'), compat.str):
-                    if fk.get('fields') not in field_names:
-                        yield exceptions.SchemaValidationError(
-                            'A Table Schema foreignKey.fields value must '
-                            'correspond with field names.')
-                elif isinstance(fk.get('fields', []), list):
+                if isinstance(fk.get('fields', []), list):
                     for field in fk.get('fields'):
                         if field not in field_names:
                             yield exceptions.SchemaValidationError(
                                 'A Table Schema foreignKey.fields value '
                                 'must correspond with field names.')
-
-                # ensure that `foreignKey.reference.fields`
-                # matches outer `fields`
-                if isinstance(fk.get('fields'), compat.str):
-                    if not isinstance(fk['reference']['fields'], compat.str):
-                        yield exceptions.SchemaValidationError(
-                            'A Table Schema foreignKey.reference.fields '
-                            'must match field names.')
-                else:
-                    if isinstance(fk['reference']['fields'], compat.str):
-                        yield exceptions.SchemaValidationError(
-                            'A Table Schema foreignKey.fields cannot '
-                            'be a string when foreignKey.reference.fields.'
-                            'is a string')
                     if not (len(fk.get('fields')) ==
                             len(fk['reference']['fields'])):
                         yield exceptions.SchemaValidationError(
