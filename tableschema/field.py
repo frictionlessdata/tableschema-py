@@ -114,7 +114,7 @@ class Field(object):
                     return False
                 if value is None:
                     return True
-            validator = getattr(self, '_Field__validate_%s' % constraint)
+            validator = getattr(self, '_Field__check_%s' % constraint)
             try:
                 validator(value)
             except exceptions.ConstraintError:
@@ -124,11 +124,11 @@ class Field(object):
 
     # Private
 
-    # Family of validate methods could use cache
+    # Family of check methods could use cache
     # of constraint params to improve performance
 
-    def __validate_required(self, value):
-        """Validate value against required constraint.
+    def __check_required(self, value):
+        """Check value against required constraint.
         """
         missing_values = self.descriptor.get('missingValues', [])
         null_values = self.__type.null_values + missing_values
@@ -138,8 +138,8 @@ class Field(object):
             raise exceptions.ConstraintError(message)
         return True
 
-    def __validate_pattern(self, value):
-        """Validate value against pattern constraint.
+    def __check_pattern(self, value):
+        """Check value against pattern constraint.
         """
         pattern = self.constraints.get('pattern')
         if pattern is not None and isinstance(value, six.string_types):
@@ -151,13 +151,13 @@ class Field(object):
                 raise exceptions.ConstraintError(message)
         return True
 
-    def __validate_unique(self, value):
-        """Validate CAST value against unique constraint.
+    def __check_unique(self, value):
+        """Check CAST value against unique constraint.
         """
         return True
 
-    def __validate_enum(self, value):
-        """Validate CAST value against enum constraint.
+    def __check_enum(self, value):
+        """Check CAST value against enum constraint.
         """
         enum = self.constraints.get('enum')
         if enum is not None:
@@ -168,8 +168,8 @@ class Field(object):
                 raise exceptions.ConstraintError(message)
         return True
 
-    def __validate_minimum(self, value):
-        """Validate CAST value against minimum constraint.
+    def __check_minimum(self, value):
+        """Check CAST value against minimum constraint.
         """
         minimum = self.constraints.get('minimum')
         if minimum is not None:
@@ -180,8 +180,8 @@ class Field(object):
                 raise exceptions.ConstraintError(message)
         return True
 
-    def __validate_maximum(self, value):
-        """Validate CAST value against maximum constraint.
+    def __check_maximum(self, value):
+        """Check CAST value against maximum constraint.
         """
         maximum = self.constraints.get('maximum')
         if maximum is not None:
@@ -192,8 +192,8 @@ class Field(object):
                 raise exceptions.ConstraintError(message)
         return True
 
-    def __validate_minLength(self, value):
-        """Validate CAST value against minLength constraint.
+    def __check_minLength(self, value):
+        """Check CAST value against minLength constraint.
         """
         min_length = self.constraints.get('minLength')
         if min_length is not None:
@@ -203,8 +203,8 @@ class Field(object):
                 raise exceptions.ConstraintError(message)
         return True
 
-    def __validate_maxLength(self, value):
-        """Validate CAST value against maxLength constraint.
+    def __check_maxLength(self, value):
+        """Check CAST value against maxLength constraint.
         """
         max_length = self.constraints.get('maxLength')
         if max_length is not None:
