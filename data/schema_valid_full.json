@@ -4,21 +4,18 @@
             "name": "first_name",
             "title": "First Name",
             "type": "string",
-            "format": "",
             "description": "The first name of the person"
         },
         {
             "name": "last_name",
             "title": "Last Name",
             "type": "string",
-            "format": "",
             "description": "The last name of the person"
         },
         {
             "name": "gender",
             "title": "Gender",
             "type": "string",
-            "format": "",
             "description": "The gender of the person."
         },
         {
@@ -37,34 +34,31 @@
             "name": "employment_start",
             "title": "Employment Start",
             "type": "date",
-            "format": "",
             "description": "The date this person started employment."
         },
         {
             "name": "daily_start",
             "title": "Daily Start",
             "type": "time",
-            "format": "",
             "description": "Usual start time for this person."
         },
         {
             "name": "daily_end",
             "title": "Daily End",
             "type": "time",
-            "format": "",
             "description": "Usual end time for this person."
         },
         {
             "name": "is_management",
             "title": "Is Management",
             "type": "boolean",
-            "format": "",
             "description": "Is this person part of upper management."
         },
         {
             "name": "photo",
             "title": "Photo",
-            "type": "binary",
+            "type": "string",
+            "format": "binary",
             "description": "A photo of this person."
         },
         {
@@ -106,11 +100,10 @@
     ],
     "foreignKeys": [
         {
-            "fields": "position_title",
+            "fields": ["position_title"],
             "reference": {
-                "datapackage": "",
                 "resource": "positions",
-                "fields": "name"
+                "fields": ["name"]
             }
         }
     ]
