@@ -14,7 +14,6 @@ from . import exceptions
 from . import types
 
 # Deprecated
-from .validate import validator
 from .pushpull import push_resource, pull_resource
 from . import model
 from . import storage
