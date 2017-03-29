@@ -32,12 +32,11 @@ def validate(descriptor, no_fail_fast=False):
     # Fail fast
     if not no_fail_fast:
         jsonschema.validate(
-            descriptor, _json_table_schema,
-            cls=_TableSchemaValidator)
+            descriptor, _table_schema, cls=_TableSchemaValidator)
 
     # Multiple errors
     else:
-        validator = _TableSchemaValidator(_json_table_schema)
+        validator = _TableSchemaValidator(_table_schema)
         errors = list(validator.iter_errors(descriptor))
         if errors:
             raise exceptions.MultipleInvalid(errors=errors)
@@ -52,10 +51,10 @@ def _load_schema_and_validator():
     basepath = os.path.dirname(__file__)
     filepath = os.path.join(basepath, 'schemas/table-schema.json')
     with open(filepath) as file:
-        json_table_schema = json.load(file)
-    BaseValidator = validator_for(json_table_schema)
-    return json_table_schema, BaseValidator
-_json_table_schema, _BaseValidator = _load_schema_and_validator()
+        table_schema = json.load(file)
+    BaseValidator = validator_for(table_schema)
+    return table_schema, BaseValidator
+_table_schema, _BaseValidator = _load_schema_and_validator()
 
 
 class _TableSchemaValidator(_BaseValidator):
