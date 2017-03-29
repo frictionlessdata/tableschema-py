@@ -1,4 +1,4 @@
-.PHONY: all install list test version
+.PHONY: all install list schemas test version
 
 
 PACKAGE := $(shell grep '^PACKAGE =' setup.py | cut -d "'" -f2)
@@ -12,6 +12,9 @@ install:
 
 list:
 	@grep '^\.PHONY' Makefile | cut -d' ' -f2- | tr ' ' '\n'
+
+schemas:
+	wget -O tableschema/schemas/table-schema.json https://specs.frictionlessdata.io/schemas/table-schema.json
 
 test:
 	pylama $(PACKAGE)
