@@ -25,8 +25,8 @@ DESCRIPTOR_MAX = {
         {'name': 'name', 'type': 'string'},
         {'name': 'occupation', 'type': 'string'},
     ],
-    'primaryKey': 'id',
-    'foreignKeys': [{'fields': 'name', 'reference': {'resource': 'self', 'fields': 'id'}}],
+    'primaryKey': ['id'],
+    'foreignKeys': [{'fields': ['name'], 'reference': {'resource': '', 'fields': ['id']}}],
 }
 
 
