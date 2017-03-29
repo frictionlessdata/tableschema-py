@@ -14,5 +14,4 @@ from . import exceptions
 from . import types
 
 # Deprecated
-from .pushpull import push_resource, pull_resource
 from . import model
