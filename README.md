@@ -22,6 +22,11 @@ A library for working with [Table Schema](http://specs.frictionlessdata.io/table
 
 - There are BREAKING changes in `v1` (pre-release):
   - package on PyPi has been renamed to `tableschema`
+  - following deprecated API has been removed the package:
+    - `tableschema.push/pull_resource` (use `tableschema.Table`)
+    - `tableschema.Validator` (use `tableschema.validate`)
+    - `tableschema.storage` (use `tableschema.Storage`)
+    - `tableschema.model` (use `tableschema.Schema`)
   - other changes could be introduced before final release
   - documentation for previous release (`v0.10`) could be found [here](https://github.com/frictionlessdata/tableschema-py/tree/v0.10.0)
 - There are deprecating changes in `v0.7`:
