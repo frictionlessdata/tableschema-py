@@ -14,3 +14,4 @@ from .string import cast_string_email
 from .string import cast_string_uuid
 from .string import cast_string_binary
 from .year import cast_year_default
+from .yearmonth import cast_yearmonth_default

@@ -10,16 +10,16 @@ from ..config import ERROR
 
 # Module API
 
-def cast_year_default(value):
+def cast_yearmonth_default(value):
     if not isinstance(value, int):
         if not isinstance(value, six.string_types):
             return ERROR
-        if len(value) != 4:
+        if len(value) not in [1, 2]:
             return ERROR
         try:
             value = int(value)
         except Exception:
             return ERROR
-    if value < 0 or value > 9999:
+    if value < 0 or value > 12:
         return ERROR
     return value
