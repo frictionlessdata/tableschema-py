@@ -21,6 +21,7 @@ def read(*paths):
 PACKAGE = 'tableschema'
 NAME = PACKAGE.replace('_', '-')
 INSTALL_REQUIRES = [
+    'six>=1.9,<2.0a',
     'click>=3.3,<7.0a',
     'requests>=2.5,<3.0a',
     'python-dateutil>=2.4,<3.0a',
