@@ -16,7 +16,7 @@ from tableschema import Schema, exceptions
 # Constants
 
 BASE_URL = 'https://raw.githubusercontent.com/frictionlessdata/tableschema-py/master/%s'
-DESCRIPTOR_MIN = {'fields': [{'name': 'id'}, {'name': 'height'}]}
+DESCRIPTOR_MIN = {'fields': [{'name': 'id'}, {'name': 'height', 'type': 'integer'}]}
 DESCRIPTOR_MAX = {
     'fields': [
         {'name': 'id', 'type': 'string', 'constraints': {'required': True}},
@@ -25,8 +25,8 @@ DESCRIPTOR_MAX = {
         {'name': 'name', 'type': 'string'},
         {'name': 'occupation', 'type': 'string'},
     ],
-    'primaryKey': 'id',
-    'foreignKeys': [{'fields': 'name', 'reference': {'resource': 'self', 'fields': 'id'}}],
+    'primaryKey': ['id'],
+    'foreignKeys': [{'fields': ['name'], 'reference': {'resource': '', 'fields': ['id']}}],
 }
 
 
@@ -34,30 +34,44 @@ DESCRIPTOR_MAX = {
 
 
 def test_init():
-    # Valid
     assert Schema(DESCRIPTOR_MIN)
     assert Schema(DESCRIPTOR_MAX)
     assert Schema('data/schema_valid_full.json')
     assert Schema('data/schema_valid_simple.json')
-    # Invalid
+
+
+def test_init_invalid():
     with pytest.raises(exceptions.SchemaValidationError) as exception:
         Schema('data/schema_invalid_multiple_errors.json')
 
-def test_descriptor():
-    # Dict
-    assert Schema(DESCRIPTOR_MIN).descriptor == DESCRIPTOR_MIN
-    assert Schema(DESCRIPTOR_MAX).descriptor == DESCRIPTOR_MAX
-    # Path
-    path = 'data/schema_valid_simple.json'
-    expect = Schema(path).descriptor
-    actual = json.load(io.open(path, encoding='utf-8'))
-    assert expect == actual
-    # Url
-    url = BASE_URL % 'data/schema_valid_simple.json'
-    expect = Schema(url).descriptor
-    actual = requests.get(url).json()
-    assert expect == actual
 
+def test_descriptor(apply_defaults):
+    assert Schema(DESCRIPTOR_MIN).descriptor == apply_defaults(DESCRIPTOR_MIN)
+    assert Schema(DESCRIPTOR_MAX).descriptor == apply_defaults(DESCRIPTOR_MAX)
+
+
+def test_descriptor_path(apply_defaults):
+    path = 'data/schema_valid_simple.json'
+    actual = Schema(path).descriptor
+    expect = apply_defaults(json.load(io.open(path, encoding='utf-8')))
+    assert actual == expect
+
+
+def test_descriptor_url(apply_defaults):
+    url = BASE_URL % 'data/schema_valid_simple.json'
+    actual = Schema(url).descriptor
+    expect = apply_defaults(requests.get(url).json())
+    assert actual == expect
+
+
+def test_descriptor_applied_defaults():
+    assert Schema(DESCRIPTOR_MIN).descriptor == {
+        'fields': [
+            {'name': 'id', 'type': 'string', 'format': 'default'},
+            {'name': 'height', 'type': 'integer', 'format': 'default'},
+        ],
+        'missingValues': [''],
+    }
 
 def test_cast_row():
     schema = Schema(DESCRIPTOR_MAX)
@@ -136,7 +150,7 @@ def test_foreign_keys():
     assert Schema(DESCRIPTOR_MAX).foreign_keys == DESCRIPTOR_MAX['foreignKeys']
 
 
-def test_save(tmpdir):
+def test_save(tmpdir, apply_defaults):
     path = str(tmpdir.join('schema.json'))
     Schema(DESCRIPTOR_MIN).save(path)
-    assert DESCRIPTOR_MIN == json.load(io.open(path, encoding='utf-8'))
+    assert json.load(io.open(path, encoding='utf-8')) == apply_defaults(DESCRIPTOR_MIN)

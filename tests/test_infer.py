@@ -48,8 +48,8 @@ class TestInferSchema(base.BaseTestCase):
         self.assertEqual(schema_model.get_field('age').type, 'integer')
         self.assertEqual(schema_model.get_field('name').type, 'string')
 
-    def test_infer_schema_primary_key_string(self):
-        primary_key = 'id'
+    def test_infer_schema_primary_key_simple(self):
+        primary_key = ['id']
         filepath = os.path.join(self.data_dir, 'data_infer.csv')
         with io.open(filepath) as stream:
             headers = stream.readline().rstrip('\n').split(',')

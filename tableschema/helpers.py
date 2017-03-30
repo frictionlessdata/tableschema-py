@@ -29,7 +29,7 @@ def load_json_source(source):
         source (mixed): source in various forms
 
     Returns:
-        dict: loaded source
+        dict: loaded source/deepcopy if already loaded
 
     """
 

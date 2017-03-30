@@ -28,13 +28,6 @@ class TestValidateSchema(base.BaseTestCase):
         valid = tableschema.validate(schema)
         self.assertTrue(valid)
 
-    def test_schema_valid_pk_string(self):
-        filepath = os.path.join(self.data_dir, 'schema_valid_pk_string.json')
-        with io.open(filepath) as stream:
-            schema = json.load(stream)
-        valid = tableschema.validate(schema)
-        self.assertTrue(valid)
-
     def test_schema_valid_pk_array(self):
         filepath = os.path.join(self.data_dir, 'schema_valid_pk_array.json')
         with io.open(filepath) as stream:
@@ -74,21 +67,6 @@ class TestValidateSchema(base.BaseTestCase):
         self.assertRaises(tableschema.exceptions.SchemaValidationError,
                           tableschema.validate,
                           schema)
-
-    def test_schema_valid_fk_string(self):
-        filepath = os.path.join(self.data_dir, 'schema_valid_fk_string.json')
-        with io.open(filepath) as stream:
-            schema = json.load(stream)
-        valid = tableschema.validate(schema)
-        self.assertTrue(valid)
-
-    def test_schema_valid_fk_string_self_ref(self):
-        filepath = os.path.join(self.data_dir,
-                                'schema_valid_fk_string_self_referencing.json')
-        with io.open(filepath) as stream:
-            schema = json.load(stream)
-        valid = tableschema.validate(schema)
-        self.assertTrue(valid)
 
     def test_schema_valid_fk_array(self):
         filepath = os.path.join(self.data_dir,

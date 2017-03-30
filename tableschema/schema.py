@@ -6,7 +6,6 @@ from __future__ import unicode_literals
 
 import io
 import json
-from copy import deepcopy
 from .field import Field
 from .validate import validate
 from . import compat
@@ -32,12 +31,21 @@ class Schema(object):
 
     def __init__(self, descriptor):
 
-        # Set attributes
-        self.__descriptor = deepcopy(helpers.load_json_source(descriptor))
-        self.__fields = None
+        # Load descriptor
+        descriptor = helpers.load_json_source(descriptor)
 
-        # Validate
-        validate(self.__descriptor)
+        # Apply descriptor defaults
+        descriptor.setdefault('missingValues', [''])
+        for field in descriptor['fields']:
+            field.setdefault('type', 'string')
+            field.setdefault('format', 'default')
+
+        # Validate descriptor
+        validate(descriptor)
+
+        # Set attributes
+        self.__descriptor = descriptor
+        self.__fields = None
 
     @property
     def descriptor(self):
