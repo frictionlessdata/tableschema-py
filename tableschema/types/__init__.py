@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 
 # Module API
 
+from .any import cast_any_default
 from .array import cast_array_default
 from .boolean import cast_boolean_default
 from .integer import cast_integer_default
