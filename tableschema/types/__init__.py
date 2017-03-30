@@ -17,6 +17,8 @@ from .datetime import cast_datetime_default
 from .datetime import cast_datetime_any
 from .datetime import cast_datetime_pattern
 from .duration import cast_duration_default
+from .geojson import cast_geojson_default
+from .geojson import cast_geojson_topojson
 from .integer import cast_integer_default
 from .object import cast_object_default
 from .string import cast_string_default

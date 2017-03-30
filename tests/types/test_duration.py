@@ -14,7 +14,8 @@ from tableschema.config import ERROR
 
 @pytest.mark.parametrize('value, result', [
     (isodate.Duration(years=1), isodate.Duration(years=1)),
-    ('P1Y10M3DT5H11M7S', isodate.Duration(years=1, months=10, days=3, hours=5, minutes=11, seconds=7)),
+    ('P1Y10M3DT5H11M7S',
+        isodate.Duration(years=1, months=10, days=3, hours=5, minutes=11, seconds=7)),
     ('P1Y', isodate.Duration(years=1)),
     ('P1M', isodate.Duration(months=1)),
     ('P1D', isodate.Duration(days=1)),
