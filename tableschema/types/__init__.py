@@ -9,6 +9,7 @@ from __future__ import unicode_literals
 
 from .boolean import cast_boolean_default
 from .integer import cast_integer_default
+from .object import cast_object_default
 from .string import cast_string_default
 from .string import cast_string_uri
 from .string import cast_string_email
