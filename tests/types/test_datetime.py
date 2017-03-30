@@ -24,19 +24,6 @@ def test_cast_datetime_default(value, result):
     assert types.cast_datetime_default(value) == result
 
 
-@pytest.mark.parametrize('value, pattern, result', [
-    (datetime(2006, 11, 21, 16, 30), '%d/%m/%y %H:%M', datetime(2006, 11, 21, 16, 30)),
-    ('21/11/06 16:30', '%d/%m/%y %H:%M', datetime(2006, 11, 21, 16, 30)),
-    ('21/11/06 16:30', '%H:%M %d/%m/%y', ERROR),
-    ('21/11/06 16:30', 'invalid', ERROR),
-    ('invalid', '%H:%M %d/%m/%y', ERROR),
-    (True, '%H:%M %d/%m/%y', ERROR),
-    ('', '%H:%M %d/%m/%y', ERROR),
-])
-def test_cast_datetime_pattern(value, pattern, result):
-    assert types.cast_datetime_pattern(value, pattern) == result
-
-
 @pytest.mark.parametrize('value, result', [
     (datetime(2014, 1, 1, 6), datetime(2014, 1, 1, 6)),
     ('10th Jan 1969 9 am', datetime(1969, 1, 10, 9)),
@@ -46,3 +33,16 @@ def test_cast_datetime_pattern(value, pattern, result):
 ])
 def test_cast_datetime_any(value, result):
     assert types.cast_datetime_any(value) == result
+
+
+@pytest.mark.parametrize('value, pattern, result', [
+    (datetime(2006, 11, 21, 16, 30), '%d/%m/%y %H:%M', datetime(2006, 11, 21, 16, 30)),
+    ('21/11/06 16:30', '%d/%m/%y %H:%M', datetime(2006, 11, 21, 16, 30)),
+    ('21/11/06 16:30', '%H:%M %d/%m/%y', ERROR),
+    ('21/11/06 16:30', 'invalid', ERROR),
+    ('invalid', '%d/%m/%y %H:%M', ERROR),
+    (True, '%d/%m/%y %H:%M', ERROR),
+    ('', '%d/%m/%y %H:%M', ERROR),
+])
+def test_cast_datetime_pattern(value, pattern, result):
+    assert types.cast_datetime_pattern(value, pattern) == result

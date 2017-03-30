@@ -10,9 +10,12 @@ from __future__ import unicode_literals
 from .any import cast_any_default
 from .array import cast_array_default
 from .boolean import cast_boolean_default
+from .date import cast_date_default
+from .date import cast_date_any
+from .date import cast_date_pattern
 from .datetime import cast_datetime_default
-from .datetime import cast_datetime_pattern
 from .datetime import cast_datetime_any
+from .datetime import cast_datetime_pattern
 from .duration import cast_duration_default
 from .integer import cast_integer_default
 from .object import cast_object_default
