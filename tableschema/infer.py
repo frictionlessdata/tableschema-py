@@ -5,7 +5,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import operator
-from . import types
+from .legacy import types
 
 
 # Module API

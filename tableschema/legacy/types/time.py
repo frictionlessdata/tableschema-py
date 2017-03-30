@@ -4,21 +4,22 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import time
 import datetime
 from future.utils import raise_with_traceback
 from dateutil.parser import parse as date_parse
-from .. import exceptions
-from .. import helpers
+from ... import exceptions
+from ... import helpers
 from . import base
 
 
 # Module API
 
-class DateType(base.JTSType):
+class TimeType(base.JTSType):
 
     # Public
 
-    name = 'date'
+    name = 'time'
     null_values = helpers.NULL_VALUES
     supported_constraints = [
         'required',
@@ -28,11 +29,10 @@ class DateType(base.JTSType):
         'maximum',
     ]
     # ---
-    python_type = datetime.date
-    formats = ('default', 'any', 'fmt')
-    ISO8601 = '%Y-%m-%d'
-    raw_formats = ['DD/MM/YYYY', 'DD/MM/YY', 'YYYY/MM/DD']
-    py_formats = ['%d/%m/%Y', '%d/%m/%y', '%Y/%m/%d']
+    python_type = datetime.time
+    ISO8601 = '%H:%M:%S'
+    raw_formats = ['HH/MM/SS']
+    py_formats = ['%H:%M:%S']
     format_map = dict(zip(raw_formats, py_formats))
 
     def cast_default(self, value, fmt=None):
@@ -41,9 +41,11 @@ class DateType(base.JTSType):
             return value
 
         try:
-            return datetime.datetime.strptime(value, self.ISO8601).date()
+            struct_time = time.strptime(value, self.ISO8601)
+            return datetime.time(
+                struct_time.tm_hour, struct_time.tm_min, struct_time.tm_sec)
         except (TypeError, ValueError) as e:
-            raise_with_traceback(exceptions.InvalidDateType(e))
+            raise_with_traceback(exceptions.InvalidTimeType(e))
 
     def cast_any(self, value, fmt=None):
 
@@ -51,9 +53,9 @@ class DateType(base.JTSType):
             return value
 
         try:
-            return date_parse(value).date()
+            return date_parse(value).time()
         except (TypeError, ValueError) as e:
-            raise_with_traceback(exceptions.InvalidDateType(e))
+            raise_with_traceback(exceptions.InvalidTimeType(e))
 
     def cast_fmt(self, value, fmt=None):
 
@@ -61,6 +63,6 @@ class DateType(base.JTSType):
             return value
 
         try:
-            return datetime.datetime.strptime(value, fmt).date()
+            return datetime.datetime.strptime(value, fmt).time()
         except (TypeError, ValueError) as e:
-            raise_with_traceback(exceptions.InvalidDateType(e))
+            raise_with_traceback(exceptions.InvalidTimeType(e))

@@ -9,21 +9,20 @@ import decimal
 from future.utils import raise_with_traceback
 
 from . import base
-from .. import exceptions
-from .. import helpers
+from ... import exceptions
+from ... import helpers
 
 
 # Module API
 
-class YearMonthType(base.JTSType):
+class YearType(base.JTSType):
     # Public
 
-    name = 'yearmonth'
+    name = 'year'
     null_values = helpers.NULL_VALUES
     supported_constraints = [
         'required',
         'unique',
-        'pattern',
         'enum',
         'minimum',
         'maximum',
@@ -37,11 +36,11 @@ class YearMonthType(base.JTSType):
         if isinstance(value, self.python_type):
             return value
 
+        if len(value) > 4:
+            raise exceptions.InvalidYearType(
+                '{0} is not a valid year value'.format(value))
+
         try:
-            cast_value = self.python_type(value)
-            if not (1 <= cast_value <= 12):
-                raise exceptions.InvalidYearMonthType(
-                    '{0} is not a valid yearmonth value'.format(value))
-            return cast_value
+            return self.python_type(value)
         except (ValueError, TypeError, decimal.InvalidOperation) as e:
-            raise_with_traceback(exceptions.InvalidYearMonthType(e))
+            raise_with_traceback(exceptions.InvalidYearType(e))

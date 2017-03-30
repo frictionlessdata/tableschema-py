@@ -8,9 +8,9 @@ import io
 import json
 from .field import Field
 from .validate import validate
-from . import compat
-from . import helpers
 from . import exceptions
+from . import helpers
+from . import compat
 
 
 # Module API

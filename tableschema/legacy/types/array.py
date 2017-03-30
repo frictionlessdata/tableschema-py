@@ -5,8 +5,8 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import json
-from .. import exceptions
-from .. import helpers
+from ... import exceptions
+from ... import helpers
 from . import base
 
 

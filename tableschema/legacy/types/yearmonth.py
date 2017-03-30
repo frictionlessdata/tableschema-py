@@ -5,29 +5,32 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import decimal
+
 from future.utils import raise_with_traceback
-from .. import exceptions
-from .. import helpers
+
 from . import base
+from ... import exceptions
+from ... import helpers
 
 
 # Module API
 
-class IntegerType(base.JTSType):
-
+class YearMonthType(base.JTSType):
     # Public
 
-    name = 'integer'
+    name = 'yearmonth'
+    null_values = helpers.NULL_VALUES
     supported_constraints = [
         'required',
+        'unique',
         'pattern',
         'enum',
         'minimum',
         'maximum',
     ]
-    null_values = helpers.NULL_VALUES
     # ---
     python_type = int
+    formats = 'default'
 
     def cast_default(self, value, fmt=None):
 
@@ -35,8 +38,10 @@ class IntegerType(base.JTSType):
             return value
 
         try:
-            return self.python_type(value)
+            cast_value = self.python_type(value)
+            if not (1 <= cast_value <= 12):
+                raise exceptions.InvalidYearMonthType(
+                    '{0} is not a valid yearmonth value'.format(value))
+            return cast_value
         except (ValueError, TypeError, decimal.InvalidOperation) as e:
-            raise_with_traceback(exceptions.InvalidCastError(e))
-
-        raise exceptions.InvalidCastError('Could not cast value')
+            raise_with_traceback(exceptions.InvalidYearMonthType(e))

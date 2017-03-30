@@ -11,9 +11,9 @@ import decimal
 import binascii
 from rfc3986 import is_valid_uri
 from future.utils import raise_with_traceback
-from .. import exceptions
-from .. import helpers
-from .. import compat
+from ... import exceptions
+from ... import helpers
+from ... import compat
 from . import base
 
 

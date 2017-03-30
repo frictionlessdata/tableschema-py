@@ -8,9 +8,9 @@ import os
 import json
 import jsonschema
 from future.utils import raise_with_traceback
-from .. import exceptions
-from .. import helpers
-from .. import compat
+from ... import exceptions
+from ... import helpers
+from ... import compat
 from . import base
 
 
@@ -61,7 +61,7 @@ class GeoJSONType(base.JTSType):
 def _load_geojson_schema():
     filepath = os.path.join(
         os.path.dirname(os.path.realpath(__file__)),
-        '..', 'schemas', 'geojson.json')
+        '..', '..', 'schemas', 'geojson.json')
     with open(filepath) as f:
         json_table_schema = json.load(f)
     return json_table_schema

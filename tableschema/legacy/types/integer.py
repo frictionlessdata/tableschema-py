@@ -5,42 +5,38 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import decimal
-
 from future.utils import raise_with_traceback
-
+from ... import exceptions
+from ... import helpers
 from . import base
-from .. import exceptions
-from .. import helpers
 
 
 # Module API
 
-class YearType(base.JTSType):
+class IntegerType(base.JTSType):
+
     # Public
 
-    name = 'year'
-    null_values = helpers.NULL_VALUES
+    name = 'integer'
     supported_constraints = [
         'required',
-        'unique',
+        'pattern',
         'enum',
         'minimum',
         'maximum',
     ]
+    null_values = helpers.NULL_VALUES
     # ---
     python_type = int
-    formats = 'default'
 
     def cast_default(self, value, fmt=None):
 
         if isinstance(value, self.python_type):
             return value
 
-        if len(value) > 4:
-            raise exceptions.InvalidYearType(
-                '{0} is not a valid year value'.format(value))
-
         try:
             return self.python_type(value)
         except (ValueError, TypeError, decimal.InvalidOperation) as e:
-            raise_with_traceback(exceptions.InvalidYearType(e))
+            raise_with_traceback(exceptions.InvalidCastError(e))
+
+        raise exceptions.InvalidCastError('Could not cast value')

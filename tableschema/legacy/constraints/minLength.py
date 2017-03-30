@@ -4,28 +4,28 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from .. import exceptions
+from ... import exceptions
 
 
 # Module API
 
-def check_enum(name, value, enum):
-    """Enum constraint.
+def check_minLength(name, value, min_length):
+    """Length constraint.
 
-    Check value is one from enumerable type.
+    Supported types: sting, array, object.
 
     Args:
         name (str): field name
-        value (any): field value
-        enum (any[]): enum to check against
+        value (str/list/dict): field value
+        min_length (str/list/dict): min length to check
 
     Raises:
         TypeError: for non supported type
         ConstraintError: if check is failed
 
     """
-    if value not in enum:
+    if len(value) < min_length:
         raise exceptions.ConstraintError(
-            "The value for field '{0}' must be in the enum array"
-            .format(name))
+            "The field '{0}' must have a minimum length of {1}"
+            .format(name, min_length))
     return True

@@ -5,8 +5,8 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import re
-from .. import exceptions
-from .. import compat
+from ... import exceptions
+from ... import compat
 
 
 # Module API

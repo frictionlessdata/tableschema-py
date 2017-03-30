@@ -10,7 +10,7 @@ from copy import deepcopy
 from functools import partial
 from . import exceptions
 from . import helpers
-from . import types
+from .legacy import types
 
 
 # Module API

@@ -9,8 +9,9 @@ import time
 import decimal
 import datetime
 import pytest
-from tableschema import types, exceptions
-from . import base
+from tableschema import exceptions
+from tableschema.legacy import constraints, types
+from .. import base
 
 
 class ConstraintsBase(base.BaseTestCase):
