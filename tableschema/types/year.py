@@ -5,17 +5,22 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import six
+import decimal
 from ..config import ERROR
 
 
 # Module API
 
-def cast_integer_default(value):
+def cast_year_default(value):
     if not isinstance(value, int):
         if not isinstance(value, six.string_types):
+            return ERROR
+        if len(value) != 4:
             return ERROR
         try:
             value = int(value)
         except Exception:
             return ERROR
+    if value < 0 or value > 9999:
+        return ERROR
     return value
