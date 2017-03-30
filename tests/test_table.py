@@ -19,13 +19,16 @@ SCHEMA_CSV = {
         {'name': 'age', 'type': 'integer', 'format': 'default', 'description': '', 'title': ''},
         {'name': 'name', 'type': 'string', 'format': 'default', 'description': '', 'title': ''},
     ],
+    'missingValues': [''],
 }
 
 
 # Tests
 
-def test_schema():
-    assert Table(DATA_MIN, schema=SCHEMA_MIN).schema.descriptor == SCHEMA_MIN
+def test_schema(apply_defaults):
+    actual = Table(DATA_MIN, schema=SCHEMA_MIN).schema.descriptor
+    expect = apply_defaults(SCHEMA_MIN)
+    assert actual == expect
 
 
 def test_schema_infer_tabulator():
@@ -33,13 +36,16 @@ def test_schema_infer_tabulator():
 
 
 @patch('tableschema.table.import_module')
-def test_schema_infer_storage(import_module):
+def test_schema_infer_storage(import_module, apply_defaults):
     # Mocks
     import_module.return_value = Mock(Storage=Mock(return_value=Mock(
         describe = Mock(return_value=SCHEMA_MIN),
         iter = Mock(return_value=DATA_MIN[1:]),
     )))
-    assert Table('table', backend='storage').schema.descriptor == SCHEMA_MIN
+    # Assertions
+    actual = Table('table', backend='storage').schema.descriptor
+    expect = apply_defaults(SCHEMA_MIN)
+    assert actual == expect
 
 
 def test_iter():

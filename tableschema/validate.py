@@ -13,6 +13,7 @@ from . import exceptions
 
 # Module API
 
+
 def validate(descriptor, no_fail_fast=False):
     """Validate Table Schema schema descriptor.
 
