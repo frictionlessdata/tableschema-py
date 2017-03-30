@@ -8,16 +8,6 @@ from __future__ import unicode_literals
 # Module API
 
 def check_required(value, required):
-    """Required value constraint.
-
-    Args:
-        value (str): data value
-        required (bool): is value required
-
-    Returns:
-        bool: constraint check result
-
-    """
     if required and value is None:
         return False
     return True
