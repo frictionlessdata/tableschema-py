@@ -10,10 +10,10 @@ from tableschema import constraints
 
 # Tests
 
-@pytest.mark.parametrize('value, maximum, result', [
-    (1, 0, False),
+@pytest.mark.parametrize('constraint, value, result', [
+    (0, 1, False),
     (1, 1, True),
-    (1, 2, True),
+    (2, 1, True),
 ])
-def test_check_maximum(value, maximum, result):
-    assert constraints.check_maximum(value, maximum) == result
+def test_check_maximum(constraint, value, result):
+    assert constraints.check_maximum(constraint, value) == result

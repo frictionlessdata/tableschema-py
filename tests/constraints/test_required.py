@@ -10,10 +10,10 @@ from tableschema import constraints
 
 # Tests
 
-@pytest.mark.parametrize('value, required, result', [
-    (1, False, True),
-    (0, True, True),
-    (None, True, False),
+@pytest.mark.parametrize('constraint, value, result', [
+    (False, 1, True),
+    (True, 0, True),
+    (True, None, False),
 ])
-def test_check_required(value, required, result):
-    assert constraints.check_required(value, required) == result
+def test_check_required(constraint, value, result):
+    assert constraints.check_required(constraint, value) == result

@@ -9,8 +9,8 @@ import re
 
 # Module API
 
-def check_pattern(value, pattern):
-    regex = re.compile('^{0}$'.format(pattern))
+def check_pattern(constraint, value):
+    regex = re.compile('^{0}$'.format(constraint))
     match = regex.match(value)
     if not match:
         return False

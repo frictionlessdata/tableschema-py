@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 
 # Module API
 
-def check_minimum(value, minimum):
-    if value < minimum:
+def check_minimum(constraint, value):
+    if value < constraint:
         return False
     return True

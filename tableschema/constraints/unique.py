@@ -7,5 +7,5 @@ from __future__ import unicode_literals
 
 # Module API
 
-def check_unique(value, unique):
+def check_unique(constraint, unique):
     return True

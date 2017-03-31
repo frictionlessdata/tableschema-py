@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 
 # Module API
 
-def check_required(value, required):
-    if required and value is None:
+def check_required(constraint, value):
+    if constraint and value is None:
         return False
     return True

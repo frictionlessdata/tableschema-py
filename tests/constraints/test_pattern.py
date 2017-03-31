@@ -10,9 +10,9 @@ from tableschema import constraints
 
 # Tests
 
-@pytest.mark.parametrize('value, pattern, result', [
-    ('test', '^test$', True),
-    ('TEST', '^test$', False),
+@pytest.mark.parametrize('constraint, value, result', [
+    ('^test$', 'test', True),
+    ('^test$', 'TEST', False),
 ])
-def test_check_pattern(value, pattern, result):
-    assert constraints.check_pattern(value, pattern) == result
+def test_check_pattern(constraint, value, result):
+    assert constraints.check_pattern(constraint, value) == result

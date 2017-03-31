@@ -10,9 +10,9 @@ from tableschema import constraints
 
 # Tests
 
-@pytest.mark.parametrize('value, unique, result', [
-    ('any', False, True),
-    ('any', True, True),
+@pytest.mark.parametrize('constraint, value, result', [
+    (False, 'any', True),
+    (True, 'any', True),
 ])
-def test_check_unique(value, unique, result):
-    assert constraints.check_unique(value, unique) == result
+def test_check_unique(constraint, value, result):
+    assert constraints.check_unique(constraint, value) == result

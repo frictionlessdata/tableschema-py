@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 
 # Module API
 
-def check_maximum(value, maximum):
-    if value > maximum:
+def check_maximum(constraint, value):
+    if value > constraint:
         return False
     return True

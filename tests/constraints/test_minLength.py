@@ -10,10 +10,10 @@ from tableschema import constraints
 
 # Tests
 
-@pytest.mark.parametrize('value, minLength, result', [
-    ([1], 0, True),
-    ([1], 1, True),
-    ([1], 2, False),
+@pytest.mark.parametrize('constraint, value, result', [
+    (0, [1], True),
+    (1, [1], True),
+    (2, [1], False),
 ])
-def test_check_minLength(value, minLength, result):
-    assert constraints.check_minLength(value, minLength) == result
+def test_check_minLength(constraint, value, result):
+    assert constraints.check_minLength(constraint, value) == result

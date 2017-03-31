@@ -10,10 +10,10 @@ from tableschema import constraints
 
 # Tests
 
-@pytest.mark.parametrize('value, minimum, result', [
-    (1, 0, True),
+@pytest.mark.parametrize('constraint, value, result', [
+    (0, 1, True),
     (1, 1, True),
-    (1, 2, False),
+    (2, 1, False),
 ])
-def test_check_minimum(value, minimum, result):
-    assert constraints.check_minimum(value, minimum) == result
+def test_check_minimum(constraint, value, result):
+    assert constraints.check_minimum(constraint, value) == result
