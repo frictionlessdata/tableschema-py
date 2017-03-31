@@ -10,6 +10,7 @@ from copy import deepcopy
 from functools import partial
 from . import exceptions
 from . import helpers
+from . import config
 from .legacy import types
 
 
@@ -21,15 +22,14 @@ class Field(object):
 
     # Public
 
-    def __init__(self, descriptor, missing_values=None):
+    def __init__(self, descriptor, missing_values=config.DEFAULT_MISSING_VALUES):
 
         # Deepcopy descriptor
         descriptor = deepcopy(descriptor)
 
         # Apply descriptor defaults
-        descriptor.setdefault('type', 'string')
-        descriptor.setdefault('format', 'default')
-        missing_values = ['']
+        descriptor.setdefault('type', config.DEFAULT_FIELD_TYPE)
+        descriptor.setdefault('format', config.DEFAULT_FIELD_FORMAT)
 
         # Set attributes
         self.__descriptor = descriptor

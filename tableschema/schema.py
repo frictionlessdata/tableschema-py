@@ -10,6 +10,7 @@ from .field import Field
 from .validate import validate
 from . import exceptions
 from . import helpers
+from . import config
 from . import compat
 
 
@@ -35,10 +36,10 @@ class Schema(object):
         descriptor = helpers.load_json_source(descriptor)
 
         # Apply descriptor defaults
-        descriptor.setdefault('missingValues', [''])
         for field in descriptor['fields']:
-            field.setdefault('type', 'string')
-            field.setdefault('format', 'default')
+            field.setdefault('type', config.DEFAULT_FIELD_TYPE)
+            field.setdefault('format', config.DEFAULT_FIELD_FORMAT)
+        descriptor.setdefault('missingValues', config.DEFAULT_MISSING_VALUES)
 
         # Validate descriptor
         validate(descriptor)
