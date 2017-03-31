@@ -16,6 +16,7 @@ from .duration import cast_duration
 from .geojson import cast_geojson
 from .geopoint import cast_geopoint
 from .integer import cast_integer
+from .number import cast_number
 from .object import cast_object
 from .string import cast_string
 from .time import cast_time
