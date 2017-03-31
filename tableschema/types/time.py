@@ -12,35 +12,18 @@ from ..config import ERROR
 
 # Module API
 
-def cast_time_default(value):
+def cast_time(format, value):
     PATTERN = '%H:%M:%S'
     if not isinstance(value, time):
         if not isinstance(value, six.string_types):
             return ERROR
         try:
-            value = datetime.strptime(value, PATTERN).time()
-        except Exception:
-            return ERROR
-    return value
-
-
-def cast_time_any(value):
-    if not isinstance(value, time):
-        if not isinstance(value, six.string_types):
-            return ERROR
-        try:
-            value = parse(value).time()
-        except Exception:
-            return ERROR
-    return value
-
-
-def cast_time_pattern(value, pattern):
-    if not isinstance(value, time):
-        if not isinstance(value, six.string_types):
-            return ERROR
-        try:
-            value = datetime.strptime(value, pattern).time()
+            if format == 'default':
+                value = datetime.strptime(value, PATTERN).time()
+            elif format == 'any':
+                value = parse(value).time()
+            else:
+                value = datetime.strptime(value, format).time()
         except Exception:
             return ERROR
     return value

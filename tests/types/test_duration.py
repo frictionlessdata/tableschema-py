@@ -12,21 +12,21 @@ from tableschema.config import ERROR
 
 # Tests
 
-@pytest.mark.parametrize('value, result', [
-    (isodate.Duration(years=1), isodate.Duration(years=1)),
-    ('P1Y10M3DT5H11M7S',
-        isodate.Duration(years=1, months=10, days=3, hours=5, minutes=11, seconds=7)),
-    ('P1Y', isodate.Duration(years=1)),
-    ('P1M', isodate.Duration(months=1)),
-    ('P1D', isodate.Duration(days=1)),
-    ('PT1H', isodate.Duration(hours=1)),
-    ('PT1M', isodate.Duration(minutes=1)),
-    ('PT1S', isodate.Duration(seconds=1)),
-    ('P1M1Y', ERROR),
-    ('P-1Y', ERROR),
-    (True, ERROR),
-    (1, ERROR),
-    ('', ERROR),
+@pytest.mark.parametrize('format, value, result', [
+    ('default', isodate.Duration(years=1), isodate.Duration(years=1)),
+    ('default', 'P1Y10M3DT5H11M7S',
+         isodate.Duration(years=1, months=10, days=3, hours=5, minutes=11, seconds=7)),
+    ('default', 'P1Y', isodate.Duration(years=1)),
+    ('default', 'P1M', isodate.Duration(months=1)),
+    ('default', 'P1D', isodate.Duration(days=1)),
+    ('default', 'PT1H', isodate.Duration(hours=1)),
+    ('default', 'PT1M', isodate.Duration(minutes=1)),
+    ('default', 'PT1S', isodate.Duration(seconds=1)),
+    ('default', 'P1M1Y', ERROR),
+    ('default', 'P-1Y', ERROR),
+    ('default', True, ERROR),
+    ('default', 1, ERROR),
+    ('default', '', ERROR),
 ])
-def test_cast_duration_default(value, result):
-    assert types.cast_duration_default(value) == result
+def test_cast_duration(format, value, result):
+    assert types.cast_duration(format, value) == result

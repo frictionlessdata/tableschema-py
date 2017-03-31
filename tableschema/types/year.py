@@ -10,7 +10,7 @@ from ..config import ERROR
 
 # Module API
 
-def cast_year_default(value):
+def cast_year(format, value):
     if not isinstance(value, int):
         if not isinstance(value, six.string_types):
             return ERROR

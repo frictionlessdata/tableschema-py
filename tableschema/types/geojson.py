@@ -13,7 +13,7 @@ from ..config import ERROR
 
 # Module API
 
-def cast_geojson_default(value):
+def cast_geojson(format, value):
     if not isinstance(value, dict):
         if not isinstance(value, six.string_types):
             return ERROR
@@ -21,21 +21,12 @@ def cast_geojson_default(value):
             value = json.loads(value)
         except Exception:
             return ERROR
-    try:
-        jsonschema.validate(value, _geojson_schema)
-    except Exception:
-        return ERROR
-    return value
-
-
-def cast_geojson_topojson(value):
-    if not isinstance(value, dict):
-        if not isinstance(value, six.string_types):
-            return ERROR
+    if format == 'default':
         try:
-            value = json.loads(value)
+            jsonschema.validate(value, _geojson_schema)
         except Exception:
             return ERROR
+    elif format == 'topojson':
         if not isinstance(value, dict):
             return ERROR
     return value

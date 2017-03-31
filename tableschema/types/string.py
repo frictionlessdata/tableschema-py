@@ -16,44 +16,24 @@ from ..config import ERROR
 
 # Module API
 
-def cast_string_default(value):
+def cast_string(format, value):
     if not isinstance(value, six.string_types):
         return ERROR
-    return value
-
-
-def cast_string_uri(value):
-    if not isinstance(value, six.string_types):
-        return ERROR
-    if not rfc3986.is_valid_uri(value, require_scheme=True):
-        return ERROR
-    return value
-
-
-def cast_string_email(value):
-    PATTERN = re.compile(r'[^@]+@[^@]+\.[^@]+')
-    if not isinstance(value, six.string_types):
-        return ERROR
-    if not re.match(PATTERN, value):
-        return ERROR
-    return value
-
-
-def cast_string_uuid(value):
-    if not isinstance(value, six.string_types):
-        return ERROR
-    try:
-        uuid.UUID(value, version=4)
-    except ValueError:
-        return ERROR
-    return value
-
-
-def cast_string_binary(value):
-    if not isinstance(value, six.string_types):
-        return ERROR
-    try:
-        base64.b64decode(value)
-    except binascii.Error:
-        return ERROR
+    if format == 'uri':
+        if not rfc3986.is_valid_uri(value, require_scheme=True):
+            return ERROR
+    elif format == 'email':
+        PATTERN = re.compile(r'[^@]+@[^@]+\.[^@]+')
+        if not re.match(PATTERN, value):
+            return ERROR
+    elif format == 'uuid':
+        try:
+            uuid.UUID(value, version=4)
+        except ValueError:
+            return ERROR
+    elif format == 'binary':
+        try:
+            base64.b64decode(value)
+        except binascii.Error:
+            return ERROR
     return value

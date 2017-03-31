@@ -12,37 +12,25 @@ from tableschema.config import ERROR
 
 # Tests
 
-@pytest.mark.parametrize('value, result', [
-    (datetime(2014, 1, 1, 6), datetime(2014, 1, 1, 6)),
-    ('2014-01-01T06:00:00Z', datetime(2014, 1, 1, 6)),
-    ('Mon 1st Jan 2014 9 am', ERROR),
-    ('invalid', ERROR),
-    (True, ERROR),
-    ('', ERROR),
+@pytest.mark.parametrize('format, value, result', [
+    ('default', datetime(2014, 1, 1, 6), datetime(2014, 1, 1, 6)),
+    ('default', '2014-01-01T06:00:00Z', datetime(2014, 1, 1, 6)),
+    ('default', 'Mon 1st Jan 2014 9 am', ERROR),
+    ('default', 'invalid', ERROR),
+    ('default', True, ERROR),
+    ('default', '', ERROR),
+    ('any', datetime(2014, 1, 1, 6), datetime(2014, 1, 1, 6)),
+    ('any', '10th Jan 1969 9 am', datetime(1969, 1, 10, 9)),
+    ('any', 'invalid', ERROR),
+    ('any', True, ERROR),
+    ('any', '', ERROR),
+    ('%d/%m/%y %H:%M', datetime(2006, 11, 21, 16, 30), datetime(2006, 11, 21, 16, 30)),
+    ('%d/%m/%y %H:%M', '21/11/06 16:30', datetime(2006, 11, 21, 16, 30)),
+    ('%H:%M %d/%m/%y', '21/11/06 16:30', ERROR),
+    ('%d/%m/%y %H:%M', 'invalid', ERROR),
+    ('%d/%m/%y %H:%M', True, ERROR),
+    ('%d/%m/%y %H:%M', '', ERROR),
+    ('invalid', '21/11/06 16:30', ERROR),
 ])
-def test_cast_datetime_default(value, result):
-    assert types.cast_datetime_default(value) == result
-
-
-@pytest.mark.parametrize('value, result', [
-    (datetime(2014, 1, 1, 6), datetime(2014, 1, 1, 6)),
-    ('10th Jan 1969 9 am', datetime(1969, 1, 10, 9)),
-    ('invalid', ERROR),
-    (True, ERROR),
-    ('', ERROR),
-])
-def test_cast_datetime_any(value, result):
-    assert types.cast_datetime_any(value) == result
-
-
-@pytest.mark.parametrize('value, pattern, result', [
-    (datetime(2006, 11, 21, 16, 30), '%d/%m/%y %H:%M', datetime(2006, 11, 21, 16, 30)),
-    ('21/11/06 16:30', '%d/%m/%y %H:%M', datetime(2006, 11, 21, 16, 30)),
-    ('21/11/06 16:30', '%H:%M %d/%m/%y', ERROR),
-    ('21/11/06 16:30', 'invalid', ERROR),
-    ('invalid', '%d/%m/%y %H:%M', ERROR),
-    (True, '%d/%m/%y %H:%M', ERROR),
-    ('', '%d/%m/%y %H:%M', ERROR),
-])
-def test_cast_datetime_pattern(value, pattern, result):
-    assert types.cast_datetime_pattern(value, pattern) == result
+def test_cast_datetime(format, value, result):
+    assert types.cast_datetime(format, value) == result

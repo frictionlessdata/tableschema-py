@@ -10,7 +10,7 @@ from ..config import ERROR
 
 # Module API
 
-def cast_boolean_default(value):
+def cast_boolean(format, value):
     TRUE_VALUES = ['yes', 'y', 'true', 't', '1']
     FALSE_VALUES = ['no', 'n', 'false', 'f', '0']
     if not isinstance(value, bool):

@@ -11,27 +11,27 @@ from tableschema.config import ERROR
 
 # Tests
 
-@pytest.mark.parametrize('value, result', [
-    (True, True),
-    ('yes', True),
-    ('y', True),
-    ('true', True),
-    ('t', True),
-    ('1', True),
-    ('YES', True),
-    ('Yes', True),
-    (False, False),
-    ('no', False),
-    ('n', False),
-    ('false', False),
-    ('f', False),
-    ('0', False),
-    ('NO', False),
-    ('No', False),
-    (0, ERROR),
-    (1, ERROR),
-    ('3.14', ERROR),
-    ('', ERROR),
+@pytest.mark.parametrize('format, value, result', [
+    ('default', True, True),
+    ('default', 'yes', True),
+    ('default', 'y', True),
+    ('default', 'true', True),
+    ('default', 't', True),
+    ('default', '1', True),
+    ('default', 'YES', True),
+    ('default', 'Yes', True),
+    ('default', False, False),
+    ('default', 'no', False),
+    ('default', 'n', False),
+    ('default', 'false', False),
+    ('default', 'f', False),
+    ('default', '0', False),
+    ('default', 'NO', False),
+    ('default', 'No', False),
+    ('default', 0, ERROR),
+    ('default', 1, ERROR),
+    ('default', '3.14', ERROR),
+    ('default', '', ERROR),
 ])
-def test_cast_boolean_default(value, result):
-    assert types.cast_boolean_default(value) == result
+def test_cast_boolean(format, value, result):
+    assert types.cast_boolean(format, value) == result

@@ -11,11 +11,11 @@ from tableschema.config import ERROR
 
 # Tests
 
-@pytest.mark.parametrize('value, result', [
-    (1, 1),
-    ('1', 1),
-    ('3.14', ERROR),
-    ('', ERROR),
+@pytest.mark.parametrize('format, value, result', [
+    ('default', 1, 1),
+    ('default', '1', 1),
+    ('default', '3.14', ERROR),
+    ('default', '', ERROR),
 ])
-def test_cast_integer_default(value, result):
-    assert types.cast_integer_default(value) == result
+def test_cast_integer(format, value, result):
+    assert types.cast_integer(format, value) == result

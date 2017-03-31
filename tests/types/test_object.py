@@ -11,16 +11,16 @@ from tableschema.config import ERROR
 
 # Tests
 
-@pytest.mark.parametrize('value, result', [
-    ({}, {}),
-    ('{}', {}),
-    ({'key': 'value'}, {'key': 'value'}),
-    ('{"key": "value"}', {'key': 'value'}),
-    ('["key", "value"]', ERROR),
-    ('string', ERROR),
-    (1, ERROR),
-    ('3.14', ERROR),
-    ('', ERROR),
+@pytest.mark.parametrize('format, value, result', [
+    ('default', {}, {}),
+    ('default', '{}', {}),
+    ('default', {'key': 'value'}, {'key': 'value'}),
+    ('default', '{"key": "value"}', {'key': 'value'}),
+    ('default', '["key", "value"]', ERROR),
+    ('default', 'string', ERROR),
+    ('default', 1, ERROR),
+    ('default', '3.14', ERROR),
+    ('default', '', ERROR),
 ])
-def test_cast_object_default(value, result):
-    assert types.cast_object_default(value) == result
+def test_cast_object(format, value, result):
+    assert types.cast_object(format, value) == result

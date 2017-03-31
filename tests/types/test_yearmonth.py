@@ -11,13 +11,13 @@ from tableschema.config import ERROR
 
 # Tests
 
-@pytest.mark.parametrize('value, result', [
-    (10, 10),
-    ('10', 10),
-    (-10, ERROR),
-    (20, ERROR),
-    ('3.14', ERROR),
-    ('', ERROR),
+@pytest.mark.parametrize('format, value, result', [
+    ('default', 10, 10),
+    ('default', '10', 10),
+    ('default', -10, ERROR),
+    ('default', 20, ERROR),
+    ('default', '3.14', ERROR),
+    ('default', '', ERROR),
 ])
-def test_cast_yearmonth_default(value, result):
-    assert types.cast_yearmonth_default(value) == result
+def test_cast_yearmonth(format, value, result):
+    assert types.cast_yearmonth(format, value) == result

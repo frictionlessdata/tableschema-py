@@ -11,47 +11,35 @@ from tableschema.config import ERROR
 
 # Tests
 
-@pytest.mark.parametrize('value, result', [
-    ({'lon': 180, 'lat': 90}, {'lon': 180, 'lat': 90}),
-    ('180,90', {'lon': 180, 'lat': 90}),
-    ('180, -90', {'lon': 180, 'lat': -90}),
-    ('181,90', ERROR),
-    ('0,91', ERROR),
-    ('string', ERROR),
-    (1, ERROR),
-    ('3.14', ERROR),
-    ('', ERROR),
+@pytest.mark.parametrize('format, value, result', [
+    ('default', {'lon': 180, 'lat': 90}, {'lon': 180, 'lat': 90}),
+    ('default', '180,90', {'lon': 180, 'lat': 90}),
+    ('default', '180, -90', {'lon': 180, 'lat': -90}),
+    ('default', '181,90', ERROR),
+    ('default', '0,91', ERROR),
+    ('default', 'string', ERROR),
+    ('default', 1, ERROR),
+    ('default', '3.14', ERROR),
+    ('default', '', ERROR),
+    ('array', {'lon': 180, 'lat': 90}, {'lon': 180, 'lat': 90}),
+    ('array', '[180, -90]', {'lon': 180, 'lat': -90}),
+    ('array', [181, 90], ERROR),
+    ('array', [0, 91], ERROR),
+    ('array', '180,90', ERROR),
+    ('array', 'string', ERROR),
+    ('array', 1, ERROR),
+    ('array', '3.14', ERROR),
+    ('array', '', ERROR),
+    ('object', {'lon': 180, 'lat': 90}, {'lon': 180, 'lat': 90}),
+    ('object', '{"lon": 180, "lat": 90}', {'lon': 180, 'lat': 90}),
+    ('object', {'lon': 181, 'lat': 90}, ERROR),
+    ('object', {'lon': 180, 'lat': -91}, ERROR),
+    ('object', [180, -90], ERROR),
+    ('object', '180,90', ERROR),
+    ('object', 'string', ERROR),
+    ('object', 1, ERROR),
+    ('object', '3.14', ERROR),
+    ('object', '', ERROR),
 ])
-def test_cast_geopoint_default(value, result):
-    assert types.cast_geopoint_default(value) == result
-
-
-@pytest.mark.parametrize('value, result', [
-    ({'lon': 180, 'lat': 90}, {'lon': 180, 'lat': 90}),
-    ('[180, -90]', {'lon': 180, 'lat': -90}),
-    ([181, 90], ERROR),
-    ([0, 91], ERROR),
-    ('180,90', ERROR),
-    ('string', ERROR),
-    (1, ERROR),
-    ('3.14', ERROR),
-    ('', ERROR),
-])
-def test_cast_geopoint_array(value, result):
-    assert types.cast_geopoint_array(value) == result
-
-
-@pytest.mark.parametrize('value, result', [
-    ({'lon': 180, 'lat': 90}, {'lon': 180, 'lat': 90}),
-    ('{"lon": 180, "lat": 90}', {'lon': 180, 'lat': 90}),
-    ({'lon': 181, 'lat': 90}, ERROR),
-    ({'lon': 180, 'lat': -91}, ERROR),
-    ([180, -90], ERROR),
-    ('180,90', ERROR),
-    ('string', ERROR),
-    (1, ERROR),
-    ('3.14', ERROR),
-    ('', ERROR),
-])
-def test_cast_geopoint_object(value, result):
-    assert types.cast_geopoint_object(value) == result
+def test_cast_geopoint(format, value, result):
+    assert types.cast_geopoint(format, value) == result

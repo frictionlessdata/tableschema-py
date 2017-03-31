@@ -12,46 +12,32 @@ from ..config import ERROR
 
 # Module API
 
-def cast_geopoint_default(value):
+def cast_geopoint(format, value):
     geopoint = _extract_geopoint(value)
     if not geopoint:
         if not isinstance(value, six.string_types):
             return ERROR
         try:
-            lon, lat = value.split(',')
-            geopoint = {'lon': Decimal(lon.strip()), 'lat': Decimal(lat.strip())}
-        except Exception:
-            return ERROR
-    if not _validate_geopoint(geopoint):
-        return ERROR
-    return geopoint
-
-
-def cast_geopoint_array(value):
-    geopoint = _extract_geopoint(value)
-    if not geopoint:
-        if not isinstance(value, six.string_types):
-            return ERROR
-        try:
-            lon, lat = json.loads(value)
-            geopoint = {'lon': Decimal(lon), 'lat': Decimal(lat)}
-        except Exception:
-            return ERROR
-    if not _validate_geopoint(geopoint):
-        return ERROR
-    return geopoint
-
-
-def cast_geopoint_object(value):
-    geopoint = _extract_geopoint(value)
-    if not geopoint:
-        if not isinstance(value, six.string_types):
-            return ERROR
-        try:
-            value = json.loads(value)
-            if len(value) != 2:
-                return ERROR
-            geopoint = {'lon': Decimal(value['lon']), 'lat': Decimal(value['lat'])}
+            if format == 'default':
+                lon, lat = value.split(',')
+                geopoint = {
+                    'lon': Decimal(lon.strip()),
+                    'lat': Decimal(lat.strip()),
+                }
+            elif format == 'array':
+                lon, lat = json.loads(value)
+                geopoint = {
+                    'lon': Decimal(lon),
+                    'lat': Decimal(lat),
+                }
+            elif format == 'object':
+                value = json.loads(value)
+                if len(value) != 2:
+                    return ERROR
+                geopoint = {
+                    'lon': Decimal(value['lon']),
+                    'lat': Decimal(value['lat']),
+                }
         except Exception:
             return ERROR
     if not _validate_geopoint(geopoint):
