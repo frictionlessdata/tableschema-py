@@ -11,6 +11,7 @@ from future.utils import raise_with_traceback
 from ... import exceptions
 from ... import helpers
 from ... import compat
+from ... import specs
 from . import base
 
 
@@ -38,14 +39,14 @@ class GeoJSONType(base.JTSType):
     def cast_default(self, value, fmt=None):
         if isinstance(value, self.python_type):
             try:
-                jsonschema.validate(value, _geojson_schema)
+                jsonschema.validate(value, specs.geojson)
                 return value
             except jsonschema.exceptions.ValidationError:
                 raise_with_traceback(exceptions.InvalidGeoJSONType())
         if isinstance(value, compat.str):
             try:
                 geojson = json.loads(value)
-                jsonschema.validate(geojson, _geojson_schema)
+                jsonschema.validate(geojson, specs.geojson)
                 return geojson
             except (TypeError, ValueError):
                 raise_with_traceback(exceptions.InvalidGeoJSONType())
@@ -54,16 +55,3 @@ class GeoJSONType(base.JTSType):
 
     def cast_topojson(self, value, fmt=None):
         raise NotImplementedError
-
-
-# Internal
-
-def _load_geojson_schema():
-    filepath = os.path.join(
-        os.path.dirname(os.path.realpath(__file__)),
-        '..', '..', 'schemas', 'geojson.json')
-    with open(filepath) as f:
-        json_table_schema = json.load(f)
-    return json_table_schema
-
-_geojson_schema = _load_geojson_schema()

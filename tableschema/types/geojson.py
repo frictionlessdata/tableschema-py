@@ -8,6 +8,7 @@ import os
 import six
 import json
 import jsonschema
+from .. import specs
 from ..config import ERROR
 
 
@@ -23,21 +24,10 @@ def cast_geojson(format, value):
             return ERROR
     if format == 'default':
         try:
-            jsonschema.validate(value, _geojson_schema)
+            jsonschema.validate(value, specs.geojson)
         except Exception:
             return ERROR
     elif format == 'topojson':
         if not isinstance(value, dict):
             return ERROR
     return value
-
-
-# Internal
-
-def _load_geojson_schema():
-    dirname = os.path.dirname(__file__)
-    filepath = os.path.join(dirname, '..', 'schemas', 'geojson.json')
-    with open(filepath) as file:
-        return json.load(file)
-
-_geojson_schema = _load_geojson_schema()

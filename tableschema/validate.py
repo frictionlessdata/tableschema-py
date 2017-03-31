@@ -9,6 +9,7 @@ import json
 import jsonschema
 from jsonschema.validators import validator_for
 from . import exceptions
+from . import specs
 
 
 # Module API
@@ -33,11 +34,11 @@ def validate(descriptor, no_fail_fast=False):
     # Fail fast
     if not no_fail_fast:
         jsonschema.validate(
-            descriptor, _table_schema, cls=_TableSchemaValidator)
+            descriptor, specs.table_schema, cls=_TableSchemaValidator)
 
     # Multiple errors
     else:
-        validator = _TableSchemaValidator(_table_schema)
+        validator = _TableSchemaValidator(specs.table_schema)
         errors = list(validator.iter_errors(descriptor))
         if errors:
             raise exceptions.MultipleInvalid(errors=errors)
@@ -47,18 +48,8 @@ def validate(descriptor, no_fail_fast=False):
 
 # Internal
 
-# Get schema and validator
-def _load_schema_and_validator():
-    basepath = os.path.dirname(__file__)
-    filepath = os.path.join(basepath, 'schemas/table-schema.json')
-    with open(filepath) as file:
-        table_schema = json.load(file)
-    BaseValidator = validator_for(table_schema)
-    return table_schema, BaseValidator
-_table_schema, _BaseValidator = _load_schema_and_validator()
 
-
-class _TableSchemaValidator(_BaseValidator):
+class _TableSchemaValidator(validator_for(specs.table_schema)):
     @classmethod
     def check_schema(cls, schema):
         # When checking against the metaschema, we do not want to run the
