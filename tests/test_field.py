@@ -25,8 +25,8 @@ DESCRIPTOR_MAX = {
 
 # Tests [general]
 
-def test_descriptor():
-    assert Field(DESCRIPTOR_MIN).descriptor == DESCRIPTOR_MIN
+def test_descriptor(apply_defaults):
+    assert Field(DESCRIPTOR_MIN).descriptor == apply_defaults(DESCRIPTOR_MIN)
 
 
 def test_name():

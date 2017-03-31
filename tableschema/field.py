@@ -21,8 +21,19 @@ class Field(object):
 
     # Public
 
-    def __init__(self, descriptor):
-        self.__descriptor = deepcopy(descriptor)
+    def __init__(self, descriptor, missing_values=None):
+
+        # Deepcopy descriptor
+        descriptor = deepcopy(descriptor)
+
+        # Apply descriptor defaults
+        descriptor.setdefault('type', 'string')
+        descriptor.setdefault('format', 'default')
+        missing_values = ['']
+
+        # Set attributes
+        self.__descriptor = descriptor
+        self.__missing_values = missing_values
         # Probably it's just a temporal solution
         self.__type = _TYPES[self.type](descriptor)
 
@@ -42,13 +53,13 @@ class Field(object):
     def type(self):
         """str: field type
         """
-        return self.__descriptor.get('type', 'string')
+        return self.__descriptor['type']
 
     @property
     def format(self):
         """str: field format
         """
-        return self.__descriptor.get('format', 'default')
+        return self.__descriptor['format']
 
     @property
     def constraints(self):

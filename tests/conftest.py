@@ -14,9 +14,15 @@ from copy import deepcopy
 def apply_defaults():
     def function(descriptor):
         descriptor = deepcopy(descriptor)
-        descriptor.setdefault('missingValues', [''])
-        for field in descriptor['fields']:
-            field.setdefault('type', 'string')
-            field.setdefault('format', 'default')
+        # Schema descriptor
+        if descriptor.get('fields'):
+            descriptor.setdefault('missingValues', [''])
+            for field in descriptor['fields']:
+                field.setdefault('type', 'string')
+                field.setdefault('format', 'default')
+        # Field descriptor
+        else:
+            descriptor.setdefault('type', 'string')
+            descriptor.setdefault('format', 'default')
         return descriptor
     return function
