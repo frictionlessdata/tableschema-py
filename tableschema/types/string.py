@@ -23,8 +23,7 @@ def cast_string(format, value):
         if not rfc3986.is_valid_uri(value, require_scheme=True):
             return ERROR
     elif format == 'email':
-        PATTERN = re.compile(r'[^@]+@[^@]+\.[^@]+')
-        if not re.match(PATTERN, value):
+        if not re.match(_EMAIL_PATTERN, value):
             return ERROR
     elif format == 'uuid':
         try:
@@ -37,3 +36,8 @@ def cast_string(format, value):
         except binascii.Error:
             return ERROR
     return value
+
+
+# Internal
+
+_EMAIL_PATTERN = re.compile(r'[^@]+@[^@]+\.[^@]+')

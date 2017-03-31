@@ -8,6 +8,8 @@ from __future__ import unicode_literals
 # Module API
 
 def check_maxLength(constraint, value):
-    if len(value) > constraint:
-        return False
-    return True
+    if value is None:
+        return True
+    if len(value) <= constraint:
+        return True
+    return False

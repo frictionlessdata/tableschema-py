@@ -13,13 +13,12 @@ from ..config import ERROR
 # Module API
 
 def cast_time(format, value):
-    PATTERN = '%H:%M:%S'
     if not isinstance(value, time):
         if not isinstance(value, six.string_types):
             return ERROR
         try:
             if format == 'default':
-                value = datetime.strptime(value, PATTERN).time()
+                value = datetime.strptime(value, _DEFAULT_PATTERN).time()
             elif format == 'any':
                 value = parse(value).time()
             else:
@@ -27,3 +26,8 @@ def cast_time(format, value):
         except Exception:
             return ERROR
     return value
+
+
+# Internal
+
+_DEFAULT_PATTERN = '%H:%M:%S'

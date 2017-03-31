@@ -8,6 +8,8 @@ from __future__ import unicode_literals
 # Module API
 
 def check_enum(constraint, value):
-    if value not in constraint:
-        return False
-    return True
+    if value is None:
+        return True
+    if value in constraint:
+        return True
+    return False

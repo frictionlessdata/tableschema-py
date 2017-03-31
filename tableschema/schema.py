@@ -104,7 +104,9 @@ class Schema(object):
         """Field[]: field instances
         """
         if self.__fields is None:
-            self.__fields = [Field(fd) for fd in self.__descriptor['fields']]
+            self.__fields = [
+                Field(descriptor, self.__descriptor['missingValues'])
+                for descriptor in self.__descriptor['fields']]
         return self.__fields
 
     def get_field(self, name):

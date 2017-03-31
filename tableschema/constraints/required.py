@@ -8,6 +8,6 @@ from __future__ import unicode_literals
 # Module API
 
 def check_required(constraint, value):
-    if constraint and value is None:
-        return False
-    return True
+    if not (constraint and value is None):
+        return True
+    return False

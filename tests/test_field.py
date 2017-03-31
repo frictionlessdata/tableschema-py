@@ -18,7 +18,7 @@ DESCRIPTOR_MIN = {'name': 'id'}
 DESCRIPTOR_MAX = {
     'name': 'id',
     'type': 'integer',
-    'format': 'object',
+    'format': 'default',
     'constraints': {'required': True},
 }
 
@@ -40,7 +40,7 @@ def test_type():
 
 def test_format():
     assert Field(DESCRIPTOR_MIN).format == 'default'
-    assert Field(DESCRIPTOR_MAX).format == 'object'
+    assert Field(DESCRIPTOR_MAX).format == 'default'
 
 
 def test_constraints():
@@ -54,19 +54,21 @@ def test_required():
 
 
 def test_cast_value():
-    # Success
     assert Field(DESCRIPTOR_MAX).cast_value('1') == 1
-    # Constraint error
+
+
+def test_cast_value_constraint_error():
     with pytest.raises(exceptions.ConstraintError):
         Field(DESCRIPTOR_MAX).cast_value('')
 
 
-def test_cast_value_skip_constraints():
-    assert Field(DESCRIPTOR_MIN).cast_value('', skip_constraints=True) == ''
+def test_cast_value_constraints_false():
+    assert Field(DESCRIPTOR_MIN).cast_value('', constraints=False) == None
 
 
-def test_cast_value_null_case_insensitive():
-    assert Field({'name': 'name', 'type': 'number'}).cast_value('Null') == None
+def test_cast_value_null_with_missing_values():
+    field = Field({'name': 'name', 'type': 'number'}, missing_values=['null'])
+    assert field.cast_value('null') == None
 
 
 def test_test_value():
@@ -75,12 +77,8 @@ def test_test_value():
     assert Field(DESCRIPTOR_MAX).test_value('') == False
 
 
-def test_test_value_skip_constraints():
-    assert Field(DESCRIPTOR_MIN).test_value('', skip_constraints=True) == True
-
-
-def test_test_value_not_supported_constraint():
-    assert Field(DESCRIPTOR_MIN).test_value('', constraint='bad') == True
+def test_test_value_constraints_false():
+    assert Field(DESCRIPTOR_MIN).test_value('', constraints=False) == True
 
 
 # Tests [missingValues]
@@ -89,10 +87,9 @@ def test_string_missingValues():
     field = Field({
         'name': 'name',
         'type': 'string',
-        'missingValues': ['NA', 'N/A']
-    })
+    }, missing_values=['', 'NA', 'N/A'])
     cast = field.cast_value
-    assert cast('') == ''
+    assert cast('') == None
     assert cast('NA') == None
     assert cast('N/A') == None
 
@@ -101,8 +98,7 @@ def test_number_missingValues():
     field = Field({
         'name': 'name',
         'type': 'number',
-        'missingValues': ['NA', 'N/A']
-    })
+    }, missing_values=['', 'NA', 'N/A'])
     cast = field.cast_value
     assert cast('') == None
     assert cast('NA') == None
@@ -115,29 +111,28 @@ def test_test_value_required():
     field = Field({
         'name': 'name',
         'type': 'string',
-        'missingValues': ['NA', 'N/A'],
         'constraints': {'required': True}
-    })
-    test = partial(field.test_value, constraint='required')
+    }, missing_values=['', 'NA', 'N/A'])
+    test = partial(field.test_value, constraints=['required'])
     assert test('test') == True
-    assert test('null') == False
-    assert test('none') == False
-    assert test('nil') == False
-    assert test('nan') == False
+    assert test('null') == True
+    assert test('none') == True
+    assert test('nil') == True
+    assert test('nan') == True
     assert test('NA') == False
     assert test('N/A') == False
-    assert test('-') == False
-    assert test('') == True
+    assert test('-') == True
+    assert test('') == False
     assert test(None) == False
 
 
 def test_test_value_pattern():
     field = Field({
         'name': 'name',
-        'type': 'integer',
+        'type': 'string',
         'constraints': {'pattern': '3.*'}
     })
-    test = partial(field.test_value, constraint='pattern')
+    test = partial(field.test_value, constraints=['pattern'])
     assert test('3') == True
     assert test('321') == True
     assert test('123') == False
@@ -149,7 +144,7 @@ def test_test_value_unique():
         'type': 'integer',
         'constraints': {'unique': True}
     })
-    test = partial(field.test_value, constraint='unique')
+    test = partial(field.test_value, constraints=['unique'])
     assert test(30000) == True
     assert test('bad') == False
 
@@ -160,7 +155,7 @@ def test_test_value_enum():
         'type': 'integer',
         'constraints': {'enum': ['1', '2', '3']}
     })
-    test = partial(field.test_value, constraint='enum')
+    test = partial(field.test_value, constraints=['enum'])
     assert test('1') == True
     assert test(1) == True
     assert test('4') == False
@@ -173,7 +168,7 @@ def test_test_value_minimum():
         'type': 'integer',
         'constraints': {'minimum': 1}
     })
-    test = partial(field.test_value, constraint='minimum')
+    test = partial(field.test_value, constraints=['minimum'])
     assert test('2') == True
     assert test(2) == True
     assert test('1') == True
@@ -188,7 +183,7 @@ def test_test_value_maximum():
         'type': 'integer',
         'constraints': {'maximum': 1}
     })
-    test = partial(field.test_value, constraint='maximum')
+    test = partial(field.test_value, constraints=['maximum'])
     assert test('0') == True
     assert test(0) == True
     assert test('1') == True
@@ -203,10 +198,11 @@ def test_test_value_minLength():
         'type': 'string',
         'constraints': {'minLength': 1}
     })
-    test = partial(field.test_value, constraint='minLength')
+    test = partial(field.test_value, constraints=['minLength'])
     assert test('ab') == True
     assert test('a') == True
-    assert test('') == False
+    # Null value passes
+    assert test('') == True
 
 
 def test_test_value_maxLength():
@@ -215,7 +211,7 @@ def test_test_value_maxLength():
         'type': 'string',
         'constraints': {'maxLength': 1}
     })
-    test = partial(field.test_value, constraint='maxLength')
+    test = partial(field.test_value, constraints=['maxLength'])
     assert test('') == True
     assert test('a') == True
     assert test('ab') == False

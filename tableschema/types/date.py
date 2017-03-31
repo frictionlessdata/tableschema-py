@@ -18,8 +18,7 @@ def cast_date(format, value):
             return ERROR
         try:
             if format == 'default':
-                PATTERN = '%Y-%m-%d'
-                value = datetime.strptime(value, PATTERN).date()
+                value = datetime.strptime(value, _DEFAULT_PATTERN).date()
             elif format == 'any':
                 value = parse(value).date()
             else:
@@ -27,3 +26,8 @@ def cast_date(format, value):
         except Exception:
             return ERROR
     return value
+
+
+# Internal
+
+_DEFAULT_PATTERN = '%Y-%m-%d'
