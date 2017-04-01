@@ -8,9 +8,7 @@ import re
 import six
 import uuid
 import base64
-import decimal
 import rfc3986
-import binascii
 from ..config import ERROR
 
 
@@ -28,12 +26,12 @@ def cast_string(format, value):
     elif format == 'uuid':
         try:
             uuid.UUID(value, version=4)
-        except ValueError:
+        except Exception:
             return ERROR
     elif format == 'binary':
         try:
             base64.b64decode(value)
-        except binascii.Error:
+        except Exception:
             return ERROR
     return value
 
