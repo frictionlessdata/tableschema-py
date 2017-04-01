@@ -30,7 +30,7 @@ def cast_number(format, value, **options):
 # Internal
 
 _DEFAULT_DECIMAL_CHAR = '.'
-_DEFAULT_GROUP_CHAR = ','
+_DEFAULT_GROUP_CHAR = ''
 _PERCENT_CHAR = '%‰‱％﹪٪'
 _CURRENCIES = ''.join(compat.chr(i) for i in range(0xffff)
      if unicodedata.category(compat.chr(i)) == 'Sc')
@@ -40,7 +40,8 @@ def _preprocess_number(value, **options):
     currency = options.get('currency', False)
     group_char = options.get('groupChar', _DEFAULT_GROUP_CHAR)
     decimal_char = options.get('decimalChar', _DEFAULT_DECIMAL_CHAR)
-    value = value.replace(group_char, '').replace(decimal_char, '.')
+    value = value.replace(decimal_char, '.')
+    value = value.replace(group_char, '')
     value = re.sub('[' + _PERCENT_CHAR + ']', '', value)
     value = re.sub('\s', '', value)
     if currency:
