@@ -28,6 +28,8 @@ A library for working with [Table Schema](http://specs.frictionlessdata.io/table
     - `tableschema.storage` (use `tableschema.Storage`)
     - `tableschema.model` (use `tableschema.Schema`)
     - `tableschema.types` (use `tableschema.Field`)
+  - rebased on Table Schema v1 null/types/constraints symantics
+  - `Field.cast/test_value` now accepts `constraints=bool/list` argument instead of `skip_constraints=bool` and `constraint=str`
   - other changes could be introduced before final release
   - documentation for previous release (`v0.10`) could be found [here](https://github.com/frictionlessdata/tableschema-py/tree/v0.10.0)
 - There are deprecating changes in `v0.7`:
@@ -129,7 +131,7 @@ Where the option `no_fail_fast` is given, it will collect all errors it encouter
 from tableschema import Field
 
 # Init field
-field = Field({'type': 'number'})
+field = Field({'name': 'name', type': 'number'})
 
 # Cast a value
 field.cast_value('12345') # -> 12345
@@ -302,8 +304,8 @@ Field(descriptor)
     type -> str
     format -> str
     constraints -> dict
-    cast_value(value, skip_constraints=False) -> value
-    test_value(value, skip_constraints=False, constraint=None) -> bool
+    cast_value(value, constraints=True) -> value
+    test_value(value, constraints=True) -> bool
 validate(descriptor, no_fail_fast=False) -> bool
 infer(headers, values) -> descriptor
 exceptions
