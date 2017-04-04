@@ -20,6 +20,6 @@ def cast_yearmonth(format, value):
             value = int(value)
         except Exception:
             return ERROR
-    if value < 0 or value > 12:
+    if value < 1 or value > 12:
         return ERROR
     return value
