@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 
 import six
 import json
+from collections import namedtuple
 from decimal import Decimal
 from ..config import ERROR
 
@@ -13,51 +14,35 @@ from ..config import ERROR
 # Module API
 
 def cast_geopoint(format, value):
-    geopoint = _extract_geopoint(value)
-    if not geopoint:
-        if not isinstance(value, six.string_types):
-            return ERROR
-        try:
-            if format == 'default':
+    try:
+        if format == 'default':
+            if isinstance(value, six.string_types):
                 lon, lat = value.split(',')
-                geopoint = {
-                    'lon': Decimal(lon.strip()),
-                    'lat': Decimal(lat.strip()),
-                }
-            elif format == 'array':
-                lon, lat = json.loads(value)
-                geopoint = {
-                    'lon': Decimal(lon),
-                    'lat': Decimal(lat),
-                }
-            elif format == 'object':
+                lon = lon.strip()
+                lat = lat.strip()
+            elif isinstance(value, (tuple, list)):
+                lon, lat = value
+        elif format == 'array':
+            if isinstance(value, six.string_types):
                 value = json.loads(value)
-                if len(value) != 2:
-                    return ERROR
-                geopoint = {
-                    'lon': Decimal(value['lon']),
-                    'lat': Decimal(value['lat']),
-                }
-        except Exception:
-            return ERROR
-    if not _validate_geopoint(geopoint):
+            lon, lat = value
+        elif format == 'object':
+            if isinstance(value, six.string_types):
+                value = json.loads(value)
+            if len(value) != 2:
+                return ERROR
+            lon = value['lon']
+            lat = value['lat']
+        geopoint = _geopoint(Decimal(lon), Decimal(lat))
+    except Exception:
+        return ERROR
+    if geopoint.lon > 180 or geopoint.lon < -180:
+        return ERROR
+    if geopoint.lat > 90 or geopoint.lat < -90:
         return ERROR
     return geopoint
 
 
 # Internal
 
-def _extract_geopoint(value):
-    if not isinstance(value, dict):
-        return None
-    if len(value) != 2:
-        return None
-    return {'lon': value['lon'], 'lat': value['lat']}
-
-
-def _validate_geopoint(geopoint):
-    if geopoint['lon'] > 180 or geopoint['lon'] < -180:
-        return False
-    elif geopoint['lat'] > 90 or geopoint['lat'] < -90:
-        return False
-    return True
+_geopoint = namedtuple('geopoint', ['lon', 'lat'])
