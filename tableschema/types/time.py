@@ -5,6 +5,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import six
+import warnings
 from datetime import datetime, time
 from dateutil.parser import parse
 from ..config import ERROR
@@ -22,6 +23,12 @@ def cast_time(format, value):
             elif format == 'any':
                 value = parse(value).time()
             else:
+                if format.startswith('fmt:'):
+                    warnings.warn(
+                        'Format "fmt:<PATTERN>" is deprecated. '
+                        'Please use "<PATTERN>" without "fmt:" prefix.',
+                        UserWarning)
+                    format = format.replace('fmt:', '')
                 value = datetime.strptime(value, format).time()
         except Exception:
             return ERROR

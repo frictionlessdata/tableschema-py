@@ -37,6 +37,15 @@ from tableschema.config import ERROR
     ('%H:%M', True, ERROR),
     ('%H:%M', '', ERROR),
     ('invalid', '', ERROR),
+    # Deprecated
+    ('fmt:%H:%M', time(6), time(6)),
+    ('fmt:%H:%M', '06:00', time(6)),
+    ('fmt:%M:%H', '06:50', ERROR),
+    ('fmt:%H:%M', '3:00 am', ERROR),
+    ('fmt:%H:%M', 'some night', ERROR),
+    ('fmt:%H:%M', 'invalid', ERROR),
+    ('fmt:%H:%M', True, ERROR),
+    ('fmt:%H:%M', '', ERROR),
 ])
 def test_cast_time(format, value, result):
     assert types.cast_time(format, value) == result
