@@ -33,6 +33,13 @@ from tableschema.config import ERROR
     ('%d/%m/%y',True, ERROR),
     ('%d/%m/%y', '', ERROR),
     ('invalid','21/11/06 16:30', ERROR),
+    # Deprecated
+    ('fmt:%d/%m/%y', date(2019, 1, 1), date(2019, 1, 1)),
+    ('fmt:%d/%m/%y', '21/11/06', date(2006, 11, 21)),
+    ('fmt:%y/%m/%d','21/11/06 16:30', ERROR),
+    ('fmt:%d/%m/%y','invalid', ERROR),
+    ('fmt:%d/%m/%y',True, ERROR),
+    ('fmt:%d/%m/%y', '', ERROR),
 ])
 def test_cast_date(format, value, result):
     assert types.cast_date(format, value) == result
