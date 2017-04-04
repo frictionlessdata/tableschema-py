@@ -5,21 +5,32 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import six
+from collections import namedtuple
 from ..config import ERROR
 
 
 # Module API
 
 def cast_yearmonth(format, value):
-    if not isinstance(value, int):
-        if not isinstance(value, six.string_types):
+    if isinstance(value, (tuple, list)):
+        if len(value) != 2:
             return ERROR
-        if len(value) not in [1, 2]:
-            return ERROR
+        value = _yearmonth(value[0], value[1])
+    elif isinstance(value, six.string_types):
         try:
-            value = int(value)
+            year, month = value.split('-')
+            year = int(year)
+            month = int(month)
+            if month < 1 or month > 12:
+                return ERROR
+            value = _yearmonth(year, month)
         except Exception:
             return ERROR
-    if value < 1 or value > 12:
+    else:
         return ERROR
     return value
+
+
+# Internal
+
+_yearmonth = namedtuple('yearmonth', ['year', 'month'])

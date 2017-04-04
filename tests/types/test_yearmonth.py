@@ -12,11 +12,13 @@ from tableschema.config import ERROR
 # Tests
 
 @pytest.mark.parametrize('format, value, result', [
-    ('default', 10, 10),
-    ('default', '10', 10),
-    ('default', '1', 1),
-    ('default', '12', 12),
-    ('default', '0', ERROR),
+    ('default', [2000, 10], (2000, 10)),
+    ('default', (2000, 10), (2000, 10)),
+    ('default', '2000-10', (2000, 10)),
+    ('default', (2000, 10, 20), ERROR),
+    ('default', '2000-13-20', ERROR),
+    ('default', '2000-13', ERROR),
+    ('default', '2000-0', ERROR),
     ('default', '13', ERROR),
     ('default', -10, ERROR),
     ('default', 20, ERROR),
