@@ -8,9 +8,10 @@ import io
 import json
 from .field import Field
 from .validate import validate
-from . import compat
-from . import helpers
 from . import exceptions
+from . import helpers
+from . import config
+from . import compat
 
 
 # Module API
@@ -35,10 +36,10 @@ class Schema(object):
         descriptor = helpers.load_json_source(descriptor)
 
         # Apply descriptor defaults
-        descriptor.setdefault('missingValues', [''])
         for field in descriptor['fields']:
-            field.setdefault('type', 'string')
-            field.setdefault('format', 'default')
+            field.setdefault('type', config.DEFAULT_FIELD_TYPE)
+            field.setdefault('format', config.DEFAULT_FIELD_FORMAT)
+        descriptor.setdefault('missingValues', config.DEFAULT_MISSING_VALUES)
 
         # Validate descriptor
         validate(descriptor)
@@ -103,7 +104,9 @@ class Schema(object):
         """Field[]: field instances
         """
         if self.__fields is None:
-            self.__fields = [Field(fd) for fd in self.__descriptor['fields']]
+            self.__fields = [
+                Field(descriptor, self.__descriptor['missingValues'])
+                for descriptor in self.__descriptor['fields']]
         return self.__fields
 
     def get_field(self, name):

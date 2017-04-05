@@ -4,42 +4,21 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import six
 import json
-from .. import exceptions
-from .. import helpers
-from . import base
+from ..config import ERROR
 
 
 # Module API
 
-class ArrayType(base.JTSType):
-
-    # Public
-
-    name = 'array'
-    null_values = helpers.NULL_VALUES
-    supported_constraints = [
-        'required',
-        'pattern',
-        'enum',
-        'minLength',
-        'maxLength',
-    ]
-    # ---
-    python_type = list
-
-    def cast_default(self, value, fmt=None):
-
-        if isinstance(value, self.python_type):
-            return value
-
+def cast_array(format, value):
+    if not isinstance(value, list):
+        if not isinstance(value, six.string_types):
+            return ERROR
         try:
-            array_type = json.loads(value)
-            if isinstance(array_type, self.python_type):
-                return array_type
-            else:
-                raise exceptions.InvalidArrayType('Not an array')
-
-        except (TypeError, ValueError):
-            raise exceptions.InvalidArrayType(
-                '"{0}" is not a array type'.format(value))
+            value = json.loads(value)
+        except Exception:
+            return ERROR
+        if not isinstance(value, list):
+            return ERROR
+    return value

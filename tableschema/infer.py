@@ -5,6 +5,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import operator
+from . import config
 from . import types
 
 
@@ -89,6 +90,23 @@ def infer(headers, values, row_limit=None, explicit=False, primary_key=None):
 
 # Internal
 
+_TYPE_ORDER = [
+    'duration',
+    'geojson',
+    'geopoint',
+    'object',
+    'array',
+    'datetime',
+    'time',
+    'date',
+    'integer',
+    'number',
+    'boolean',
+    'string',
+    'any',
+]
+
+
 class _TypeGuesser(object):
     """Guess the type for a value.
 
@@ -97,26 +115,17 @@ class _TypeGuesser(object):
 
     """
 
-    def __init__(self, type_options=None):
-        self._types = _get_available_types()
-        self.type_options = type_options or {}
-
     def cast(self, value):
-        for _type in reversed(self._types):
-            result = _type(self.type_options.get(_type.name, {})).test(value)
-            if result:
-                rv = (_type.name, 'default')
-                break
-
-        return rv
+        for name in _TYPE_ORDER:
+            cast = getattr(types, 'cast_%s' % name)
+            result = cast('default', value)
+            if result != config.ERROR:
+                return (name, 'default')
 
 
 class _TypeResolver(object):
     """Get the best matching type/format from a list of possible ones.
     """
-
-    def __init__(self):
-        self._types = _get_available_types()
 
     def get(self, results):
 
@@ -146,24 +155,3 @@ class _TypeResolver(object):
             }
 
         return rv
-
-
-def _get_available_types():
-    """Return available types.
-    """
-    return [
-        types.AnyType,
-        types.StringType,
-        types.BooleanType,
-        types.NumberType,
-        types.IntegerType,
-        types.NullType,
-        types.DateType,
-        types.TimeType,
-        types.DateTimeType,
-        types.ArrayType,
-        types.ObjectType,
-        types.GeoPointType,
-        types.GeoJSONType,
-        types.DurationType,
-    ]

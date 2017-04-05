@@ -4,43 +4,27 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-from .. import exceptions
-from .. import helpers
-from . import base
+import six
+from ..config import ERROR
 
 
 # Module API
 
-class BooleanType(base.JTSType):
-
-    # Public
-
-    name = 'boolean'
-    null_values = helpers.NULL_VALUES
-    supported_constraints = [
-        'required',
-        'pattern',
-        'enum',
-    ]
-    # ---
-    python_type = bool
-    true_values = helpers.TRUE_VALUES
-    false_values = helpers.FALSE_VALUES
-
-    def cast_default(self, value, fmt=None):
-
-        if isinstance(value, self.python_type):
-            return value
-
-        try:
-            value = value.strip().lower()
-        except AttributeError:
-            pass
-
-        if value in (self.true_values):
-            return True
-        elif value in (self.false_values):
-            return False
+def cast_boolean(format, value):
+    if not isinstance(value, bool):
+        if not isinstance(value, six.string_types):
+            return ERROR
+        value = value.strip().lower()
+        if value in _TRUE_VALUES:
+            value = True
+        elif value in _FALSE_VALUES:
+            value = False
         else:
-            raise exceptions.InvalidBooleanType(
-                '{0} is not a boolean value'.format(value))
+            return ERROR
+    return value
+
+
+# Internal
+
+_TRUE_VALUES = ['yes', 'y', 'true', 't', '1']
+_FALSE_VALUES = ['no', 'n', 'false', 'f', '0']

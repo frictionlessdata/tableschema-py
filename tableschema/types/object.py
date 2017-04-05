@@ -4,41 +4,21 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
+import six
 import json
-from future.utils import raise_with_traceback
-from .. import exceptions
-from .. import helpers
-from . import base
+from ..config import ERROR
 
 
 # Module API
 
-class ObjectType(base.JTSType):
-
-    # Public
-
-    name = 'object'
-    null_values = helpers.NULL_VALUES
-    supported_constraints = [
-        'required',
-        'pattern',
-        'enum',
-        'minLength',
-        'maxLength',
-    ]
-    # ---
-    python_type = dict
-
-    def cast_default(self, value, fmt=None):
-
-        if isinstance(value, self.python_type):
-            return value
-
+def cast_object(format, value):
+    if not isinstance(value, dict):
+        if not isinstance(value, six.string_types):
+            return ERROR
         try:
-            json_value = json.loads(value)
-            if isinstance(json_value, self.python_type):
-                return json_value
-            else:
-                raise exceptions.InvalidObjectType()
-        except (TypeError, ValueError) as e:
-            raise_with_traceback(exceptions.InvalidObjectType(e))
+            value = json.loads(value)
+        except Exception:
+            return ERROR
+        if not isinstance(value, dict):
+            return ERROR
+    return value

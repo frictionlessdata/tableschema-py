@@ -4,62 +4,37 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import datetime
-from future.utils import raise_with_traceback
-from dateutil.parser import parse as date_parse
-from .. import exceptions
-from .. import helpers
-from . import base
+import six
+import warnings
+from datetime import datetime
+from dateutil.parser import parse
+from ..config import ERROR
 
 
 # Module API
 
-class DateTimeType(base.JTSType):
-
-    # Public
-
-    name = 'datetime'
-    null_values = helpers.NULL_VALUES
-    supported_constraints = [
-        'required',
-        'pattern',
-        'enum',
-        'minimum',
-        'maximum',
-    ]
-    # ---
-    python_type = datetime.datetime
-    ISO8601 = '%Y-%m-%dT%H:%M:%SZ'
-    raw_formats = ['DD/MM/YYYYThh/mm/ss']
-    py_formats = ['%Y/%m/%dT%H:%M:%S']
-    format_map = dict(zip(raw_formats, py_formats))
-
-    def cast_default(self, value, fmt=None):
-
-        if isinstance(value, self.python_type):
-            return value
-
+def cast_datetime(format, value):
+    if not isinstance(value, datetime):
+        if not isinstance(value, six.string_types):
+            return ERROR
         try:
-            return datetime.datetime.strptime(value, self.ISO8601)
-        except (TypeError, ValueError) as e:
-            raise_with_traceback(exceptions.InvalidDateTimeType(e))
+            if format == 'default':
+                value = datetime.strptime(value, _DEFAULT_PATTERN)
+            elif format == 'any':
+                value = parse(value)
+            else:
+                if format.startswith('fmt:'):
+                    warnings.warn(
+                        'Format "fmt:<PATTERN>" is deprecated. '
+                        'Please use "<PATTERN>" without "fmt:" prefix.',
+                        UserWarning)
+                    format = format.replace('fmt:', '')
+                value = datetime.strptime(value, format)
+        except Exception:
+            return ERROR
+    return value
 
-    def cast_any(self, value, fmt=None):
 
-        if isinstance(value, self.python_type):
-            return value
+# Internal
 
-        try:
-            return date_parse(value)
-        except (TypeError, ValueError) as e:
-            raise_with_traceback(exceptions.InvalidDateTimeType(e))
-
-    def cast_fmt(self, value, fmt=None):
-
-        if isinstance(value, self.python_type):
-            return value
-
-        try:
-            return datetime.datetime.strptime(value, fmt)
-        except (TypeError, ValueError) as e:
-            raise_with_traceback(exceptions.InvalidDateTimeType(e))
+_DEFAULT_PATTERN = '%Y-%m-%dT%H:%M:%SZ'

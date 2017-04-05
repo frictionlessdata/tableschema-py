@@ -4,12 +4,12 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
-import re
-import six
 from copy import deepcopy
 from functools import partial
+from . import constraints
 from . import exceptions
-from . import helpers
+from . import config
+from . import specs
 from . import types
 
 
@@ -21,10 +21,20 @@ class Field(object):
 
     # Public
 
-    def __init__(self, descriptor):
-        self.__descriptor = deepcopy(descriptor)
-        # Probably it's just a temporal solution
-        self.__type = _TYPES[self.type](descriptor)
+    def __init__(self, descriptor, missing_values=config.DEFAULT_MISSING_VALUES):
+
+        # Deepcopy descriptor
+        descriptor = deepcopy(descriptor)
+
+        # Apply descriptor defaults
+        descriptor.setdefault('type', config.DEFAULT_FIELD_TYPE)
+        descriptor.setdefault('format', config.DEFAULT_FIELD_FORMAT)
+
+        # Set attributes
+        self.__descriptor = descriptor
+        self.__missing_values = missing_values
+        self.__cast_function = self.__get_cast_function()
+        self.__check_functions = self.__get_check_functions()
 
     @property
     def descriptor(self):
@@ -42,13 +52,13 @@ class Field(object):
     def type(self):
         """str: field type
         """
-        return self.__descriptor.get('type', 'string')
+        return self.__descriptor['type']
 
     @property
     def format(self):
         """str: field format
         """
-        return self.__descriptor.get('format', 'default')
+        return self.__descriptor['format']
 
     @property
     def constraints(self):
@@ -62,176 +72,106 @@ class Field(object):
         """
         return self.constraints.get('required', False)
 
-    def cast_value(self, value, skip_constraints=False):
+    def cast_value(self, value, constraints=True):
         """Cast value against field.
 
         Args:
-            value (mixed): value to cast
-            skip_constraints (bool): skip constraints if true
+            value (any): value to cast
+            constraints (None/str[]/False):
+                - pass True to check all constraints (default)
+                - pass list of constraints for granular check
+                - pass False to skip all constraints
 
         Returns:
-            mixed: cast value
+            any: cast value
 
         """
-        return self.__type.cast(value, skip_constraints=skip_constraints)
 
-    def test_value(self, value, skip_constraints=False, constraint=None):
+        # Null value
+        if value in self.__missing_values:
+            value = None
+
+        # Cast value
+        cast_value = value
+        if value is not None:
+            cast_value = self.__cast_function(value)
+            if cast_value == config.ERROR:
+                raise exceptions.InvalidCastError((
+                    'Field "{field.name}" can\'t cast value "{value}" '
+                    'for type "{field.type}" with format "{field.format}"'
+                    ).format(field=self, value=value))
+
+        # Check value
+        if constraints:
+            for name, check in self.__check_functions.items():
+                if isinstance(constraints, list):
+                    if name not in constraints:
+                        continue
+                passed = check(cast_value)
+                if not passed:
+                    raise exceptions.ConstraintError((
+                        'Field "{field.name}" has constraint "{name}" '
+                        'which is not satisfied for value "{value}"'
+                        ).format(field=self, name=name, value=value))
+
+        return cast_value
+
+    def test_value(self, value, constraints=True):
         """Cast value against field.
-
-        If no cast error unique constraint is alway passed.
 
         Args:
             value (mixed): value to test
-            skip_constraints (bool): skip constraints if true
-            constraint (str): constraint to test against (priority over skip)
-                - required
-                - pattern
-                - unique
-                - enum
-                - minimum
-                - maximum
-                - minLenght
-                - maxLength
+            constraints (None/str[]/False):
+                - pass True to check all constraints (default)
+                - pass list of constraints for granular check
+                - pass False to skip all constraints
 
         Returns:
-            bool: test result
+            bool: result of test
 
         """
-
-        # General test
-        if constraint is None:
-            try:
-                self.__type.cast(value, skip_constraints=skip_constraints)
-            except (exceptions.InvalidCastError, exceptions.ConstraintError):
-                return False
-
-        # Granular test
-        if constraint in self.__type.supported_constraints + ['unique']:
-            if constraint not in ['required', 'pattern']:
-                try:
-                    value = self.__type.cast(value, skip_constraints=True)
-                except exceptions.InvalidCastError:
-                    return False
-                if value is None:
-                    return True
-            validator = getattr(self, '_Field__check_%s' % constraint)
-            try:
-                validator(value)
-            except exceptions.ConstraintError:
-                return False
-
+        try:
+            self.cast_value(value, constraints=constraints)
+        except (exceptions.InvalidCastError, exceptions.ConstraintError):
+            return False
         return True
 
     # Private
 
-    # Family of check methods could use cache
-    # of constraint params to improve performance
+    def __get_cast_function(self):
+        options = {}
+        # Get cast options for number
+        if self.type == 'number':
+            for key in ['decimalChar', 'groupChar', 'currency']:
+                value = self.descriptor.get(key)
+                if value is not None:
+                    options[key] = value
+        cast = getattr(types, 'cast_%s' % self.type)
+        cast = partial(cast, self.format, **options)
+        return cast
 
-    def __check_required(self, value):
-        """Check value against required constraint.
-        """
-        missing_values = self.descriptor.get('missingValues', [])
-        null_values = self.__type.null_values + missing_values
-        null_values = map(helpers.normalize_value, null_values)
-        if self.required and (helpers.normalize_value(value) in null_values):
-            message = 'The field "%s" requires a value' % self.name
-            raise exceptions.ConstraintError(message)
-        return True
-
-    def __check_pattern(self, value):
-        """Check value against pattern constraint.
-        """
-        pattern = self.constraints.get('pattern')
-        if pattern is not None and isinstance(value, six.string_types):
-            regex = re.compile('^{0}$'.format(pattern))
-            match = regex.match(value)
-            if not match:
-                message = 'The value for field "%s" must match the pattern"%s"'
-                message = message % (self.name, pattern)
-                raise exceptions.ConstraintError(message)
-        return True
-
-    def __check_unique(self, value):
-        """Check CAST value against unique constraint.
-        """
-        return True
-
-    def __check_enum(self, value):
-        """Check CAST value against enum constraint.
-        """
-        enum = self.constraints.get('enum')
-        if enum is not None:
-            enum = map(partial(self.cast_value, skip_constraints=True), enum)
-            if value not in enum:
-                message = 'The value for field "%s" must be in enum "%s"'
-                message = message % (self.name, enum)
-                raise exceptions.ConstraintError(message)
-        return True
-
-    def __check_minimum(self, value):
-        """Check CAST value against minimum constraint.
-        """
-        minimum = self.constraints.get('minimum')
-        if minimum is not None:
-            minimum = self.cast_value(minimum, skip_constraints=True)
-            if value < minimum:
-                message = 'The field "%s" must not be less than "%s"'
-                message = message % (self.name, minimum)
-                raise exceptions.ConstraintError(message)
-        return True
-
-    def __check_maximum(self, value):
-        """Check CAST value against maximum constraint.
-        """
-        maximum = self.constraints.get('maximum')
-        if maximum is not None:
-            maximum = self.cast_value(maximum, skip_constraints=True)
-            if value > maximum:
-                message = 'The field "%s" must not be more than "%s"'
-                message = message % (self.name, maximum)
-                raise exceptions.ConstraintError(message)
-        return True
-
-    def __check_minLength(self, value):
-        """Check CAST value against minLength constraint.
-        """
-        min_length = self.constraints.get('minLength')
-        if min_length is not None:
-            if len(value) < min_length:
-                message = 'The field "%s" must have a minimum length of "%s"'
-                message = message % (self.name, min_length)
-                raise exceptions.ConstraintError(message)
-        return True
-
-    def __check_maxLength(self, value):
-        """Check CAST value against maxLength constraint.
-        """
-        max_length = self.constraints.get('maxLength')
-        if max_length is not None:
-            if len(value) > max_length:
-                message = 'The field "%s" must have a maximum length of "%s"'
-                message = message % (self.name, max_length)
-                raise exceptions.ConstraintError(message)
-        return True
+    def __get_check_functions(self):
+        checks = {}
+        cast = partial(self.cast_value, constraints=False)
+        whitelist = _get_field_constraints(specs.table_schema, self.type)
+        for name, constraint in self.constraints.items():
+            if name in whitelist:
+                # Cast enum constraint
+                if name in ['enum']:
+                    constraint = list(map(cast, constraint))
+                # Cast maximum/minimum constraint
+                if name in ['maximum', 'minimum']:
+                    constraint = cast(constraint)
+                check = getattr(constraints, 'check_%s' % name)
+                checks[name] = partial(check, constraint)
+        return checks
 
 
 # Internal
 
-_TYPES = {
-    'string': types.StringType,
-    'number': types.NumberType,
-    'integer': types.IntegerType,
-    'boolean': types.BooleanType,
-    'null': types.NullType,
-    'array': types.ArrayType,
-    'object': types.ObjectType,
-    'date': types.DateType,
-    'time': types.TimeType,
-    'datetime': types.DateTimeType,
-    'year': types.YearType,
-    'yearmonth': types.YearMonthType,
-    'geopoint': types.GeoPointType,
-    'geojson': types.GeoJSONType,
-    'duration': types.DurationType,
-    'any': types.AnyType,
-}
+def _get_field_constraints(spec, type):
+    # Extract list of constraints for given type from jsonschema
+    spec_types = spec['properties']['fields']['items']['anyOf']
+    for spec_type in spec_types:
+        if type in spec_type['properties']['type']['enum']:
+            return spec_type['properties']['constraints']['properties'].keys()

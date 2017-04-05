@@ -4,44 +4,33 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import decimal
-
-from future.utils import raise_with_traceback
-
-from . import base
-from .. import exceptions
-from .. import helpers
+import six
+from collections import namedtuple
+from ..config import ERROR
 
 
 # Module API
 
-class YearMonthType(base.JTSType):
-    # Public
-
-    name = 'yearmonth'
-    null_values = helpers.NULL_VALUES
-    supported_constraints = [
-        'required',
-        'unique',
-        'pattern',
-        'enum',
-        'minimum',
-        'maximum',
-    ]
-    # ---
-    python_type = int
-    formats = 'default'
-
-    def cast_default(self, value, fmt=None):
-
-        if isinstance(value, self.python_type):
-            return value
-
+def cast_yearmonth(format, value):
+    if isinstance(value, (tuple, list)):
+        if len(value) != 2:
+            return ERROR
+        value = _yearmonth(value[0], value[1])
+    elif isinstance(value, six.string_types):
         try:
-            cast_value = self.python_type(value)
-            if not (1 <= cast_value <= 12):
-                raise exceptions.InvalidYearMonthType(
-                    '{0} is not a valid yearmonth value'.format(value))
-            return cast_value
-        except (ValueError, TypeError, decimal.InvalidOperation) as e:
-            raise_with_traceback(exceptions.InvalidYearMonthType(e))
+            year, month = value.split('-')
+            year = int(year)
+            month = int(month)
+            if month < 1 or month > 12:
+                return ERROR
+            value = _yearmonth(year, month)
+        except Exception:
+            return ERROR
+    else:
+        return ERROR
+    return value
+
+
+# Internal
+
+_yearmonth = namedtuple('yearmonth', ['year', 'month'])

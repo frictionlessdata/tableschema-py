@@ -4,63 +4,37 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import datetime
-from future.utils import raise_with_traceback
-from dateutil.parser import parse as date_parse
-from .. import exceptions
-from .. import helpers
-from . import base
+import six
+import warnings
+from datetime import datetime, date
+from dateutil.parser import parse
+from ..config import ERROR
 
 
 # Module API
 
-class DateType(base.JTSType):
-
-    # Public
-
-    name = 'date'
-    null_values = helpers.NULL_VALUES
-    supported_constraints = [
-        'required',
-        'pattern',
-        'enum',
-        'minimum',
-        'maximum',
-    ]
-    # ---
-    python_type = datetime.date
-    formats = ('default', 'any', 'fmt')
-    ISO8601 = '%Y-%m-%d'
-    raw_formats = ['DD/MM/YYYY', 'DD/MM/YY', 'YYYY/MM/DD']
-    py_formats = ['%d/%m/%Y', '%d/%m/%y', '%Y/%m/%d']
-    format_map = dict(zip(raw_formats, py_formats))
-
-    def cast_default(self, value, fmt=None):
-
-        if isinstance(value, self.python_type):
-            return value
-
+def cast_date(format, value):
+    if not isinstance(value, date):
+        if not isinstance(value, six.string_types):
+            return ERROR
         try:
-            return datetime.datetime.strptime(value, self.ISO8601).date()
-        except (TypeError, ValueError) as e:
-            raise_with_traceback(exceptions.InvalidDateType(e))
+            if format == 'default':
+                value = datetime.strptime(value, _DEFAULT_PATTERN).date()
+            elif format == 'any':
+                value = parse(value).date()
+            else:
+                if format.startswith('fmt:'):
+                    warnings.warn(
+                        'Format "fmt:<PATTERN>" is deprecated. '
+                        'Please use "<PATTERN>" without "fmt:" prefix.',
+                        UserWarning)
+                    format = format.replace('fmt:', '')
+                value = datetime.strptime(value, format).date()
+        except Exception:
+            return ERROR
+    return value
 
-    def cast_any(self, value, fmt=None):
 
-        if isinstance(value, self.python_type):
-            return value
+# Internal
 
-        try:
-            return date_parse(value).date()
-        except (TypeError, ValueError) as e:
-            raise_with_traceback(exceptions.InvalidDateType(e))
-
-    def cast_fmt(self, value, fmt=None):
-
-        if isinstance(value, self.python_type):
-            return value
-
-        try:
-            return datetime.datetime.strptime(value, fmt).date()
-        except (TypeError, ValueError) as e:
-            raise_with_traceback(exceptions.InvalidDateType(e))
+_DEFAULT_PATTERN = '%Y-%m-%d'

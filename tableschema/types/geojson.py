@@ -4,66 +4,29 @@ from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
 
-import os
+import six
 import json
 import jsonschema
-from future.utils import raise_with_traceback
-from .. import exceptions
-from .. import helpers
-from .. import compat
-from . import base
+from .. import specs
+from ..config import ERROR
 
 
 # Module API
 
-class GeoJSONType(base.JTSType):
-
-    # Public
-
-    name = 'geojson'
-    null_values = helpers.NULL_VALUES
-    supported_constraints = [
-        'required',
-        'pattern',
-        'enum',
-    ]
-    # ---
-    python_type = dict
-    spec = {
-        'types': ['Point', 'MultiPoint', 'LineString', 'MultiLineString',
-                  'Polygon', 'MultiPolygon', 'GeometryCollection', 'Feature',
-                  'FeatureCollection']
-    }
-
-    def cast_default(self, value, fmt=None):
-        if isinstance(value, self.python_type):
-            try:
-                jsonschema.validate(value, _geojson_schema)
-                return value
-            except jsonschema.exceptions.ValidationError:
-                raise_with_traceback(exceptions.InvalidGeoJSONType())
-        if isinstance(value, compat.str):
-            try:
-                geojson = json.loads(value)
-                jsonschema.validate(geojson, _geojson_schema)
-                return geojson
-            except (TypeError, ValueError):
-                raise_with_traceback(exceptions.InvalidGeoJSONType())
-            except jsonschema.exceptions.ValidationError:
-                raise_with_traceback(exceptions.InvalidGeoJSONType())
-
-    def cast_topojson(self, value, fmt=None):
-        raise NotImplementedError
-
-
-# Internal
-
-def _load_geojson_schema():
-    filepath = os.path.join(
-        os.path.dirname(os.path.realpath(__file__)),
-        '..', 'schemas', 'geojson.json')
-    with open(filepath) as f:
-        json_table_schema = json.load(f)
-    return json_table_schema
-
-_geojson_schema = _load_geojson_schema()
+def cast_geojson(format, value):
+    if not isinstance(value, dict):
+        if not isinstance(value, six.string_types):
+            return ERROR
+        try:
+            value = json.loads(value)
+        except Exception:
+            return ERROR
+    if format == 'default':
+        try:
+            jsonschema.validate(value, specs.geojson)
+        except Exception:
+            return ERROR
+    elif format == 'topojson':
+        if not isinstance(value, dict):
+            return ERROR
+    return value

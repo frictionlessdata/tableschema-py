@@ -27,6 +27,7 @@ DESCRIPTOR_MAX = {
     ],
     'primaryKey': ['id'],
     'foreignKeys': [{'fields': ['name'], 'reference': {'resource': '', 'fields': ['id']}}],
+    'missingValues': ['', '-', 'null'],
 }
 
 
