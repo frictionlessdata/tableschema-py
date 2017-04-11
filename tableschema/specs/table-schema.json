@@ -357,7 +357,7 @@
               },
               "format": {
                 "description": "The format keyword options for `date` are `default`, `any`, and `{PATTERN}`.",
-                "context": "The following `format` options are supported:\n  * **default**: An ISO8601 format string of YYYY-MM-DD.\n  * **any**: Any parsable representation of a date. The implementing library can attempt to parse the datetime via a range of strategies.\n  * **{PATTERN}**: The value can be parsed according to `{PATTERN}`, which `MUST` follow the date formatting syntax of C / Python [strptime]().",
+                "context": "The following `format` options are supported:\n  * **default**: An ISO8601 format string of YYYY-MM-DD.\n  * **any**: Any parsable representation of a date. The implementing library can attempt to parse the datetime via a range of strategies.\n  * **{PATTERN}**: The value can be parsed according to `{PATTERN}`, which `MUST` follow the date formatting syntax of C / Python [strftime](http://strftime.org/).",
                 "enum": [
                   "default",
                   "any"
@@ -450,7 +450,7 @@
               },
               "format": {
                 "description": "The format keyword options for `time` are `default`, `any`, and `{PATTERN}`.",
-                "context": "The following `format` options are supported:\n  * **default**: An ISO8601 format string for time.\n  * **any**: Any parsable representation of a date. The implementing library can attempt to parse the datetime via a range of strategies.\n  * **{PATTERN}**: The value can be parsed according to `{PATTERN}`, which `MUST` follow the date formatting syntax of C / Python [strptime]().",
+                "context": "The following `format` options are supported:\n  * **default**: An ISO8601 format string for time.\n  * **any**: Any parsable representation of a date. The implementing library can attempt to parse the datetime via a range of strategies.\n  * **{PATTERN}**: The value can be parsed according to `{PATTERN}`, which `MUST` follow the date formatting syntax of C / Python [strftime](http://strftime.org/).",
                 "enum": [
                   "default",
                   "any"
@@ -542,7 +542,7 @@
               },
               "format": {
                 "description": "The format keyword options for `datetime` are `default`, `any`, and `{PATTERN}`.",
-                "context": "The following `format` options are supported:\n  * **default**: An ISO8601 format string for datetime.\n  * **any**: Any parsable representation of a date. The implementing library can attempt to parse the datetime via a range of strategies.\n  * **{PATTERN}**: The value can be parsed according to `{PATTERN}`, which `MUST` follow the date formatting syntax of C / Python [strptime]().",
+                "context": "The following `format` options are supported:\n  * **default**: An ISO8601 format string for datetime.\n  * **any**: Any parsable representation of a date. The implementing library can attempt to parse the datetime via a range of strategies.\n  * **{PATTERN}**: The value can be parsed according to `{PATTERN}`, which `MUST` follow the date formatting syntax of C / Python [strftime](http://strftime.org/).",
                 "enum": [
                   "default",
                   "any"
