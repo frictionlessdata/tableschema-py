@@ -21,16 +21,16 @@ def read(*paths):
 PACKAGE = 'tableschema'
 NAME = PACKAGE.replace('_', '-')
 INSTALL_REQUIRES = [
-    'six>=1.9,<2.0a',
-    'click>=3.3,<7.0a',
-    'requests>=2.5,<3.0a',
-    'python-dateutil>=2.4,<3.0a',
-    'jsonschema>=2.5,<3.0a',
-    'rfc3986>=0.4,<1.0a',
-    'future>=0.15,<1.0a',
-    'unicodecsv>=0.14,<1.0a',
-    'tabulator>=0.7,<1.0a',
-    'isodate>=0.5.4,<1.0a',
+    'six>=1.9,<2.0',
+    'click>=3.3,<7.0',
+    'requests>=2.5,<3.0',
+    'python-dateutil>=2.4,<3.0',
+    'jsonschema>=2.5,<3.0',
+    'rfc3986>=0.4,<1.0',
+    'future>=0.15,<1.0',
+    'unicodecsv>=0.14,<1.0',
+    'isodate>=0.5.4,<1.0',
+    'tabulator>=1.0.0a5,<2.0',
 ]
 TESTS_REQUIRE = [
     'pylama',
