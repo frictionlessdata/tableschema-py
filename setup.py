@@ -26,10 +26,9 @@ INSTALL_REQUIRES = [
     'requests>=2.5,<3.0',
     'python-dateutil>=2.4,<3.0',
     'jsonschema>=2.5,<3.0',
-    'rfc3986>=0.4,<1.0',
-    'future>=0.15,<1.0',
-    'unicodecsv>=0.14,<1.0',
-    'isodate>=0.5.4,<1.0',
+    'unicodecsv>=0.14,<2.0',
+    'isodate>=0.5.4,<2.0',
+    'rfc3986>=0.4,<2.0',
     'tabulator>=1.0.0a5,<2.0',
 ]
 TESTS_REQUIRE = [
