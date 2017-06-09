@@ -257,9 +257,7 @@ The library includes interface declaration to implement tabular `Storage`:
 
 ![Storage](data/storage.png)
 
-An implementor should follow `tableschema.Storage` interface to write his
-own storage backend. This backend could be used with `Table` class. See `plugins`
-system below to know how to integrate custom storage plugin.
+An implementor should follow `tableschema.Storage` interface to write his own storage backend. This backend could be used with `Table` class. See `plugins` system below to know how to integrate custom storage plugin.
 
 ### plugins
 
