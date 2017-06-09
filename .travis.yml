@@ -45,4 +45,4 @@ deploy:
   on:
     tags: true
   password:
-    secure: B2QptzzN2n88qDv3tXAfiZEYAuAFs+003s2G3Gn4D8o0UpQGNjp2az3lCeBXaTabeccX9Eko8jKj3hmrQ9vWQVlwhbTD2V/g9d3S1JEpt/1ml8NSlSgpiX+tlbJHP4zdNqqZoaQzDcE4FQbdwMXA8aSinB2tY55SiXS8pILXkVg=
+    secure: WofAaa4zh8wXQWLjfm8w0IxxGZUCgMRBsqhUoUJLLvMraGNUMV9hHp9DS7XfCGvlrIUQXHpTvgM1t7pUIJRE/PqTQR8FOocqN+ZmH8BqDDXsIoyQexDUtWDDbFXNaKJ4D2efIdoqWwDc9do2zt+EWRkt4xQcnbm7O6GUXlxUyTI=
