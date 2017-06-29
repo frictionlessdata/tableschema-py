@@ -32,7 +32,8 @@ def validate(descriptor, no_fail_fast=False):
     # Fail fast
     if not no_fail_fast:
         jsonschema.validate(
-            descriptor, specs.table_schema, cls=_TableSchemaValidator)
+            descriptor, specs.table_schema, cls=_TableSchemaValidator,
+            format_checker=jsonschema.FormatChecker())
 
     # Multiple errors
     else:
