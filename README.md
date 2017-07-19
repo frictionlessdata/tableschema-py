@@ -270,9 +270,9 @@ from tableschema.plugins import <name>
 If a plugin is not installed `ImportError` will be raised with a message describing how to install the plugin.
 
 A list of officially supported plugins:
-- BigQuery Storage - https://github.com/frictionlessdata/tableschema-bigquery-py
-- Pandas Storage - https://github.com/frictionlessdata/tableschema-pandas-py
-- SQL Storage - https://github.com/frictionlessdata/tableschema-sql-py
+- BigQuery Storage - https://github.com/frictionlessdata/jsontableschema-bigquery-py
+- Pandas Storage - https://github.com/frictionlessdata/jsontableschema-pandas-py
+- SQL Storage - https://github.com/frictionlessdata/jsontableschema-sql-py
 
 ## API Reference
 
