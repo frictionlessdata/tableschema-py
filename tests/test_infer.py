@@ -87,3 +87,7 @@ class TestInferSchema(base.BaseTestCase):
             schema = tableschema.infer(headers, values, explicit=True)
 
         self.assertTrue(schema['fields'][0].get('constraints'))
+
+    def test_check_type_boolean_string_tie(self):
+        schema = tableschema.infer(["field"],[["f",],["stringish",]])
+        self.assertEqual(schema["fields"][0]["type"], "string")
