@@ -42,4 +42,7 @@ from tableschema.config import ERROR
     ('fmt:%d/%m/%y', '', ERROR),
 ])
 def test_cast_date(format, value, result):
-    assert types.cast_date(format, value) == result
+    with pytest.warns(None) as recorded:
+        assert types.cast_date(format, value) == result
+    if not format.startswith('fmt:'):
+        assert recorded.list == []
