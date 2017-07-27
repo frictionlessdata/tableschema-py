@@ -11,7 +11,7 @@ from ..config import ERROR
 # Module API
 
 def cast_integer(format, value):
-    if not isinstance(value, int):
+    if not isinstance(value, six.integer_types):
         if not isinstance(value, six.string_types):
             return ERROR
         try:
