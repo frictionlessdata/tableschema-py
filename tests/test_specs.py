@@ -11,6 +11,7 @@ import requests
 from tableschema import specs
 
 
+@pytest.mark.skip('specs are in progress')
 def test_specs_table_schema_is_up_to_date():
     origin_spec = requests.get('https://specs.frictionlessdata.io/schemas/table-schema.json').json()
     assert specs.table_schema == origin_spec, 'run `make specs` to update specs'

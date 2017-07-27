@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 import os
 import io
 import json
+import pytest
 import tableschema
 from tableschema import exceptions
 from . import base
@@ -52,6 +53,7 @@ class TestValidateSchema(base.BaseTestCase):
                           tableschema.validate,
                           schema)
 
+    @pytest.mark.skip('changes between specs-rc.v1 and specs-rc.v2')
     def test_schema_invalid_pk_string(self):
         filepath = os.path.join(self.data_dir, 'schema_invalid_pk_string.json')
         with io.open(filepath) as stream:
@@ -76,6 +78,7 @@ class TestValidateSchema(base.BaseTestCase):
         valid = tableschema.validate(schema)
         self.assertTrue(valid)
 
+    @pytest.mark.skip('changes between specs-rc.v1 and specs-rc.v2')
     def test_schema_invalid_fk_string(self):
         filepath = os.path.join(self.data_dir, 'schema_invalid_fk_string.json')
         with io.open(filepath) as stream:
@@ -151,4 +154,4 @@ class TestValidateSchema(base.BaseTestCase):
             try:
                 tableschema.validate(schema, no_fail_fast=True)
             except exceptions.MultipleInvalid as exception:
-                self.assertEquals(5, len(exception.errors))
+                self.assertEquals(3, len(exception.errors))

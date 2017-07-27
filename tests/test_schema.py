@@ -31,7 +31,7 @@ DESCRIPTOR_MAX = {
 }
 
 
-# Tests
+# General
 
 
 def test_init():
@@ -155,3 +155,18 @@ def test_save(tmpdir, apply_defaults):
     path = str(tmpdir.join('schema.json'))
     Schema(DESCRIPTOR_MIN).save(path)
     assert json.load(io.open(path, encoding='utf-8')) == apply_defaults(DESCRIPTOR_MIN)
+
+
+# Issues
+
+
+def test_schema_field_date_format_issue_177():
+    descriptor = {'fields':[{'name':'myfield', 'type':'date', 'format':'%d/%m/%y'}]}
+    schema = Schema(descriptor)
+    assert schema
+
+
+def test_schema_field_time_format_issue_177():
+    descriptor = {'fields':[{'name':'myfield', 'type':'time', 'format':'%H:%M:%S'}]}
+    schema = Schema(descriptor)
+    assert schema
