@@ -16,6 +16,7 @@ from tableschema.config import ERROR
     ('default', Decimal(1), {}, Decimal(1)),
     ('default', 1, {}, Decimal(1)),
     ('default', 1.0, {}, Decimal(1)),
+    ('default', 1 << 63, {}, Decimal(1 << 63)),
     ('default', '1', {}, Decimal(1)),
     ('default', '10.00', {}, Decimal(10)),
     ('default', '10.50', {}, Decimal(10.5)),
