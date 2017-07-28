@@ -31,7 +31,7 @@ def cast_number(format, value, **options):
             if currency:
                 pattern = '[{0}]'.format(_CURRENCIES)
                 value = re.sub(pattern, '', value)
-        elif not isinstance(value, (int, float)):
+        elif not isinstance(value, six.integer_types + (float,)):
             return ERROR
         try:
             value = Decimal(value)
