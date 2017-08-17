@@ -111,19 +111,114 @@ schema = Schema('path.json')
 schema.cast_row(['12345', 'a string', 'another field'])
 ```
 
-Methods available to `Schema` instances:
+#### `Schema(descriptor, strict=False)`
 
-- `descriptor` - return schema descriptor
-- `fields` - an array of the schema's Field instances
-- `headers` - an array of the schema headers
-- `primary_key` - the primary key field for the schema as an array
-- `foreignKey` - the foreign key property for the schema as an array
-- `get_field(name)` - return the field object for given name
-- `has_field(name)` - return a bool if the field exists in the schema
-- `cast_row(row, no_fail_fast=False)` - return row cast against schema
-- `save(target)` - save schema to filesystem
+Factory method to instantiate `Schema` class. This method is async and it should be used with await keyword or as a `Promise`.
 
-Where the option `no_fail_fast` is given, it will collect all errors it encouters and an exceptions.MultipleInvalid will be raised (if there are errors).
+- `descriptor (str/dict)` - schema descriptor:
+  -  local path
+  -  remote url
+  -  dictionary
+- `strict (bool)` - flag to alter validation behaviour:
+  - if false error will not be raised and all error will be collected in `schema.errors`
+  - if strict is true any validation error will be raised immediately
+- `(exceptions.TableSchemaException)` - raises any error occured in the process
+- `(Schema)` - returns schema class instance
+
+#### `schema.valid`
+
+- `(bool)` - returns validation status. It always true in strict mode.
+
+#### `schema.errors`
+
+- `(Exception[])` - returns validation errors. It always empty in strict mode.
+
+#### `schema.descriptor`
+
+- `(dict)` - returns schema descriptor
+
+#### `schema.primary_key`
+
+- `(str[])` - returns schema primary key
+
+#### `schema.foreign_keys`
+
+- `(dict[])` - returns schema foreign keys
+
+#### `schema.fields`
+
+- `(Field[])` - returns an array of `Field` instances
+
+#### `schema.field_names`
+
+- `(str[])` - returns an array of field names.
+
+#### `schema.get_field(name)`
+
+Get schema field by name.
+
+- `name (str)` - schema field name
+- `(Field/None)` - returns `Field` instance or null if not found
+
+#### `schema.add_field(descriptor)`
+
+Add new field to schema. The schema descriptor will be validated with newly added field descriptor.
+
+- `descriptor (dict)` - field descriptor
+- `(exceptions.TableSchemaException)` - raises any error occured in the process
+- `(Field/None)` - returns added `Field` instance or null if not added
+
+#### `schema.remove_field(name)`
+
+Remove field resource by name. The schema descriptor will be validated after field descriptor removal.
+
+- `name (str)` - schema field name
+- `(exceptions.TableSchemaException)` - raises any error occured in the process
+- `(Field/None)` - returns removed `Field` instances or null if not found
+
+#### `schema.cast_row(row)`
+
+Cast row based on field types and formats.
+
+- `row (any[])` - data row as an array of values
+- `(any[])` - returns cast data row
+
+#### `schema.infer(rows, headers=1)`
+
+Infer and set `schema.descriptor` based on data sample.
+
+- `rows (list[])` - array of arrays representing rows.
+- `headers (int/str[])` - data sample headers (one of):
+  - row number containing headers (`rows` should contain headers rows)
+  - array of headers (`rows` should NOT contain headers rows)
+- `{dict}` - returns Table Schema descriptor
+
+#### `schema.commit(strict=None)`
+
+Update schema instance if there are in-place changes in the descriptor.
+
+- `strict (bool)` - alter `strict` mode for further work
+- `(exceptions.TableSchemaException)` - raises any error occured in the process
+- `(bool)` - returns true on success and false if not modified
+
+```python
+descriptor = {'fields': [{'name': 'field', 'type': 'string'}]}
+schema = Schema(descriptor)
+
+schema.getField('name')['type'] # string
+schema.descriptor.fields[0]['type'] = 'number'
+schema.getField('name')['type'] # string
+schema.commit()
+schema.getField('name')['type'] # number
+```
+
+#### `schema.save(target)`
+
+Save schema descriptor to target destination.
+
+- `target (str)` - path where to save a descriptor
+- `(exceptions.TableSchemaException)` - raises any error occured in the process
+- `(bool)` - returns true on success
 
 ### Field
 

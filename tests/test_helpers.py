@@ -13,15 +13,15 @@ from . import base
 
 class TestHelpers(base.BaseTestCase):
 
-    def test_load_json_source_dict(self):
+    def test_retrieve_descriptor_dict(self):
         source = {
             'this': 'that',
             'other': ['thing']
         }
 
-        self.assertTrue(helpers.load_json_source(source))
+        self.assertTrue(helpers.retrieve_descriptor(source))
 
-    def test_load_json_source_list(self):
+    def test_retrieve_descriptor_list(self):
         source = [
             {
                 'this': 'that',
@@ -29,27 +29,27 @@ class TestHelpers(base.BaseTestCase):
             }
         ]
 
-        self.assertTrue(helpers.load_json_source(source))
+        self.assertTrue(helpers.retrieve_descriptor(source))
 
-    def test_load_json_source_url(self):
+    def test_retrieve_descriptor_url(self):
         source = '{0}{1}'.format(self.remote_dir, 'schema_valid_full.json')
 
-        self.assertTrue(helpers.load_json_source(source))
+        self.assertTrue(helpers.retrieve_descriptor(source))
 
-    def test_load_json_source_string(self):
+    def test_retrieve_descriptor_string(self):
         source = os.path.join(self.data_dir, 'schema_valid_full.json')
         with io.open(source, mode='r+t', encoding='utf-8') as stream:
             source = stream.read()
 
-        self.assertTrue(helpers.load_json_source(source))
+        self.assertTrue(helpers.retrieve_descriptor(source))
 
-    def test_load_json_source_path(self):
+    def test_retrieve_descriptor_path(self):
         source = os.path.join(self.data_dir, 'schema_valid_full.json')
 
-        self.assertTrue(helpers.load_json_source(source))
+        self.assertTrue(helpers.retrieve_descriptor(source))
 
-    def test_load_json_source_invalid(self):
+    def test_retrieve_descriptor_invalid(self):
         source = os.path.join(self.data_dir, 'data_infer.csv')
 
         self.assertRaises(exceptions.InvalidJSONError,
-                          helpers.load_json_source, source)
+                          helpers.retrieve_descriptor, source)

@@ -41,9 +41,9 @@ def test_init():
     assert Schema('data/schema_valid_simple.json')
 
 
-def test_init_invalid():
-    with pytest.raises(exceptions.SchemaValidationError) as exception:
-        Schema('data/schema_invalid_multiple_errors.json')
+def test_init_invalid_in_strict_mode():
+    with pytest.raises(exceptions.TableSchemaException) as exception:
+        Schema('data/schema_invalid_multiple_errors.json', strict=True)
 
 
 def test_descriptor(apply_defaults):

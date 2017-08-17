@@ -6,68 +6,113 @@ from __future__ import unicode_literals
 
 import io
 import json
+from copy import deepcopy
 from .field import Field
 from .validate import validate
+from .infer import infer
 from . import exceptions
 from . import helpers
-from . import config
 from . import compat
 
 
 # Module API
 
 class Schema(object):
-    """Table Schema schema representation.
-
-    Raises:
-        exceptions.InvalidJSONError
-        exceptions.SchemaValidationError
-
-    Args:
-        descriptor (dict/str): schema descriptor/path/url
-
-    """
 
     # Public
 
-    def __init__(self, descriptor):
+    def __init__(self, descriptor, strict=False):
+        """https://github.com/frictionlessdata/tableschema-py#schema
+        """
 
-        # Load descriptor
-        descriptor = helpers.load_json_source(descriptor)
-
-        # Apply descriptor defaults
-        for field in descriptor['fields']:
-            field.setdefault('type', config.DEFAULT_FIELD_TYPE)
-            field.setdefault('format', config.DEFAULT_FIELD_FORMAT)
-        descriptor.setdefault('missingValues', config.DEFAULT_MISSING_VALUES)
-
-        # Validate descriptor
-        validate(descriptor)
+        # Process descriptor
+        descriptor = helpers.retrieve_descriptor(descriptor)
 
         # Set attributes
-        self.__descriptor = descriptor
-        self.__fields = None
+        self.__strict = strict
+        self.__current_descriptor = deepcopy(descriptor)
+        self.__next_descriptor = deepcopy(descriptor)
+        # TODO: instantiate profile
+        self.__errors = []
+        self.__fields = []
+
+        # Build instance
+        self.__build()
+
+    @property
+    def valid(self):
+        """https://github.com/frictionlessdata/tableschema-py#schema
+        """
+        return bool(self.__errors)
+
+    @property
+    def errors(self):
+        """https://github.com/frictionlessdata/tableschema-py#schema
+        """
+        return self.__errors
 
     @property
     def descriptor(self):
-        """dict: schema descriptor
+        """https://github.com/frictionlessdata/tableschema-py#schema
         """
-        return self.__descriptor
+        # Never use this.descriptor inside this class (!!!)
+        return self.__next_descriptor
+
+    @property
+    def primary_key(self):
+        """https://github.com/frictionlessdata/tableschema-py#schema
+        """
+        primary_key = self.__current_descriptor.get('primaryKey', [])
+        if isinstance(primary_key, compat.str):
+            primary_key = [primary_key]
+        return primary_key
+
+    @property
+    def foreign_keys(self):
+        """https://github.com/frictionlessdata/tableschema-py#schema
+        """
+        return self.__current_descriptor.get('foreignKeys', [])
+
+    @property
+    def fields(self):
+        """https://github.com/frictionlessdata/tableschema-py#schema
+        """
+        return self.__fields
+
+    @property
+    def field_names(self):
+        """https://github.com/frictionlessdata/tableschema-py#schema
+        """
+        return [field.name for field in self.fields]
+
+    def get_field(self, name):
+        """https://github.com/frictionlessdata/tableschema-py#schema
+        """
+        for field in self.fields:
+            if field.name == name:
+                return field
+        return None
+
+    def add_field(self, descriptor):
+        """https://github.com/frictionlessdata/tableschema-py#schema
+        """
+        self.__next_descriptor.setdefault('fields', [])
+        self.__next_descriptor.append(descriptor)
+        self.commit()
+        return self.__fields[-1]
+
+    def remove_field(self, name):
+        """https://github.com/frictionlessdata/tableschema-py#schema
+        """
+        field = self.get_field(name)
+        if field:
+            predicat = lambda field: field.name != name
+            self.__next_descriptor.fields = self.__next_descriptor.fields.filter(predicat)
+            self.commit()
+        return field
 
     def cast_row(self, row, no_fail_fast=False):
-        """Cast row to schema types.
-
-        Args:
-            row (mixed[]): array of values
-            no_fail_fast (bool): collect all error
-
-        Raises:
-            exceptions.InvalidCastError
-            exceptions.MultipleInvalid (no_fail_fast=True)
-
-        Returns:
-            mixed[]: cast row
-
+        """https://github.com/frictionlessdata/tableschema-py#schema
         """
 
         # Prepare
@@ -99,71 +144,42 @@ class Schema(object):
 
         return result
 
-    @property
-    def fields(self):
-        """Field[]: field instances
+    def infer(self, rows, headers=1):
+        """https://github.com/frictionlessdata/tableschema-py#schema
         """
-        if self.__fields is None:
-            self.__fields = [
-                Field(descriptor, self.__descriptor['missingValues'])
-                for descriptor in self.__descriptor['fields']]
-        return self.__fields
 
-    def get_field(self, name):
-        """Return field by name.
+        # Get headers
+        if not isinstance(headers, list):
+            headers_row = headers
+            while True:
+                headers_row = -1
+                headers = rows.pop(0)
+                if not headers_row:
+                    break
 
-        Args:
-            name (str): field name
+        # Get descriptor
+        # TODO: move infer logic here
+        descriptor = infer(headers, rows)
 
-        Returns:
-            None/Field: return field instance or
-                None if field with name doesn't exist
+        # Commit descriptor
+        self.__next_descriptor = descriptor
+        self.commit()
 
+        return descriptor
+
+    def commit(self, strict=None):
+        """https://github.com/frictionlessdata/tableschema-py#schema
         """
-        for field in self.fields:
-            if field.name == name:
-                return field
-        return None
-
-    def has_field(self, name):
-        """Check if field exists.
-
-        Args:
-            name (str): field name
-
-        Returns:
-            bool: existence of field
-
-        """
-        return self.get_field(name) is not None
-
-    @property
-    def headers(self):
-        """str[]: field names (headers)
-        """
-        return [field.name for field in self.fields]
-
-    @property
-    def primary_key(self):
-        """str[]: primary key
-        """
-        primary_key = self.__descriptor.get('primaryKey', [])
-        if isinstance(primary_key, compat.str):
-            primary_key = [primary_key]
-        return primary_key
-
-    @property
-    def foreign_keys(self):
-        """dict[]: foreign keys
-        """
-        return self.__descriptor.get('foreignKeys', [])
+        if strict is not None:
+            self.__strict = strict
+        elif self.__current_descriptor == self.__next_descrioptor:
+            return False
+        self.__current_descriptor = deepcopy(self.__next_descriptor)
+        self.__build()
+        return True
 
     def save(self, target):
-        """Save schema descriptor.
-
-        Args:
-            target (str): file path
-
+        """https://github.com/frictionlessdata/tableschema-py#schema
         """
         mode = 'w'
         encoding = 'utf-8'
@@ -172,4 +188,38 @@ class Schema(object):
             encoding = None
         helpers.ensure_dir(target)
         with io.open(target, mode=mode, encoding=encoding) as file:
-            json.dump(self.__descriptor, file, indent=4)
+            json.dump(self.__current_descriptor, file, indent=4)
+
+    # Internal
+
+    def __build(self):
+
+        # Process descriptor
+        self.__current_descriptor = helpers.expand_descriptor(self.__current_descriptor)
+        self.__next_descriptor = deepcopy(self.__current_descriptor)
+
+        # Validate descriptor
+        try:
+            validate(self.__current_descriptor, no_fail_fast=True)
+            self.__errors = []
+        except exceptions.MultipleInvalid as exception:
+            self.__errors = exception.errors
+            if self.__strict:
+                # TODO: improve message and error class
+                message = 'Validation error'
+                raise exceptions.TableSchemaException(message)
+
+        # Populate fields
+        self.__fields = []
+        for field in self.__current_descriptor.get('fields', []):
+            missing_values = self.__current_descriptor['missingValues']
+            try:
+                field = Field(field, missing_values=missing_values)
+            except Exception:
+                field = False
+            self.__fields.append(field)
+
+    # Deprecated
+
+    headers = field_names
+    has_field = get_field
