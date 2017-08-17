@@ -37,54 +37,43 @@ class Field(object):
         self.__check_functions = self.__get_check_functions()
 
     @property
-    def descriptor(self):
-        """dict: field descriptor
-        """
-        return self.__descriptor
-
-    @property
     def name(self):
-        """str: field name
+        """https://github.com/frictionlessdata/tableschema-py#field
         """
         return self.__descriptor['name']
 
     @property
     def type(self):
-        """str: field type
+        """https://github.com/frictionlessdata/tableschema-py#field
         """
         return self.__descriptor['type']
 
     @property
     def format(self):
-        """str: field format
+        """https://github.com/frictionlessdata/tableschema-py#field
         """
         return self.__descriptor['format']
 
     @property
+    def required(self):
+        """https://github.com/frictionlessdata/tableschema-py#field
+        """
+        return self.constraints.get('required', False)
+
+    @property
     def constraints(self):
-        """dict: field constraints
+        """https://github.com/frictionlessdata/tableschema-py#field
         """
         return self.__descriptor.get('constraints', {})
 
     @property
-    def required(self):
-        """bool: true if field is required
+    def descriptor(self):
+        """https://github.com/frictionlessdata/tableschema-py#field
         """
-        return self.constraints.get('required', False)
+        return self.__descriptor
 
     def cast_value(self, value, constraints=True):
-        """Cast value against field.
-
-        Args:
-            value (any): value to cast
-            constraints (None/str[]/False):
-                - pass True to check all constraints (default)
-                - pass list of constraints for granular check
-                - pass False to skip all constraints
-
-        Returns:
-            any: cast value
-
+        """https://github.com/frictionlessdata/tableschema-py#field
         """
 
         # Null value
@@ -117,18 +106,7 @@ class Field(object):
         return cast_value
 
     def test_value(self, value, constraints=True):
-        """Cast value against field.
-
-        Args:
-            value (mixed): value to test
-            constraints (None/str[]/False):
-                - pass True to check all constraints (default)
-                - pass list of constraints for granular check
-                - pass False to skip all constraints
-
-        Returns:
-            bool: result of test
-
+        """https://github.com/frictionlessdata/tableschema-py#field
         """
         try:
             self.cast_value(value, constraints=constraints)

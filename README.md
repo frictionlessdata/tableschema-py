@@ -143,6 +143,58 @@ Casting a value will check the value is of the expected type, is in the correct 
 
 Casting a value that doesn't meet the constraints will raise a `ConstraintError` exception.
 
+#### `new Field(descriptor, missingValues=[''])`
+
+Constructor to instantiate `Field` class.
+
+- `descriptor (dict)` - schema field descriptor
+- `missingValues (str[])` - an array with string representing missing values
+- `(exceptions.TableSchemaException)` - raises any error occured in the process
+- `(Field)` - returns field class instance
+
+#### `field.name`
+
+- `(str)` - returns field name
+
+#### `field.type`
+
+- `(str)` - returns field type
+
+#### `field.format`
+
+- `(str)` - returns field format
+
+#### `field.required`
+
+- `(bool)` - returns true if field is required
+
+#### `field.constraints`
+
+- `(dict)` - returns an object with field constraints
+
+#### `field.descriptor`
+
+- `(dict)` - returns field descriptor
+
+#### `field.castValue(value, constraints=true)`
+
+Cast given value according to the field type and format.
+
+- `value (any)` - value to cast against field
+- `constraints (boll/str[])` - gets constraints configuration
+  - it could be set to true to disable constraint checks
+  - it could be an Array of constraints to check e.g. ['minimum', 'maximum']
+- `(exceptions.TableSchemaException)` - raises any error occured in the process
+- `(any)` - returns cast value
+
+#### `field.testValue(value, constraints=true)`
+
+Test if value is compliant to the field.
+
+- `value (any)` - value to cast against field
+- `constraints (bool/str[])` - constraints configuration
+- `(bool)` - returns if value is compliant to the field
+
 ### validate
 
 Given a schema as JSON file, url to JSON file, or a Python dict, `validate` returns `True` for a valid Table Schema, or raises an exception, `SchemaValidationError`. It validates only **schema**, not data against schema!
