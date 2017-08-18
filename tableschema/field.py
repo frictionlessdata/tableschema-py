@@ -4,7 +4,6 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
-from copy import deepcopy
 from functools import partial
 from .profile import Profile
 from . import constraints
@@ -117,7 +116,7 @@ class Field(object):
         options = {}
         # Get cast options for number
         if self.type == 'number':
-            for key in ['decimalChar', 'groupChar', 'currency']:
+            for key in ['decimalChar', 'groupChar', 'bareNumber']:
                 value = self.descriptor.get(key)
                 if value is not None:
                     options[key] = value

@@ -22,7 +22,7 @@ class Profile(object):
         self.__profile = profile
         self.__jsonschema = _PROFILES.get(profile)
         if not self.__jsonschema:
-            message= 'Can\'t load profile "%s"' % profile
+            message = 'Can\'t load profile "%s"' % profile
             raise exceptions.LoadError(message)
 
     @property
