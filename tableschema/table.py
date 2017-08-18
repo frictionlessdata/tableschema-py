@@ -65,6 +65,9 @@ class Table(object):
         """https://github.com/frictionlessdata/tableschema-py#schema
         """
         with self.__stream as stream:
+            # TODO: remove reset after this issue will be resolved
+            # https://github.com/frictionlessdata/tabulator-py/issues/190
+            stream.reset()
             iterator = stream.iter(extended=True)
             iterator = self.__apply_processors(iterator, cast=cast)
             for row_number, headers, row in iterator:
@@ -95,6 +98,9 @@ class Table(object):
             # Infer (tabulator)
             if not self.__storage:
                 with self.__stream as stream:
+                    # TODO: remove reset after this issue will be resolved
+                    # https://github.com/frictionlessdata/tabulator-py/issues/190
+                    stream.reset()
                     self.__schema = Schema()
                     self.__schema.infer(stream.sample[:limit], headers=stream.headers)
 

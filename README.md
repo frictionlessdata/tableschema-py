@@ -52,42 +52,115 @@ for keyed_row in table.iter(keyed=True):
 
 ### Table
 
-Table represents data described by Table Schema:
+A table is a core concept in a tabular data world. It represents a data with a metadata (Table Schema). Let's see how we could use it in practice.
 
-```python
-# pip install sqlalchemy tableschema-sql
-import sqlalchemy as sa
-from pprint import pprint
-from tableschema import Table
+Consider we have some local csv file. It could be inline data or remote link - all supported by `Table` class (except local files for in-brower usage of course). But say it's `data.csv` for now:
 
-# Data source
-SOURCE = 'https://raw.githubusercontent.com/frictionlessdata/tableschema-py/master/data/data_infer.csv'
-
-# Create SQL database
-db = sa.create_engine('sqlite://')
-
-# Data processor
-def skip_under_30(erows):
-    for number, headers, row in erows:
-        krow = dict(zip(headers, row))
-        if krow['age'] >= 30:
-            yield (number, headers, row)
-
-# Work with table
-table = Table(SOURCE, post_cast=[skip_under_30])
-table.schema.save('tmp/persons.json') # Save INFERRED schema
-table.save('persons', backend='sql', engine=db) # Save data to SQL
-table.save('tmp/persons.csv')  # Save data to DRIVE
-
-# Check the result
-pprint(Table('persons', backend='sql', engine=db).read(keyed=True))
-pprint(Table('tmp/persons.csv').read(keyed=True))
-# Will print (twice)
-# [{'age': 39, 'id': 1, 'name': 'Paul'},
-#  {'age': 36, 'id': 3, 'name': 'Jane'}]
+```csv
+city,location
+london,"51.50,-0.11"
+paris,"48.85,2.30"
+rome,N/A
 ```
 
-Here is an API reference for the `Table` class:
+Let's create and read a table. We use static `Table.load` method and `table.read` method with a `keyed` option to get array of keyed rows:
+
+```python
+table = Table('data.csv')
+table.headers # ['city', 'location']
+table.read(keyed=True)
+# [
+#   {city: 'london', location: '51.50,-0.11'},
+#   {city: 'paris', location: '48.85,2.30'},
+#   {city: 'rome', location: 'N/A'},
+# ]
+```
+
+As we could see our locations are just a strings. But it should be geopoints. Also Rome's location is not available but it's also just a `N/A` string instead of JavaScript `null`. First we have to infer Table Schema:
+
+```python
+table.infer()
+table.schema.descriptor
+# { fields:
+#   [ { name: 'city', type: 'string', format: 'default' },
+#     { name: 'location', type: 'geopoint', format: 'default' } ],
+#  missingValues: [ '' ] }
+table.read(keyed=True)
+# Fails with a data validation error
+```
+
+Let's fix not available location. There is a `missingValues` property in Table Schema specification. As a first try we set `missingValues` to `N/A` in `table.schema.descriptor`. Schema descriptor could be changed in-place but all changes sould be commited by `table.schema.commit()`:
+
+```python
+table.schema.descriptor['missingValues'] = 'N/A'
+table.schema.commit()
+table.schema.valid # false
+table.schema.errors
+# [<ValidationError: "'N/A' is not of type 'array'">]
+```
+
+As a good citiziens we've decided to check out schema descriptor validity. And it's not valid! We sould use an array for `missingValues` property. Also don't forget to have an empty string as a missing value:
+
+```python
+table.schema.descriptor['missingValues'] = ['', 'N/A']
+table.schema.commit()
+table.schema.valid # true
+```
+
+All good. It looks like we're ready to read our data again:
+
+```python
+table.read(keyed=True)
+# [
+#   {city: 'london', location: [51.50,-0.11]},
+#   {city: 'paris', location: [48.85,2.30]},
+#   {city: 'rome', location: null},
+# ]
+```
+
+Now we see that:
+- locations are arrays with numeric lattide and longitude
+- Rome's location is a native Python `None`
+
+And because there are no errors on data reading we could be sure that our data is valid againt our schema. Let's save it:
+
+```python
+table.schema.save('schema.json')
+table.save('data.csv')
+```
+
+Our `data.csv` looks the same because it has been stringified back to `csv` format. But now we have `schema.json`:
+
+```json
+{
+    "fields": [
+        {
+            "name": "city",
+            "type": "string",
+            "format": "default"
+        },
+        {
+            "name": "location",
+            "type": "geopoint",
+            "format": "default"
+        }
+    ],
+    "missingValues": [
+        "",
+        "N/A"
+    ]
+}
+
+```
+
+If we decide to improve it even more we could update the schema file and then open it again. But now providing a schema path:
+
+```python
+table = Table('data.csv', schema='schema.json')
+# Continue the work
+```
+
+It was onle basic introduction to the `Table` class. To learn more let's take a look on `Table` class API reference.
 
 #### `Table(source, schema=None, strict=False, post_cast=[], storage=None, **options})`
 
@@ -158,19 +231,62 @@ Save data source to file locally in CSV format with `,` (comma) delimiter
 
 ### Schema
 
-A model of a schema with helpful methods for working with the schema and supported data. Schema instances can be initialized with a schema source as a filepath or url to a JSON file, or a Python dict. The schema is initially validated (see [validate](#validate) below), and will raise an exception if not a valid Table Schema.
+A model of a schema with helpful methods for working with the schema and supported data. Schema instances can be initialized with a schema source as a url to a JSON file or a JSON object. The schema is initially validated (see [validate](#validate) below). By default validation errors will be stored in `schema.errors` but in a strict mode it will be instantly raised.
+
+Let's create a blank schema. It's not valid because `descriptor.fields` property is required by the [Table Schema](http://specs.frictionlessdata.io/table-schema/) specification:
 
 ```python
-from tableschema import Schema
-
-# Init schema
-schema = Schema('path.json')
-
-# Cast a row
-schema.cast_row(['12345', 'a string', 'another field'])
+schema = Schema()
+schema.valid # false
+schema.errors
+# [<ValidationError: "'fields' is a required property">]
 ```
 
-Here is an API reference for the `Schema` class:
+To do not create a schema descriptor by hands we will use a `schema.infer` method to infer the descriptor from given data:
+
+```python
+schema.infer([
+  ['id', 'age', 'name'],
+  ['1','39','Paul'],
+  ['2','23','Jimmy'],
+  ['3','36','Jane'],
+  ['4','28','Judy'],
+])
+schema.valid # true
+schema.descriptor
+#{ fields:
+#   [ { name: 'id', type: 'integer', format: 'default' },
+#     { name: 'age', type: 'integer', format: 'default' },
+#     { name: 'name', type: 'string', format: 'default' } ],
+#  missingValues: [ '' ] }
+```
+
+Now we have an inferred schema and it's valid. We could cast data row against our schema. We provide a string input by an output will be cast correspondingly:
+
+```python
+schema.cast_row(['5', '66', 'Sam'])
+# [ 5, 66, 'Sam' ]
+```
+
+But if we try provide some missing value to `age` field cast will fail because for now only one possible missing value is an empty string. Let's update our schema:
+
+```python
+schema.cast_row(['6', 'N/A', 'Walt'])
+# Cast error
+schema.descriptor['missingValues'] = ['', 'N/A']
+schema.commit()
+schema.cast_row(['6', 'N/A', 'Walt'])
+# [ 6, None, 'Walt' ]
+```
+
+We could save the schema to a local file. And we could continue the work in any time just loading it from the local file:
+
+```python
+schema.save('schema.json')
+schema = Schema('schema.json')
+```
+
+It was onle basic introduction to the `Schema` class. To learn more let's take a look on `Schema` class API reference.
 
 #### `Schema(descriptor, strict=False)`
 

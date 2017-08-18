@@ -44,7 +44,7 @@ class Schema(object):
     def valid(self):
         """https://github.com/frictionlessdata/tableschema-py#schema
         """
-        return bool(self.__errors)
+        return not bool(self.__errors)
 
     @property
     def errors(self):
@@ -154,7 +154,7 @@ class Schema(object):
         if not isinstance(headers, list):
             headers_row = headers
             while True:
-                headers_row = -1
+                headers_row -= 1
                 headers = rows.pop(0)
                 if not headers_row:
                     break

@@ -46,3 +46,4 @@ def cast_geopoint(format, value):
 # Internal
 
 _geopoint = namedtuple('geopoint', ['lon', 'lat'])
+_geopoint.__repr__ = lambda self: str([float(self[0]), float(self[1])])
