@@ -114,6 +114,12 @@ class Field(object):
 
     def __get_cast_function(self):
         options = {}
+        # Get cast options for boolean
+        if self.type == 'boolean':
+            for key in ['trueValues', 'falseValues']:
+                value = self.descriptor.get(key)
+                if value is not None:
+                    options[key] = value
         # Get cast options for number
         if self.type == 'number':
             for key in ['decimalChar', 'groupChar', 'bareNumber']:

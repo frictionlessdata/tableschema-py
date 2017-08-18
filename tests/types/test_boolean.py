@@ -11,27 +11,31 @@ from tableschema.config import ERROR
 
 # Tests
 
-@pytest.mark.parametrize('format, value, result', [
-    ('default', True, True),
-    ('default', 'yes', True),
-    ('default', 'y', True),
-    ('default', 'true', True),
-    ('default', 't', True),
-    ('default', '1', True),
-    ('default', 'YES', True),
-    ('default', 'Yes', True),
-    ('default', False, False),
-    ('default', 'no', False),
-    ('default', 'n', False),
-    ('default', 'false', False),
-    ('default', 'f', False),
-    ('default', '0', False),
-    ('default', 'NO', False),
-    ('default', 'No', False),
-    ('default', 0, ERROR),
-    ('default', 1, ERROR),
-    ('default', '3.14', ERROR),
-    ('default', '', ERROR),
+@pytest.mark.parametrize('format, value, options, result', [
+    ('default', True, {}, True),
+    ('default', 'true', {}, True),
+    ('default', 'True', {}, True),
+    ('default', 'TRUE', {}, True),
+    ('default', '1', {}, True),
+    ('default', 'yes', {'trueValues': ['yes']}, True),
+    ('default', False, {}, False),
+    ('default', 'false', {}, False),
+    ('default', 'False', {}, False),
+    ('default', 'FALSE', {}, False),
+    ('default', '0', {}, False),
+    ('default', 'no', {'falseValues': ['no']}, False),
+    ('default', 't', {}, ERROR),
+    ('default', 'YES', {}, ERROR),
+    ('default', 'Yes', {}, ERROR),
+    ('default', 'f', {}, ERROR),
+    ('default', 'NO', {}, ERROR),
+    ('default', 'No', {}, ERROR),
+    ('default', 0, {}, ERROR),
+    ('default', 1, {}, ERROR),
+    ('default', '3.14', {}, ERROR),
+    ('default', '', {}, ERROR),
+    ('default', 'Yes', {'trueValues': ['yes']}, ERROR),
+    ('default', 'No', {'falseValues': ['no']}, ERROR),
 ])
-def test_cast_boolean(format, value, result):
-    assert types.cast_boolean(format, value) == result
+def test_cast_boolean(format, value, options, result):
+    assert types.cast_boolean(format, value, **options) == result
