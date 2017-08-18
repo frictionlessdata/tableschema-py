@@ -188,7 +188,7 @@ Constructor to instantiate `Table` class.
 
 #### `table.iter(keyed=Fase, extended=False, cast=True)`
 
-Iter through the table data and emits rows cast based on table schema (async for loop). Data casting could be disabled.
+Iter through the table data and emits rows cast based on table schema. Data casting could be disabled.
 
 - `keyed (bool)` - iter keyed rows
 - `extended (bool)` - iter extended rows
@@ -210,7 +210,7 @@ Read the whole table and returns as array of rows. Count of rows could be limite
 - `(exceptions.TableSchemaException)` - raises any error occured in this process
 - `(list[])` - returns array of rows (see `table.iter`)
 
-#### `async table.infer(limit=100)`
+#### `table.infer(limit=100)`
 
 Infer a schema for the table. It will infer and set Table Schema to `table.schema` based on table data.
 
@@ -290,7 +290,7 @@ It was onle basic introduction to the `Schema` class. To learn more let's take a
 
 #### `Schema(descriptor, strict=False)`
 
-Factory method to instantiate `Schema` class. This method is async and it should be used with await keyword or as a `Promise`.
+Constructor to instantiate `Schema` class.
 
 - `descriptor (str/dict)` - schema descriptor:
   -  local path
@@ -533,7 +533,7 @@ descriptor = infer('data_to_infer.csv')
 
 The number of rows used by `infer` can be limited with the `limit` argument.
 
-#### `async infer(source, headers=1, limit=100, **options)`
+#### `infer(source, headers=1, limit=100, **options)`
 
 Infer source schema.
 
