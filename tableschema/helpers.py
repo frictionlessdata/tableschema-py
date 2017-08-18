@@ -14,7 +14,6 @@ from copy import deepcopy
 from importlib import import_module
 from . import exceptions
 from . import config
-from . import compat
 
 
 # Retrieve descriptor
@@ -35,9 +34,9 @@ def retrieve_descriptor(source):
         return None
     elif isinstance(source, (dict, list)):
         return deepcopy(source)
-    elif compat.parse.urlparse(source).scheme in config.REMOTE_SCHEMES:
+    elif six.moves.urllib.parse.urlparse(source).scheme in config.REMOTE_SCHEMES:
         source = requests.get(source).text
-    elif isinstance(source, compat.str) and not os.path.exists(source):
+    elif isinstance(source, six.string_types) and not os.path.exists(source):
         pass
     else:
         with io.open(source, encoding='utf-8') as stream:

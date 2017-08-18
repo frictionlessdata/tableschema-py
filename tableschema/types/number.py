@@ -9,7 +9,6 @@ import six
 import unicodedata
 from decimal import Decimal
 from ..config import ERROR
-from .. import compat
 
 
 # Module API
@@ -47,5 +46,5 @@ def cast_number(format, value, **options):
 _DEFAULT_DECIMAL_CHAR = '.'
 _DEFAULT_GROUP_CHAR = ''
 _PERCENT_CHAR = '%‰‱％﹪٪'
-_CURRENCIES = ''.join(compat.chr(i) for i in range(0xffff)
-     if unicodedata.category(compat.chr(i)) == 'Sc')
+_CURRENCIES = ''.join(six.unichr(i) for i in range(0xffff)
+     if unicodedata.category(six.unichr(i)) == 'Sc')

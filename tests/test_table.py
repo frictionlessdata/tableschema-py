@@ -15,9 +15,9 @@ DATA_MIN = [('key', 'value'), ('one', '1'), ('two', '2')]
 SCHEMA_MIN = {'fields': [{'name': 'key'}, {'name': 'value', 'type': 'integer'}]}
 SCHEMA_CSV = {
     'fields': [
-        {'name': 'id', 'type': 'integer', 'format': 'default', 'description': '', 'title': ''},
-        {'name': 'age', 'type': 'integer', 'format': 'default', 'description': '', 'title': ''},
-        {'name': 'name', 'type': 'string', 'format': 'default', 'description': '', 'title': ''},
+        {'name': 'id', 'type': 'integer', 'format': 'default'},
+        {'name': 'age', 'type': 'integer', 'format': 'default'},
+        {'name': 'name', 'type': 'string', 'format': 'default'},
     ],
     'missingValues': [''],
 }

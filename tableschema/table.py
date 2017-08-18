@@ -96,7 +96,7 @@ class Table(object):
             if not self.__storage:
                 with self.__stream as stream:
                     self.__schema = Schema()
-                    self.__schema.infer(stream.sample, headers=stream.headers)
+                    self.__schema.infer(stream.sample[:limit], headers=stream.headers)
 
             # Infer (storage)
             else:

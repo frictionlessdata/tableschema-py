@@ -395,7 +395,7 @@ except tableschema.exceptions.MultipleInvalid as exception:
 
 ### infer
 
-Given headers and data, `infer` will return a Table Schema as a Python dict based on the data values. Given the data file, data_to_infer.csv:
+Given headers and data, `infer` will return a Table Schema as a Python dict based on the data values. Given the data file, `data_to_infer.csv`:
 
 ```
 id,age,name
@@ -405,51 +405,41 @@ id,age,name
 4,28,Judy
 ```
 
-Call `infer` with headers and values from the datafile:
+Let's call `infer` for this file:
 
 ```python
-import io
-import csv
-
 from tableschema import infer
 
-filepath = 'data_to_infer.csv'
-with io.open(filepath) as stream:
-    headers = stream.readline().rstrip('\n').split(',')
-    values = csv.reader(stream)
-
-schema = infer(headers, values)
+descriptor = infer('data_to_infer.csv')
+#{'fields': [
+#    {
+#        'format': 'default',
+#        'name': 'id',
+#        'type': 'integer'
+#    },
+#    {
+#        'format': 'default',
+#        'name': 'age',
+#        'type': 'integer'
+#    },
+#    {
+#        'format': 'default',
+#        'name': 'name',
+#        'type': 'string'
+#    }]
+#}
 ```
 
-`schema` is now a schema dict:
+The number of rows used by `infer` can be limited with the `limit` argument.
 
-```python
-{u'fields': [
-    {
-        u'description': u'',
-        u'format': u'default',
-        u'name': u'id',
-        u'title': u'',
-        u'type': u'integer'
-    },
-    {
-        u'description': u'',
-        u'format': u'default',
-        u'name': u'age',
-        u'title': u'',
-        u'type': u'integer'
-    },
-    {
-        u'description': u'',
-        u'format': u'default',
-        u'name': u'name',
-        u'title': u'',
-        u'type': u'string'
-    }]
-}
-```
+#### `async infer(source, headers=1, limit=100, **options)`
 
-The number of rows used by `infer` can be limited with the `row_limit` argument.
+Infer source schema.
+
+- `source (any)` - source as path, url or inline data
+- `headers (int/str[])` - headers rows number or headers list
+- `(exceptions.TableSchemaException)` - raises any error occured in the process
+- `(dict)` - returns schema descriptor
 
 ### CLI
 

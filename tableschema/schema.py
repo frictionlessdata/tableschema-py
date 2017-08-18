@@ -5,14 +5,15 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 
 import io
+import six
 import json
 from copy import deepcopy
 from .field import Field
 from .validate import validate
-from .infer import infer
 from . import exceptions
 from . import helpers
-from . import compat
+from . import config
+from . import types
 
 
 # Module API
@@ -63,7 +64,7 @@ class Schema(object):
         """https://github.com/frictionlessdata/tableschema-py#schema
         """
         primary_key = self.__current_descriptor.get('primaryKey', [])
-        if isinstance(primary_key, compat.str):
+        if isinstance(primary_key, six.string_types):
             primary_key = [primary_key]
         return primary_key
 
@@ -158,8 +159,33 @@ class Schema(object):
                     break
 
         # Get descriptor
-        # TODO: move infer logic here
-        descriptor = infer(headers, rows)
+        guesser = _TypeGuesser()
+        resolver = _TypeResolver()
+        descriptor = {'fields': []}
+        type_matches = {}
+        for header in headers:
+            descriptor['fields'].append({'name': header})
+        for index, row in enumerate(rows):
+            # Normalize rows with invalid dimensions for sanity
+            row_length = len(row)
+            headers_length = len(headers)
+            if row_length > headers_length:
+                row = row[:len(headers)]
+            if row_length < headers_length:
+                diff = headers_length - row_length
+                fill = [''] * diff
+                row = row + fill
+            # build a column-wise lookup of type matches
+            for index, value in enumerate(row):
+                rv = guesser.cast(value)
+                if type_matches.get(index):
+                    type_matches[index].append(rv)
+                else:
+                    type_matches[index] = [rv]
+        # choose a type/format for each column based on the matches
+        for index, results in type_matches.items():
+            rv = resolver.get(results)
+            descriptor['fields'][index].update(**rv)
 
         # Commit descriptor
         self.__next_descriptor = descriptor
@@ -183,7 +209,7 @@ class Schema(object):
         """
         mode = 'w'
         encoding = 'utf-8'
-        if compat.is_py2:
+        if six.PY2:
             mode = 'wb'
             encoding = None
         helpers.ensure_dir(target)
@@ -223,3 +249,64 @@ class Schema(object):
 
     headers = field_names
     has_field = get_field
+
+
+# Internal
+
+_INFER_TYPE_ORDER = [
+    'duration',
+    'geojson',
+    'geopoint',
+    'object',
+    'array',
+    'datetime',
+    'time',
+    'date',
+    'integer',
+    'number',
+    'boolean',
+    'string',
+    'any',
+]
+
+
+class _TypeGuesser(object):
+    """Guess the type for a value returning a tuple of ('type', 'format')
+    """
+
+    # Public
+
+    def cast(self, value):
+        for name in _INFER_TYPE_ORDER:
+            cast = getattr(types, 'cast_%s' % name)
+            result = cast('default', value)
+            if result != config.ERROR:
+                return (name, 'default')
+
+
+class _TypeResolver(object):
+    """Get the best matching type/format from a list of possible ones.
+    """
+
+    # Public
+
+    @staticmethod
+    def _sort_key(item):
+        return (item[1], _INFER_TYPE_ORDER.index(item[0][0]))
+
+    def get(self, results):
+        variants = set(results)
+        # only one candidate... that's easy.
+        if len(variants) == 1:
+            rv = {'type': results[0][0], 'format': results[0][1]}
+        else:
+            counts = {}
+            for result in results:
+                if counts.get(result):
+                    counts[result] += 1
+                else:
+                    counts[result] = 1
+            # tuple representation of `counts` dict sorted by values
+            sorted_counts = sorted(counts.items(), key=self._sort_key, reverse=True)
+            rv = {'type': sorted_counts[0][0][0], 'format': sorted_counts[0][0][1]}
+        return rv
