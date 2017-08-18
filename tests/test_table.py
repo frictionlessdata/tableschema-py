@@ -32,18 +32,20 @@ def test_schema(apply_defaults):
 
 
 def test_schema_infer_tabulator():
-    assert Table('data/data_infer.csv').schema.descriptor == SCHEMA_CSV
+    table = Table('data/data_infer.csv')
+    table.infer()
+    assert table.schema.descriptor == SCHEMA_CSV
 
 
 @patch('tableschema.table.import_module')
 def test_schema_infer_storage(import_module, apply_defaults):
-    # Mocks
     import_module.return_value = Mock(Storage=Mock(return_value=Mock(
         describe = Mock(return_value=SCHEMA_MIN),
         iter = Mock(return_value=DATA_MIN[1:]),
     )))
-    # Assertions
-    actual = Table('table', backend='storage').schema.descriptor
+    table = Table('table', storage='storage')
+    table.infer()
+    actual = table.schema.descriptor
     expect = apply_defaults(SCHEMA_MIN)
     assert actual == expect
 
@@ -97,7 +99,8 @@ def test_read_storage(import_module):
         iter = Mock(return_value=DATA_MIN[1:]),
     )))
     # Tests
-    table = Table('table', backend='storage')
+    table = Table('table', storage='storage')
+    table.infer()
     expect = [['one', 1], ['two', 2]]
     actual = table.read()
     assert actual == expect
@@ -112,16 +115,7 @@ def test_processors():
                 yield (number, headers, row)
     # Create table
     table = Table('data/data_infer.csv', post_cast=[skip_under_30])
-    # Test stream
-    table.stream.open()
-    expect = [
-        ['1', '39', 'Paul'],
-        ['2', '23', 'Jimmy'],
-        ['3', '36', 'Jane'],
-        ['4', '28', 'Judy']]
-    actual = table.stream.read()
-    assert actual == expect
-    # Test table
+    table.infer()
     expect = [
         [1, 39, 'Paul'],
         [3, 36, 'Jane']]

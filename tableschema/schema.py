@@ -21,7 +21,7 @@ class Schema(object):
 
     # Public
 
-    def __init__(self, descriptor, strict=False):
+    def __init__(self, descriptor={}, strict=False):
         """https://github.com/frictionlessdata/tableschema-py#schema
         """
 
@@ -172,7 +172,7 @@ class Schema(object):
         """
         if strict is not None:
             self.__strict = strict
-        elif self.__current_descriptor == self.__next_descrioptor:
+        elif self.__current_descriptor == self.__next_descriptor:
             return False
         self.__current_descriptor = deepcopy(self.__next_descriptor)
         self.__build()

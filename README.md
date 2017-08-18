@@ -97,6 +97,75 @@ pprint(Table('tmp/persons.csv').read(keyed=True))
 #  {'age': 36, 'id': 3, 'name': 'Jane'}]
 ```
 
+Here is an API reference for the `Table` class:
+
+#### `Table(source, schema=None, strict=False, post_cast=[], storage=None, **options})`
+
+Constructor to instantiate `Table` class.
+
+- `source (str/list[])` - data source (one of):
+  - local file (path)
+  - remote file (url)
+  - array of arrays representing the rows
+- `schema (any)` - data schema in all forms supported by `Schema` class
+- `strict (bool)` - strictness option to pass to `Schema` constructor
+- `post_cast (function[])` - list of post cast processors
+- `storage (None/str)` - storage name like `sql` or `bigquery`
+- `options (dict)` - `tabulator` or storage options
+- `(exceptions.TableSchemaException)` - raises any error occured in table creation process
+- `(Table)` - returns data table class instance
+
+#### `table.headers`
+
+- `(str[])` - returns data source headers
+
+#### `table.schema`
+
+- `(Schema)` - returns schema class instance
+
+#### `table.iter(keyed=Fase, extended=False, cast=True)`
+
+Iter through the table data and emits rows cast based on table schema (async for loop). Data casting could be disabled.
+
+- `keyed (bool)` - iter keyed rows
+- `extended (bool)` - iter extended rows
+- `cast (bool)` - disable data casting if false
+- `(exceptions.TableSchemaException)` - raises any error occured in this process
+- `(any[]/any{})` - yields rows:
+  - `[value1, value2]` - base
+  - `{header1: value1, header2: value2}` - keyed
+  - `[rowNumber, [header1, header2], [value1, value2]]` - extended
+
+#### `table.read(keyed=False, extended=False, cast=True, limit=None)`
+
+Read the whole table and returns as array of rows. Count of rows could be limited.
+
+- `keyed (bool)` - flag to emit keyed rows
+- `extended (bool)` - flag to emit extended rows
+- `cast (bool)` - flag to disable data casting if false
+- `limit (int)` - integer limit of rows to return
+- `(exceptions.TableSchemaException)` - raises any error occured in this process
+- `(list[])` - returns array of rows (see `table.iter`)
+
+#### `async table.infer(limit=100)`
+
+Infer a schema for the table. It will infer and set Table Schema to `table.schema` based on table data.
+
+- `limit (int)` - limit rows samle size
+- `(dict)` - returns Table Schema descriptor
+
+#### `table.save(target, storage=None, **options)`
+
+> To save schema use `table.schema.save()`
+
+Save data source to file locally in CSV format with `,` (comma) delimiter
+
+- `target (str)` - saving target (e.g. file path)
+- `storage (None/str)` - storage name like `sql` or `bigquery`
+- `options (dict)` - `tabulator` or storage options
+- `(exceptions.TableSchemaException)` - raises an error if there is saving problem
+- `(True/Storage)` - returns true or storage instance
+
 ### Schema
 
 A model of a schema with helpful methods for working with the schema and supported data. Schema instances can be initialized with a schema source as a filepath or url to a JSON file, or a Python dict. The schema is initially validated (see [validate](#validate) below), and will raise an exception if not a valid Table Schema.
@@ -110,6 +179,8 @@ schema = Schema('path.json')
 # Cast a row
 schema.cast_row(['12345', 'a string', 'another field'])
 ```
+
+Here is an API reference for the `Schema` class:
 
 #### `Schema(descriptor, strict=False)`
 
@@ -237,6 +308,8 @@ Data values can be cast to native Python objects with a Field instance. Type ins
 Casting a value will check the value is of the expected type, is in the correct format, and complies with any constraints imposed by a schema. E.g. a date value (in ISO 8601 format) can be cast with a DateType instance. Values that can't be cast will raise an `InvalidCastError` exception.
 
 Casting a value that doesn't meet the constraints will raise a `ConstraintError` exception.
+
+Here is an API reference for the `Field` class:
 
 #### `new Field(descriptor, missingValues=[''])`
 

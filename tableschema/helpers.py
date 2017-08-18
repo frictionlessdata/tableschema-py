@@ -54,7 +54,7 @@ def retrieve_descriptor(source):
 
 def expand_descriptor(descriptor):
     descriptor = deepcopy(descriptor)
-    for field in descriptor['fields']:
+    for field in descriptor.get('fields', []):
         field.setdefault('type', config.DEFAULT_FIELD_TYPE)
         field.setdefault('format', config.DEFAULT_FIELD_FORMAT)
     descriptor.setdefault('missingValues', config.DEFAULT_MISSING_VALUES)
