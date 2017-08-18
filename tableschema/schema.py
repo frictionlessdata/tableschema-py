@@ -99,7 +99,7 @@ class Schema(object):
         """https://github.com/frictionlessdata/tableschema-py#schema
         """
         self.__next_descriptor.setdefault('fields', [])
-        self.__next_descriptor.append(descriptor)
+        self.__next_descriptor['fields'].append(descriptor)
         self.commit()
         return self.__fields[-1]
 
@@ -108,8 +108,9 @@ class Schema(object):
         """
         field = self.get_field(name)
         if field:
-            predicat = lambda field: field.name != name
-            self.__next_descriptor.fields = self.__next_descriptor.fields.filter(predicat)
+            predicat = lambda field: field.get('name') != name
+            self.__next_descriptor['fields'] = filter(
+                predicat, self.__next_descriptor['fields'])
             self.commit()
         return field
 

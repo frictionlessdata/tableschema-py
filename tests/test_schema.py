@@ -160,6 +160,30 @@ def test_save(tmpdir, apply_defaults):
     assert descriptor == apply_defaults(DESCRIPTOR_MIN)
 
 
+def test_infer():
+    schema = Schema()
+    schema.infer([
+      ['id', 'age', 'name'],
+      ['1','39','Paul'],
+      ['2','23','Jimmy'],
+      ['3','36','Jane'],
+      ['4','N/A','Judy'],
+    ])
+    assert schema.descriptor == {
+        'fields': [
+            {'format': 'default', 'name': 'id', 'type': 'integer'},
+            {'format': 'default', 'name': 'age', 'type': 'integer'},
+            {'format': 'default', 'name': 'name', 'type': 'string'}],
+        'missingValues': ['']}
+
+
+def test_add_remove_field():
+    schema = Schema()
+    schema.add_field({'name': 'name'})
+    field = schema.remove_field('name')
+    assert field.name == 'name'
+
+
 # Issues
 
 
