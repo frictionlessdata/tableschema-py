@@ -38,7 +38,6 @@ def test_schema_invalid_wrong_type():
         valid = validate([])
 
 
-@pytest.mark.skip('changes between specs-rc.v1 and specs-rc.v2')
 def test_schema_invalid_pk_string():
     with pytest.raises(exceptions.ValidationError):
         valid = validate('data/schema_invalid_pk_string.json')
@@ -54,7 +53,6 @@ def test_schema_valid_fk_array():
     assert valid
 
 
-@pytest.mark.skip('changes between specs-rc.v1 and specs-rc.v2')
 def test_schema_invalid_fk_string():
     with pytest.raises(exceptions.ValidationError):
         valid = validate('data/schema_invalid_fk_string.json')
@@ -94,4 +92,4 @@ def test_primary_key_is_not_a_valid_type():
 def test_schema_multiple_errors_no_fail_fast_true():
     with pytest.raises(exceptions.ValidationError) as excinfo:
         valid = validate('data/schema_invalid_multiple_errors.json')
-    assert len(excinfo.value.errors) == 3
+    assert len(excinfo.value.errors) == 5

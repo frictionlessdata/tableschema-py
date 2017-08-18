@@ -72,6 +72,7 @@ class Schema(object):
     def foreign_keys(self):
         """https://github.com/frictionlessdata/tableschema-py#schema
         """
+        # TODO: normilize foreign key items to array
         return self.__current_descriptor.get('foreignKeys', [])
 
     @property
