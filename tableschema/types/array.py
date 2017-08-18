@@ -11,7 +11,7 @@ from ..config import ERROR
 
 # Module API
 
-def cast_array(format, value):
+def cast_array(format, value, **options):
     if not isinstance(value, list):
         if not isinstance(value, six.string_types):
             return ERROR

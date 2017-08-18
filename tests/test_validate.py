@@ -11,6 +11,8 @@ import pytest
 from tableschema import validate, exceptions
 
 
+# Tests
+
 def test_schema_valid_simple():
     valid = validate('data/schema_valid_simple.json')
     assert valid

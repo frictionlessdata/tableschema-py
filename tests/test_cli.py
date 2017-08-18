@@ -11,6 +11,8 @@ from tableschema import Schema, cli
 os.environ['LC_ALL'] = 'en_US.UTF-8'
 
 
+# Tests
+
 def test_infer_schema():
     runner = CliRunner()
     result = runner.invoke(cli.infer, ['data/data_infer.csv'])

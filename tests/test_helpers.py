@@ -10,6 +10,8 @@ import pytest
 from tableschema import exceptions, helpers
 
 
+# Tests
+
 def test_retrieve_descriptor_dict():
     source = {'this': 'that', 'other': ['thing']}
     assert helpers.retrieve_descriptor(source)

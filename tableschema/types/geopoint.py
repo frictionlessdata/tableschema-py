@@ -13,7 +13,7 @@ from ..config import ERROR
 
 # Module API
 
-def cast_geopoint(format, value):
+def cast_geopoint(format, value, **options):
     try:
         if format == 'default':
             if isinstance(value, six.string_types):

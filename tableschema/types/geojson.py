@@ -12,7 +12,7 @@ from ..profile import Profile
 
 # Module API
 
-def cast_geojson(format, value):
+def cast_geojson(format, value, **options):
     if not isinstance(value, dict):
         if not isinstance(value, six.string_types):
             return ERROR

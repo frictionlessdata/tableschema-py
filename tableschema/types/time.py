@@ -13,7 +13,7 @@ from ..config import ERROR
 
 # Module API
 
-def cast_time(format, value):
+def cast_time(format, value, **options):
     if not isinstance(value, time):
         if not isinstance(value, six.string_types):
             return ERROR

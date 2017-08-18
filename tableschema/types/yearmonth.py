@@ -11,7 +11,7 @@ from ..config import ERROR
 
 # Module API
 
-def cast_yearmonth(format, value):
+def cast_yearmonth(format, value, **options):
     if isinstance(value, (tuple, list)):
         if len(value) != 2:
             return ERROR

@@ -13,7 +13,7 @@ from ..config import ERROR
 
 # Module API
 
-def cast_datetime(format, value):
+def cast_datetime(format, value, **options):
     if not isinstance(value, datetime):
         if not isinstance(value, six.string_types):
             return ERROR
