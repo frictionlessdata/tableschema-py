@@ -8,7 +8,7 @@ import re
 import six
 import unicodedata
 from decimal import Decimal
-from ..config import ERROR
+from .. import config
 
 
 # Module API
@@ -16,8 +16,8 @@ from ..config import ERROR
 def cast_number(format, value, **options):
     percentage = False
     currency = options.get('currency', False)
-    group_char = options.get('groupChar', _DEFAULT_GROUP_CHAR)
-    decimal_char = options.get('decimalChar', _DEFAULT_DECIMAL_CHAR)
+    group_char = options.get('groupChar', config.DEFAULT_NUMBER_GROUP_CHAR)
+    decimal_char = options.get('decimalChar', config.DEFAULT_NUMBER_DECIMAL_CHAR)
     if not isinstance(value, Decimal):
         if isinstance(value, six.string_types):
             value = re.sub('\s', '', value)
@@ -31,11 +31,11 @@ def cast_number(format, value, **options):
                 pattern = '[{0}]'.format(_CURRENCIES)
                 value = re.sub(pattern, '', value)
         elif not isinstance(value, six.integer_types + (float,)):
-            return ERROR
+            return config.ERROR
         try:
             value = Decimal(value)
         except Exception:
-            return ERROR
+            return config.ERROR
     if percentage:
         value = value/100
     return value
@@ -43,8 +43,6 @@ def cast_number(format, value, **options):
 
 # Internal
 
-_DEFAULT_DECIMAL_CHAR = '.'
-_DEFAULT_GROUP_CHAR = ''
 _PERCENT_CHAR = '%‰‱％﹪٪'
 _CURRENCIES = ''.join(six.unichr(i) for i in range(0xffff)
      if unicodedata.category(six.unichr(i)) == 'Sc')

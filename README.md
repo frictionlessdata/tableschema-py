@@ -8,6 +8,8 @@
 
 A library for working with [Table Schema](http://specs.frictionlessdata.io/table-schema/) in Python.
 
+> Version v1.0 includes various important changes. Please read a [migration guide](#v10).
+
 ## Features
 
 - `Table` to work with data tables described by Table Schema
@@ -18,33 +20,19 @@ A library for working with [Table Schema](http://specs.frictionlessdata.io/table
 - built-in command-line interface to validate and infer schemas
 - storage/plugins system to connect tables to different storage backends like SQL Database
 
-## Important Notes
-
-- There are BREAKING changes in `v1` (pre-release):
-  - package on PyPi has been renamed to `tableschema`
-  - following deprecated API has been removed the package:
-    - `tableschema.push/pull_resource` (use `tableschema.Table`)
-    - `tableschema.Validator` (use `tableschema.validate`)
-    - `tableschema.storage` (use `tableschema.Storage`)
-    - `tableschema.model` (use `tableschema.Schema`)
-    - `tableschema.types` (use `tableschema.Field`)
-  - rebased on Table Schema v1 null/types/constraints symantics
-  - `Field.cast/test_value` now accepts `constraints=bool/list` argument instead of `skip_constraints=bool` and `constraint=str`
-  - other changes could be introduced before final release
-  - documentation for previous release (`v0.10`) could be found [here](https://github.com/frictionlessdata/tableschema-py/tree/v0.10.0)
-- There are deprecating changes in `v0.7`:
-  - renewed API has been introduced in non breaking manner
-  - documentation for deprecated API could be found [here](https://github.com/frictionlessdata/tableschema-py/tree/0.6.5)
-
 ## Gettings Started
 
 ### Installation
 
+The package use semantic versioning. It means that major versions  could include breaking changes. It's highly recommended to specify `tableschema` version range in your `setup/requirements` file e.g. `tableschema>=1.0,<2.0`.
+
 ```bash
-$ pip install jsontableschema # v0.10
-$ pip install tableschema --pre # v1.0-alpha
+$ pip install tableschema
 ```
-### Example
+
+### Examples
+
+Code examples in this readme requires Python 3.3+ interpreter. You could see even more example in [examples](https://github.com/frictionlessdata/tableschema-py/tree/master/examples) directory.
 
 ```python
 from tableschema import Table
@@ -59,6 +47,8 @@ print(table.schema.descriptor)
 for keyed_row in table.iter(keyed=True):
     print(keyed_row)
 ```
+
+## Documentation
 
 ### Table
 
@@ -365,33 +355,28 @@ Test if value is compliant to the field.
 
 ### validate
 
-Given a schema as JSON file, url to JSON file, or a Python dict, `validate` returns `True` for a valid Table Schema, or raises an exception, `SchemaValidationError`. It validates only **schema**, not data against schema!
+Given a schema as JSON file, url to JSON file, or a Python dict, `validate` returns `True` for a valid Table Schema, or raises an exception, `exceptions.ValidationError`. It validates only **schema**, not data against schema!
 
 ```python
-import io
-import json
-
-from tableschema import validate
-
-with io.open('schema_to_validate.json') as stream:
-    descriptor = json.load(stream)
+from tableschema import validate, exceptions
 
 try:
-    tableschema.validate(descriptor)
-except tableschema.exceptions.SchemaValidationError as exception:
-   # handle error
-
+    valid = validate(descriptor)
+except exceptions.ValidationError as exception:
+   for error in exception.errors:
+       # handle individual error
 ```
 
-It may be useful to report multiple errors when validating a schema. This can be done with `no_fail_fast` flag set to True.
+#### `validate(descriptor)`
 
-```python
-try:
-    tableschema.validate(descriptor, no_fail_fast=True)
-except tableschema.exceptions.MultipleInvalid as exception:
-    for error in exception.errors:
-        # handle error
-```
+Validate a Table Schema descriptor.
+
+- `descriptor (str/dict)` - schema descriptor (one of):
+  - local path
+  - remote url
+  - object
+- (exceptions.ValidationError) - raises on invalid
+- `(bool)` - returns true on valid
 
 ### infer
 
@@ -441,9 +426,68 @@ Infer source schema.
 - `(exceptions.TableSchemaException)` - raises any error occured in the process
 - `(dict)` - returns schema descriptor
 
+### Exceptions
+
+#### `exceptions.TableSchemaException`
+
+Base class for all library exceptions. If there are multiple errors it could be read from an exceptions object:
+
+```python
+
+try:
+    # lib action
+except exceptions.TableSchemaException as exception:
+    if exception.multiple:
+        for error in exception.errors:
+            # handle error
+```
+
+#### `exceptions.LoadError`
+
+All loading errors.
+
+#### `exceptions.ValidationError`
+
+All validation errors.
+
+#### `exceptions.CastError`
+
+All value cast errors.
+
+#### `exceptions.StorageError`
+
+All storage errors.
+
+### Storage
+
+> It's a provisional API excluded from SemVer. If you use it as a part of other program please pin concrete `tableschema` version to your requirements file.
+
+The library includes interface declaration to implement tabular `Storage`:
+
+![Storage](data/storage.png)
+
+An implementor should follow `tableschema.Storage` interface to write his own storage backend. This backend could be used with `Table` class. See `plugins` system below to know how to integrate custom storage plugin.
+
+### Plugins
+
+> It's a provisional API excluded from SemVer. If you use it as a part of other program please pin concrete `tableschema` version to your requirements file.
+
+Table Schema has a plugin system.  Any package with the name like `tableschema_<name>` could be imported as:
+
+```python
+from tableschema.plugins import <name>
+```
+
+If a plugin is not installed `ImportError` will be raised with a message describing how to install the plugin.
+
+A list of officially supported plugins:
+- BigQuery Storage - https://github.com/frictionlessdata/tableschema-bigquery-py
+- Pandas Storage - https://github.com/frictionlessdata/tableschema-pandas-py
+- SQL Storage - https://github.com/frictionlessdata/tableschema-sql-py
+
 ### CLI
 
-> It's a provisional API excluded from SemVer. If you use it as a part of other program please pin concrete `goodtables` version to your requirements file.
+> It's a provisional API excluded from SemVer. If you use it as a part of other program please pin concrete `tableschema` version to your requirements file.
 
 Table Schema features a CLI called `tableschema`. This CLI exposes the `infer` and `validate` functions for command line use.
 
@@ -461,84 +505,54 @@ $ tableschema infer path/to/data.csv
 
 The response is a schema as JSON. The optional argument `--encoding` allows a character encoding to be specified for the data file. The default is utf-8.
 
-### Storage
-
-The library includes interface declaration to implement tabular `Storage`:
-
-![Storage](data/storage.png)
-
-An implementor should follow `tableschema.Storage` interface to write his own storage backend. This backend could be used with `Table` class. See `plugins` system below to know how to integrate custom storage plugin.
-
-### plugins
-
-Table Schema has a plugin system.  Any package with the name like `tableschema_<name>` could be imported as:
-
-```python
-from tableschema.plugins import <name>
-```
-
-If a plugin is not installed `ImportError` will be raised with a message describing how to install the plugin.
-
-A list of officially supported plugins:
-- BigQuery Storage - https://github.com/frictionlessdata/tableschema-bigquery-py
-- Pandas Storage - https://github.com/frictionlessdata/tableschema-pandas-py
-- SQL Storage - https://github.com/frictionlessdata/tableschema-sql-py
-
-## API Reference
-
-### Snapshot
-
-```
-Table(source, schema=None, post_cast=None, backend=None, **options)
-    stream -> tabulator.Stream
-    schema -> Schema
-    name -> str
-    iter(keyed/extended=False) -> (generator) (keyed/extended)row[]
-    read(keyed/extended=False, limit=None) -> (keyed/extended)row[]
-    save(target, backend=None, **options)
-Schema(descriptor)
-    descriptor -> dict
-    fields -> Field[]
-    headers -> str[]
-    primary_key -> str[]
-    foreign_keys -> str[]
-    get_field(name) -> Field
-    has_field(name) -> bool
-    cast_row(row, no_fail_fast=False) -> row
-    save(target)
-Field(descriptor)
-    descriptor -> dict
-    name -> str
-    type -> str
-    format -> str
-    constraints -> dict
-    cast_value(value, constraints=True) -> value
-    test_value(value, constraints=True) -> bool
-validate(descriptor, no_fail_fast=False) -> bool
-infer(headers, values) -> descriptor
-exceptions
-~cli
----
-Storage(**options)
-    buckets -> str[]
-    create(bucket, descriptor, force=False)
-    delete(bucket=None, ignore=False)
-    describe(bucket, descriptor=None) -> descriptor
-    iter(bucket) -> (generator) row[]
-    read(bucket) -> row[]
-    write(bucket, rows)
-plugins
-```
-
-### Detailed
-
-- [Docstrings](https://github.com/frictionlessdata/tableschema-py/tree/master/tableschema)
-- [Changelog](https://github.com/frictionlessdata/tableschema-py/commits/master)
-
 ## Contributing
 
-Please read the contribution guideline:
+The project follows the [Open Knowledge International coding standards](https://github.com/okfn/coding-standards).
 
-[How to Contribute](CONTRIBUTING.md)
+Recommended way to get started is to create and activate a project virtual environment.
+To install package and development dependencies into active environment:
 
-Thanks!
+```
+$ make install
+```
+
+To run tests with linting and coverage:
+
+```bash
+$ make test
+```
+
+For linting `pylama` configured in `pylama.ini` is used. On this stage it's already
+installed into your environment and could be used separately with more fine-grained control
+as described in documentation - https://pylama.readthedocs.io/en/latest/.
+
+For example to sort results by error type:
+
+```bash
+$ pylama --sort <path>
+```
+
+For testing `tox` configured in `tox.ini` is used.
+It's already installed into your environment and could be used separately with more fine-grained control as described in documentation - https://testrun.org/tox/latest/.
+
+For example to check subset of tests against Python 2 environment with increased verbosity.
+All positional arguments and options after `--` will be passed to `py.test`:
+
+```bash
+tox -e py27 -- -v tests/<path>
+```
+
+Under the hood `tox` uses `pytest` configured in `pytest.ini`, `coverage`
+and `mock` packages. This packages are available only in tox envionments.
+
+## Changelog
+
+Here described only breaking and the most important changes. The full changelog and documentation for all released versions could be found in nicely formatted [commit history](https://github.com/frictionlessdata/tableschema-py/commits/master).
+
+### v1.0
+
+This version includes various big changes. **A migration guide is under development and will be published here**.
+
+### v0.10
+
+Last pre-v1 stable version of the library.

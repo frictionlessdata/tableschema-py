@@ -67,10 +67,10 @@ class Table(object):
         with self.__stream as stream:
             iterator = stream.iter(extended=True)
             iterator = self.__apply_processors(iterator, cast=cast)
-            for number, headers, row in iterator:
+            for row_number, headers, row in iterator:
                 self.__headers = self.__headers or headers
                 if extended:
-                    yield (number, headers, row)
+                    yield (row_number, headers, row)
                 elif keyed:
                     yield dict(zip(headers, row))
                 else:
@@ -129,10 +129,10 @@ class Table(object):
 
         # Apply processors to iterator
         def builtin_processor(extended_rows):
-            for number, headers, row in extended_rows:
+            for row_number, headers, row in extended_rows:
                 if self.__schema and cast:
                     row = self.__schema.cast_row(row)
-                yield (number, headers, row)
+                yield (row_number, headers, row)
         processors = [builtin_processor] + self.__post_cast
         for processor in processors:
             iterator = processor(iterator)

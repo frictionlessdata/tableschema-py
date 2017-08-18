@@ -40,9 +40,7 @@ def infer(data, row_limit, encoding, to_file):
       with --encoding
     * the first line of data must be headers
     * these constraints are just for the CLI
-
     """
-
     descriptor = tableschema.infer(data, encoding=encoding, limit=row_limit)
     if to_file:
         with io.open(to_file, mode='w+t', encoding='utf-8') as dest:
@@ -53,15 +51,13 @@ def infer(data, row_limit, encoding, to_file):
 @main.command()
 @click.argument('schema')
 def validate(schema):
-
     """Validate that a supposed schema is in fact a Table Schema."""
-
-    errors = [e.message for e in tableschema.validator.iter_errors(schema)]
-    if not errors:
+    try:
+        tableschema.validate(schema)
         click.echo(False)
-    else:
+    except tableschema.exceptions.ValidationError as exception:
         click.echo(True)
-        click.echo(errors)
+        click.echo(exception.errors)
 
 
 if __name__ == '__main__':

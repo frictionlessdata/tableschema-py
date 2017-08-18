@@ -19,44 +19,46 @@ from . import config
 # Retrieve descriptor
 
 def retrieve_descriptor(source):
-    """Load a JSON source, from string, URL or buffer, into a Python type.
 
-    Args:
-        source (mixed): source in various forms
-
-    Returns:
-        dict: loaded source/deepcopy if already loaded
-
-    """
-
-    # Return or load
-    if source is None:
-        return None
-    elif isinstance(source, (dict, list)):
-        return deepcopy(source)
-    elif six.moves.urllib.parse.urlparse(source).scheme in config.REMOTE_SCHEMES:
-        source = requests.get(source).text
-    elif isinstance(source, six.string_types) and not os.path.exists(source):
-        pass
-    else:
-        with io.open(source, encoding='utf-8') as stream:
-            source = stream.read()
-
-    # Parse
     try:
-        return json.loads(source)
-    except ValueError:
-        raise exceptions.InvalidJSONError
+
+        # Inline
+        if isinstance(source, (dict, list)):
+            return deepcopy(source)
+
+        # Remote
+        if six.moves.urllib.parse.urlparse(source).scheme in config.REMOTE_SCHEMES:
+            return requests.get(source).json()
+
+        # Local
+        if isinstance(source, six.string_types):
+            with io.open(source, encoding='utf-8') as file:
+                return json.load(file)
+
+        # Stream
+        else:
+            return json.load(source)
+
+    except Exception:
+        raise exceptions.LoadError('Can\'t load descriptor')
 
 
 # Expand descriptor
 
-def expand_descriptor(descriptor):
+def expand_schema_descriptor(descriptor):
+    if isinstance(descriptor, dict):
+        descriptor = deepcopy(descriptor)
+        for field in descriptor.get('fields', []):
+            field.setdefault('type', config.DEFAULT_FIELD_TYPE)
+            field.setdefault('format', config.DEFAULT_FIELD_FORMAT)
+        descriptor.setdefault('missingValues', config.DEFAULT_MISSING_VALUES)
+    return descriptor
+
+
+def expand_field_descriptor(descriptor):
     descriptor = deepcopy(descriptor)
-    for field in descriptor.get('fields', []):
-        field.setdefault('type', config.DEFAULT_FIELD_TYPE)
-        field.setdefault('format', config.DEFAULT_FIELD_FORMAT)
-    descriptor.setdefault('missingValues', config.DEFAULT_MISSING_VALUES)
+    descriptor.setdefault('type', config.DEFAULT_FIELD_TYPE)
+    descriptor.setdefault('format', config.DEFAULT_FIELD_FORMAT)
     return descriptor
 
 

@@ -6,10 +6,11 @@ from __future__ import unicode_literals
 
 from copy import deepcopy
 from functools import partial
+from .profile import Profile
 from . import constraints
 from . import exceptions
+from . import helpers
 from . import config
-from . import specs
 from . import types
 
 
@@ -23,12 +24,8 @@ class Field(object):
 
     def __init__(self, descriptor, missing_values=config.DEFAULT_MISSING_VALUES):
 
-        # Deepcopy descriptor
-        descriptor = deepcopy(descriptor)
-
-        # Apply descriptor defaults
-        descriptor.setdefault('type', config.DEFAULT_FIELD_TYPE)
-        descriptor.setdefault('format', config.DEFAULT_FIELD_FORMAT)
+        # Process descriptor
+        descriptor = helpers.expand_field_descriptor(descriptor)
 
         # Set attributes
         self.__descriptor = descriptor
@@ -40,19 +37,19 @@ class Field(object):
     def name(self):
         """https://github.com/frictionlessdata/tableschema-py#field
         """
-        return self.__descriptor['name']
+        return self.__descriptor.get('name')
 
     @property
     def type(self):
         """https://github.com/frictionlessdata/tableschema-py#field
         """
-        return self.__descriptor['type']
+        return self.__descriptor.get('type')
 
     @property
     def format(self):
         """https://github.com/frictionlessdata/tableschema-py#field
         """
-        return self.__descriptor['format']
+        return self.__descriptor.get('format')
 
     @property
     def required(self):
@@ -85,7 +82,7 @@ class Field(object):
         if value is not None:
             cast_value = self.__cast_function(value)
             if cast_value == config.ERROR:
-                raise exceptions.InvalidCastError((
+                raise exceptions.CastError((
                     'Field "{field.name}" can\'t cast value "{value}" '
                     'for type "{field.type}" with format "{field.format}"'
                     ).format(field=self, value=value))
@@ -98,7 +95,7 @@ class Field(object):
                         continue
                 passed = check(cast_value)
                 if not passed:
-                    raise exceptions.ConstraintError((
+                    raise exceptions.CastError((
                         'Field "{field.name}" has constraint "{name}" '
                         'which is not satisfied for value "{value}"'
                         ).format(field=self, name=name, value=value))
@@ -110,7 +107,7 @@ class Field(object):
         """
         try:
             self.cast_value(value, constraints=constraints)
-        except (exceptions.InvalidCastError, exceptions.ConstraintError):
+        except exceptions.CastError:
             return False
         return True
 
@@ -131,7 +128,7 @@ class Field(object):
     def __get_check_functions(self):
         checks = {}
         cast = partial(self.cast_value, constraints=False)
-        whitelist = _get_field_constraints(specs.table_schema, self.type)
+        whitelist = _get_field_constraints(self.type)
         for name, constraint in self.constraints.items():
             if name in whitelist:
                 # Cast enum constraint
@@ -147,9 +144,10 @@ class Field(object):
 
 # Internal
 
-def _get_field_constraints(spec, type):
+def _get_field_constraints(type):
     # Extract list of constraints for given type from jsonschema
-    spec_types = spec['properties']['fields']['items']['anyOf']
-    for spec_type in spec_types:
-        if type in spec_type['properties']['type']['enum']:
-            return spec_type['properties']['constraints']['properties'].keys()
+    jsonschema = Profile('table-schema').jsonschema
+    profile_types = jsonschema['properties']['fields']['items']['anyOf']
+    for profile_type in profile_types:
+        if type in profile_type['properties']['type']['enum']:
+            return profile_type['properties']['constraints']['properties'].keys()

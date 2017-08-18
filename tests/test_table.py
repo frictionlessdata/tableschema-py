@@ -109,10 +109,10 @@ def test_read_storage(import_module):
 def test_processors():
     # Processor
     def skip_under_30(erows):
-        for number, headers, row in erows:
+        for row_number, headers, row in erows:
             krow = dict(zip(headers, row))
             if krow['age'] >= 30:
-                yield (number, headers, row)
+                yield (row_number, headers, row)
     # Create table
     table = Table('data/data_infer.csv', post_cast=[skip_under_30])
     table.infer()

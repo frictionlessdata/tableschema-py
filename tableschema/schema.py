@@ -8,8 +8,8 @@ import io
 import six
 import json
 from copy import deepcopy
+from .profile import Profile
 from .field import Field
-from .validate import validate
 from . import exceptions
 from . import helpers
 from . import config
@@ -33,7 +33,7 @@ class Schema(object):
         self.__strict = strict
         self.__current_descriptor = deepcopy(descriptor)
         self.__next_descriptor = deepcopy(descriptor)
-        # TODO: instantiate profile
+        self.__profile = Profile('table-schema')
         self.__errors = []
         self.__fields = []
 
@@ -112,7 +112,7 @@ class Schema(object):
             self.commit()
         return field
 
-    def cast_row(self, row, no_fail_fast=False):
+    def cast_row(self, row, fail_fast=False):
         """https://github.com/frictionlessdata/tableschema-py#schema
         """
 
@@ -123,8 +123,8 @@ class Schema(object):
         if len(row) != len(self.fields):
             message = 'Row length (%s) doesn\'t match fields count (%s)'
             message = message % (len(row), len(self.fields))
-            exception = exceptions.InvalidCastError(message)
-            if not no_fail_fast:
+            exception = exceptions.CastError(message)
+            if fail_fast:
                 raise exception
             errors.append(exception)
 
@@ -134,14 +134,15 @@ class Schema(object):
             for field, value in zip(self.fields, row):
                 try:
                     result.append(field.cast_value(value))
-                except exceptions.InvalidCastError as exception:
-                    if not no_fail_fast:
+                except exceptions.CastError as exception:
+                    if fail_fast:
                         raise
                     errors.append(exception)
 
         # Raise
         if errors:
-            raise exceptions.MultipleInvalid(errors=errors)
+            message = 'There are %s cast errors (see exception.errors)' % len(errors)
+            raise exceptions.CastError(message, errors=errors)
 
         return result
 
@@ -221,19 +222,20 @@ class Schema(object):
     def __build(self):
 
         # Process descriptor
-        self.__current_descriptor = helpers.expand_descriptor(self.__current_descriptor)
+        self.__current_descriptor = helpers.expand_schema_descriptor(
+            self.__current_descriptor)
         self.__next_descriptor = deepcopy(self.__current_descriptor)
 
         # Validate descriptor
         try:
-            validate(self.__current_descriptor, no_fail_fast=True)
+            self.__profile.validate(self.__current_descriptor)
             self.__errors = []
-        except exceptions.MultipleInvalid as exception:
+        except exceptions.ValidationError as exception:
             self.__errors = exception.errors
             if self.__strict:
-                # TODO: improve message and error class
-                message = 'Validation error'
-                raise exceptions.TableSchemaException(message)
+                message = 'There are %s validation errors (see exception.errors)'
+                raise exceptions.ValidationError(
+                    message % exception.errors, errors=exception.errors)
 
         # Populate fields
         self.__fields = []

@@ -58,7 +58,7 @@ def test_cast_value():
 
 
 def test_cast_value_constraint_error():
-    with pytest.raises(exceptions.ConstraintError):
+    with pytest.raises(exceptions.CastError):
         Field(DESCRIPTOR_MAX).cast_value('')
 
 
