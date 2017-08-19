@@ -244,9 +244,7 @@ class Schema(object):
         except exceptions.ValidationError as exception:
             self.__errors = exception.errors
             if self.__strict:
-                message = 'There are %s validation errors (see exception.errors)'
-                raise exceptions.ValidationError(
-                    message % exception.errors, errors=exception.errors)
+                raise exception
 
         # Populate fields
         self.__fields = []
