@@ -64,7 +64,7 @@ class Schema(object):
         """https://github.com/frictionlessdata/tableschema-py#schema
         """
         primary_key = self.__current_descriptor.get('primaryKey', [])
-        if isinstance(primary_key, six.string_types):
+        if not isinstance(primary_key, list):
             primary_key = [primary_key]
         return primary_key
 
@@ -72,8 +72,17 @@ class Schema(object):
     def foreign_keys(self):
         """https://github.com/frictionlessdata/tableschema-py#schema
         """
-        # TODO: normilize foreign key items to array
-        return self.__current_descriptor.get('foreignKeys', [])
+        foreign_keys = self.__current_descriptor.get('foreignKeys', [])
+        for key in foreign_keys:
+            key.setdefault('fields', [])
+            key.setdefault('reference', {})
+            key['reference'].setdefault('resource', '')
+            key['reference'].setdefault('fields', [])
+            if not isinstance(key['fields'], list):
+                key['fields'] = [key['fields']]
+            if not isinstance(key['reference']['fields'], list):
+                key['reference']['fields'] = [key['reference']['fields']]
+        return foreign_keys
 
     @property
     def fields(self):

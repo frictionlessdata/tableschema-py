@@ -184,6 +184,40 @@ def test_add_remove_field():
     assert field.name == 'name'
 
 
+def test_primary_foreign_keys_as_array():
+    descriptor = {
+        'fields': [{'name': 'name'}],
+        'primaryKey': ['name'],
+        'foreignKeys': [{
+            'fields': ['parent_id'],
+            'reference': {'resource': 'resource', 'fields': ['id']}
+        }]
+    }
+    schema = Schema(descriptor)
+    assert schema.primary_key == ['name']
+    assert schema.foreign_keys == [{
+        'fields': ['parent_id'],
+        'reference': {'resource': 'resource', 'fields': ['id']}
+    }]
+
+
+def test_primary_foreign_keys_as_string():
+    descriptor = {
+        'fields': [{'name': 'name'}],
+        'primaryKey': 'name',
+        'foreignKeys': [{
+            'fields': 'parent_id',
+            'reference': {'resource': 'resource', 'fields': 'id'}
+        }]
+    }
+    schema = Schema(descriptor)
+    assert schema.primary_key == ['name']
+    assert schema.foreign_keys == [{
+        'fields': ['parent_id'],
+        'reference': {'resource': 'resource', 'fields': ['id']}
+    }]
+
+
 # Issues
 
 
