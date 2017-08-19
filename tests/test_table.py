@@ -34,6 +34,7 @@ def test_schema(apply_defaults):
 def test_schema_infer_tabulator():
     table = Table('data/data_infer.csv')
     table.infer()
+    assert table.headers == ['id', 'age', 'name']
     assert table.schema.descriptor == SCHEMA_CSV
 
 
@@ -45,9 +46,8 @@ def test_schema_infer_storage(import_module, apply_defaults):
     )))
     table = Table('table', storage='storage')
     table.infer()
-    actual = table.schema.descriptor
-    expect = apply_defaults(SCHEMA_MIN)
-    assert actual == expect
+    assert table.headers == ['key', 'value']
+    assert table.schema.descriptor == apply_defaults(SCHEMA_MIN)
 
 
 def test_iter():

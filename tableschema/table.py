@@ -93,7 +93,7 @@ class Table(object):
     def infer(self, limit=100):
         """https://github.com/frictionlessdata/tableschema-py#schema
         """
-        if self.__schema is None:
+        if self.__schema is None or self.__headers is None:
 
             # Infer (tabulator)
             if not self.__storage:
@@ -101,13 +101,19 @@ class Table(object):
                     # TODO: remove reset after this issue will be resolved
                     # https://github.com/frictionlessdata/tabulator-py/issues/190
                     stream.reset()
-                    self.__schema = Schema()
-                    self.__schema.infer(stream.sample[:limit], headers=stream.headers)
+                    if self.__schema is None:
+                        self.__schema = Schema()
+                        self.__schema.infer(stream.sample[:limit], headers=stream.headers)
+                    if self.__headers is None:
+                        self.__headers = stream.headers
 
             # Infer (storage)
             else:
                 descriptor = self.__storage.describe(self.__source)
-                self.__schema = Schema(descriptor)
+                if self.__schema is None:
+                    self.__schema = Schema(descriptor)
+                if self.__headers is None:
+                    self.__headers = self.__schema.field_names
 
         return self.__schema.descriptor
 
