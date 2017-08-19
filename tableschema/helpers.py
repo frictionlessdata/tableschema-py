@@ -13,45 +13,56 @@ import requests
 from copy import deepcopy
 from importlib import import_module
 from . import exceptions
-from . import compat
+from . import config
 
 
-REMOTE_SCHEMES = ('http', 'https', 'ftp', 'ftps')
-NULL_VALUES = ['null', 'none', 'nil', 'nan', '-', '']
-TRUE_VALUES = ['yes', 'y', 'true', 't', '1', 1]
-FALSE_VALUES = ['no', 'n', 'false', 'f', '0', 0]
+# Retrieve descriptor
 
+def retrieve_descriptor(source):
 
-def load_json_source(source):
-    """Load a JSON source, from string, URL or buffer, into a Python type.
-
-    Args:
-        source (mixed): source in various forms
-
-    Returns:
-        dict: loaded source/deepcopy if already loaded
-
-    """
-
-    # Return or load
-    if source is None:
-        return None
-    elif isinstance(source, (dict, list)):
-        return deepcopy(source)
-    elif compat.parse.urlparse(source).scheme in REMOTE_SCHEMES:
-        source = requests.get(source).text
-    elif isinstance(source, compat.str) and not os.path.exists(source):
-        pass
-    else:
-        with io.open(source, encoding='utf-8') as stream:
-            source = stream.read()
-
-    # Parse
     try:
-        return json.loads(source)
-    except ValueError:
-        raise exceptions.InvalidJSONError
 
+        # Inline
+        if isinstance(source, (dict, list)):
+            return deepcopy(source)
+
+        # Remote
+        if six.moves.urllib.parse.urlparse(source).scheme in config.REMOTE_SCHEMES:
+            return requests.get(source).json()
+
+        # Local
+        if isinstance(source, six.string_types):
+            with io.open(source, encoding='utf-8') as file:
+                return json.load(file)
+
+        # Stream
+        else:
+            return json.load(source)
+
+    except Exception:
+        raise exceptions.LoadError('Can\'t load descriptor')
+
+
+# Expand descriptor
+
+def expand_schema_descriptor(descriptor):
+    if isinstance(descriptor, dict):
+        descriptor = deepcopy(descriptor)
+        for field in descriptor.get('fields', []):
+            field.setdefault('type', config.DEFAULT_FIELD_TYPE)
+            field.setdefault('format', config.DEFAULT_FIELD_FORMAT)
+        descriptor.setdefault('missingValues', config.DEFAULT_MISSING_VALUES)
+    return descriptor
+
+
+def expand_field_descriptor(descriptor):
+    descriptor = deepcopy(descriptor)
+    descriptor.setdefault('type', config.DEFAULT_FIELD_TYPE)
+    descriptor.setdefault('format', config.DEFAULT_FIELD_FORMAT)
+    return descriptor
+
+
+# Miscellaneous
 
 def ensure_dir(path):
     """Ensure directory exists.
@@ -63,6 +74,15 @@ def ensure_dir(path):
     dirpath = os.path.dirname(path)
     if dirpath and not os.path.exists(dirpath):
         os.makedirs(dirpath)
+
+
+def normalize_value(value):
+    """Convert value to string and make it lower cased.
+    """
+    cast = str
+    if six.PY2:
+        cast = unicode  # noqa
+    return cast(value).lower()
 
 
 class PluginImporter(object):
@@ -124,12 +144,3 @@ class PluginImporter(object):
         sys.modules[realname] = module
         sys.modules[fullname] = module
         return module
-
-
-def normalize_value(value):
-    """Convert value to string and make it lower cased.
-    """
-    cast = str
-    if six.PY2:
-        cast = unicode  # noqa
-    return cast(value).lower()

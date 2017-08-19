@@ -10,14 +10,14 @@ from ..config import ERROR
 
 # Module API
 
-def cast_boolean(format, value):
+def cast_boolean(format, value, **options):
     if not isinstance(value, bool):
         if not isinstance(value, six.string_types):
             return ERROR
-        value = value.strip().lower()
-        if value in _TRUE_VALUES:
+        value = value.strip()
+        if value in options.get('trueValues', _TRUE_VALUES):
             value = True
-        elif value in _FALSE_VALUES:
+        elif value in options.get('falseValues', _FALSE_VALUES):
             value = False
         else:
             return ERROR
@@ -26,5 +26,5 @@ def cast_boolean(format, value):
 
 # Internal
 
-_TRUE_VALUES = ['yes', 'y', 'true', 't', '1']
-_FALSE_VALUES = ['no', 'n', 'false', 'f', '0']
+_TRUE_VALUES = ['true', 'True', 'TRUE', '1']
+_FALSE_VALUES = ['false', 'False', 'FALSE', '0']

@@ -41,9 +41,9 @@ def test_init():
     assert Schema('data/schema_valid_simple.json')
 
 
-def test_init_invalid():
-    with pytest.raises(exceptions.SchemaValidationError) as exception:
-        Schema('data/schema_invalid_multiple_errors.json')
+def test_init_invalid_in_strict_mode():
+    with pytest.raises(exceptions.TableSchemaException) as exception:
+        Schema('data/schema_invalid_multiple_errors.json', strict=True)
 
 
 def test_descriptor(apply_defaults):
@@ -54,7 +54,8 @@ def test_descriptor(apply_defaults):
 def test_descriptor_path(apply_defaults):
     path = 'data/schema_valid_simple.json'
     actual = Schema(path).descriptor
-    expect = apply_defaults(json.load(io.open(path, encoding='utf-8')))
+    with io.open(path, encoding='utf-8') as file:
+        expect = apply_defaults(json.load(file))
     assert actual == expect
 
 
@@ -91,29 +92,29 @@ def test_cast_row_null_values():
 def test_cast_row_too_short():
     schema = Schema(DESCRIPTOR_MAX)
     source = ['string', '10.0', '1', 'string']
-    with pytest.raises(exceptions.InvalidCastError):
+    with pytest.raises(exceptions.CastError):
         schema.cast_row(source)
 
 
 def test_cast_row_too_long():
     schema = Schema(DESCRIPTOR_MAX)
     source = ['string', '10.0', '1', 'string', 'string', 'string']
-    with pytest.raises(exceptions.InvalidCastError):
+    with pytest.raises(exceptions.CastError):
         schema.cast_row(source)
 
 
-def test_cast_row_wrong_type_no_fail_fast_true():
+def test_cast_row_wrong_type():
     schema = Schema(DESCRIPTOR_MAX)
     source = ['string', 'notdecimal', '10.6', 'string', 'string']
-    with pytest.raises(exceptions.MultipleInvalid):
-        schema.cast_row(source, no_fail_fast=True)
+    with pytest.raises(exceptions.CastError):
+        schema.cast_row(source)
 
 
 def test_cast_row_wrong_type_multiple_errors():
     schema = Schema(DESCRIPTOR_MAX)
     source = ['string', 'notdecimal', '10.6', 'string', 'string']
-    with pytest.raises(exceptions.MultipleInvalid) as excinfo:
-        schema.cast_row(source, no_fail_fast=True)
+    with pytest.raises(exceptions.CastError) as excinfo:
+        schema.cast_row(source)
     assert len(excinfo.value.errors) == 2
 
 
@@ -154,7 +155,33 @@ def test_foreign_keys():
 def test_save(tmpdir, apply_defaults):
     path = str(tmpdir.join('schema.json'))
     Schema(DESCRIPTOR_MIN).save(path)
-    assert json.load(io.open(path, encoding='utf-8')) == apply_defaults(DESCRIPTOR_MIN)
+    with io.open(path, encoding='utf-8') as file:
+        descriptor = json.load(file)
+    assert descriptor == apply_defaults(DESCRIPTOR_MIN)
+
+
+def test_infer():
+    schema = Schema()
+    schema.infer([
+      ['id', 'age', 'name'],
+      ['1','39','Paul'],
+      ['2','23','Jimmy'],
+      ['3','36','Jane'],
+      ['4','N/A','Judy'],
+    ])
+    assert schema.descriptor == {
+        'fields': [
+            {'format': 'default', 'name': 'id', 'type': 'integer'},
+            {'format': 'default', 'name': 'age', 'type': 'integer'},
+            {'format': 'default', 'name': 'name', 'type': 'string'}],
+        'missingValues': ['']}
+
+
+def test_add_remove_field():
+    schema = Schema()
+    schema.add_field({'name': 'name'})
+    field = schema.remove_field('name')
+    assert field.name == 'name'
 
 
 # Issues

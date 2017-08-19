@@ -7,5 +7,5 @@ from __future__ import unicode_literals
 
 # Module API
 
-def cast_any(format, value):
+def cast_any(format, value, **options):
     return value

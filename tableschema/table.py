@@ -4,139 +4,126 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
+from copy import copy
 from tabulator import Stream
 from functools import partial
 from importlib import import_module
 from .schema import Schema
-from .infer import infer
-from . import compat
 
 
 # Module API
 
 class Table(object):
-    """Table Schema table representation.
-
-    Args:
-        source (mixed): data source
-        schema (Schema/dict/str): schema instance or descriptor/path/url
-        backend (None/str): backend name like `sql` or `bigquery`
-        options (dict): tabulator options or backend options
-
-    """
 
     # Public
 
-    def __init__(self, source, schema=None, post_cast=None,
-                 backend=None, **options):
+    def __init__(self, source, schema=None, strict=False,
+                 post_cast=[], storage=None, **options):
+        """https://github.com/frictionlessdata/tableschema-py#schema
+        """
 
-        # Defaults
-        if post_cast is None:
-            post_cast = []
+        # Set attributes
+        self.__source = source
+        self.__stream = None
+        self.__schema = None
+        self.__headers = None
+        self.__storage = None
+        self.__post_cast = copy(post_cast)
 
         # Schema
-        self.__schema = None
-        if isinstance(schema, (compat.str, dict)):
+        if schema is not None:
             self.__schema = Schema(schema)
 
-        # Tabulator
-        if backend is None:
+        # Stream (tabulator)
+        if storage is None:
             options.setdefault('headers', 1)
             self.__stream = Stream(source,  **options)
-            self.__stream.open()
-            if self.__schema is None:
-                self.__schema = Schema(infer(
-                    self.__stream.headers, self.__stream.sample))
 
-        # Storage
+        # Stream (storage)
         else:
-            module = 'tableschema.plugins.%s' % backend
+            module = 'tableschema.plugins.%s' % storage
             storage = import_module(module).Storage(**options)
-            generator = partial(storage.iter, source)
-            if self.__schema is None:
-                self.__schema = Schema(storage.describe(source))
-            storage.describe(source, self.__schema.descriptor)
-            self.__stream = Stream(generator, headers=self.__schema.headers)
-            self.__stream.open()
-
-        # Attributes
-        self.__post_cast = post_cast
+            if self.__schema:
+                storage.describe(source, self.__schema.descriptor)
+            headers = Schema(storage.describe(source)).field_names
+            self.__stream = Stream(partial(storage.iter, source), headers=headers)
+            self.__storage = storage
 
     @property
-    def stream(self):
-        """tabulator.Stream: stream instance
+    def headers(self):
+        """https://github.com/frictionlessdata/tableschema-py#schema
         """
-        return self.__stream
+        return self.__headers
 
     @property
     def schema(self):
-        """Schema: schema instance
+        """https://github.com/frictionlessdata/tableschema-py#schema
         """
         return self.__schema
 
-    def iter(self, keyed=False, extended=False):
-        """Yields table rows.
-
-        Args:
-            keyed (bool): yield keyed rows
-            extended (bool): yield extended rows
-
-        Yields:
-            mixed[]/mixed{}: row or keyed row or extended row
-
+    def iter(self, keyed=False, extended=False, cast=True):
+        """https://github.com/frictionlessdata/tableschema-py#schema
         """
-        self.__stream.reset()
-        iterator = self.__stream.iter(extended=True)
-        iterator = self.__apply_processors(iterator)
-        for number, headers, row in iterator:
-            if extended:
-                yield (number, headers, row)
-            elif keyed:
-                yield dict(zip(headers, row))
-            else:
-                yield row
+        with self.__stream as stream:
+            # TODO: remove reset after this issue will be resolved
+            # https://github.com/frictionlessdata/tabulator-py/issues/190
+            stream.reset()
+            iterator = stream.iter(extended=True)
+            iterator = self.__apply_processors(iterator, cast=cast)
+            for row_number, headers, row in iterator:
+                self.__headers = self.__headers or headers
+                if extended:
+                    yield (row_number, headers, row)
+                elif keyed:
+                    yield dict(zip(headers, row))
+                else:
+                    yield row
 
-    def read(self, keyed=False, extended=False, limit=None):
-        """Read table rows.
-
-        Args:
-            limit (int): return this amount of rows
-
-        Returns:
-            list[]: table rows
-
+    def read(self, keyed=False, extended=False, cast=True, limit=None):
+        """https://github.com/frictionlessdata/tableschema-py#schema
         """
         result = []
-        rows = self.iter(keyed=keyed, extended=extended)
+        rows = self.iter(keyed=keyed, extended=extended, cast=cast)
         for count, row in enumerate(rows, start=1):
             result.append(row)
             if count == limit:
                 break
         return result
 
-    def save(self, target, backend=None, **options):
-        """Save table rows.
+    def infer(self, limit=100):
+        """https://github.com/frictionlessdata/tableschema-py#schema
+        """
+        if self.__schema is None:
 
-        NOTE: To save schema use `table.schema.save(target)`
+            # Infer (tabulator)
+            if not self.__storage:
+                with self.__stream as stream:
+                    # TODO: remove reset after this issue will be resolved
+                    # https://github.com/frictionlessdata/tabulator-py/issues/190
+                    stream.reset()
+                    self.__schema = Schema()
+                    self.__schema.infer(stream.sample[:limit], headers=stream.headers)
 
-        Args:
-            target (str): saving target
-            backend (None/str): backend name like sql` or `bigquery`
-            options (dict): tabulator options or backend options
+            # Infer (storage)
+            else:
+                descriptor = self.__storage.describe(self.__source)
+                self.__schema = Schema(descriptor)
 
-        Returns:
-            None/Storage: storage instance if backend used
+        return self.__schema.descriptor
 
+    def save(self, target, storage=None, **options):
+        """https://github.com/frictionlessdata/tableschema-py#schema
         """
 
-        # Tabulator
-        if backend is None:
+        # Save (tabulator)
+        if storage is None:
             with Stream(self.iter, headers=self.__schema.headers) as stream:
                 stream.save(target, **options)
+            return True
 
-        # Storage
+        # Save (storage)
         else:
-            module = 'tableschema.plugins.%s' % backend
+            module = 'tableschema.plugins.%s' % storage
             storage = import_module(module).Storage(**options)
             storage.create(target, self.__schema.descriptor, force=True)
             storage.write(target, self.iter())
@@ -144,15 +131,16 @@ class Table(object):
 
     # Internal
 
-    def __apply_processors(self, iterator):
+    def __apply_processors(self, iterator, cast=True):
 
         # Apply processors to iterator
         def builtin_processor(extended_rows):
-            for number, headers, row in extended_rows:
-                headers = self.__schema.headers
-                row = self.__schema.cast_row(row)
-                yield (number, headers, row)
+            for row_number, headers, row in extended_rows:
+                if self.__schema and cast:
+                    row = self.__schema.cast_row(row)
+                yield (row_number, headers, row)
         processors = [builtin_processor] + self.__post_cast
         for processor in processors:
             iterator = processor(iterator)
+
         return iterator

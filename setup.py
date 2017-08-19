@@ -29,7 +29,7 @@ INSTALL_REQUIRES = [
     'unicodecsv>=0.14,<2.0',
     'isodate>=0.5.4,<2.0',
     'rfc3986>=0.4,<2.0',
-    'tabulator>=1.0.0a5,<2.0',
+    'tabulator>=1.3,<2.0',
 ]
 TESTS_REQUIRE = [
     'pylama',

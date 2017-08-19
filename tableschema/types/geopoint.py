@@ -13,7 +13,7 @@ from ..config import ERROR
 
 # Module API
 
-def cast_geopoint(format, value):
+def cast_geopoint(format, value, **options):
     try:
         if format == 'default':
             if isinstance(value, six.string_types):
@@ -46,3 +46,4 @@ def cast_geopoint(format, value):
 # Internal
 
 _geopoint = namedtuple('geopoint', ['lon', 'lat'])
+_geopoint.__repr__ = lambda self: str([float(self[0]), float(self[1])])

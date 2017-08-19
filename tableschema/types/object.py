@@ -11,7 +11,7 @@ from ..config import ERROR
 
 # Module API
 
-def cast_object(format, value):
+def cast_object(format, value, **options):
     if not isinstance(value, dict):
         if not isinstance(value, six.string_types):
             return ERROR

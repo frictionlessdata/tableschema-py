@@ -15,9 +15,9 @@ DATA_MIN = [('key', 'value'), ('one', '1'), ('two', '2')]
 SCHEMA_MIN = {'fields': [{'name': 'key'}, {'name': 'value', 'type': 'integer'}]}
 SCHEMA_CSV = {
     'fields': [
-        {'name': 'id', 'type': 'integer', 'format': 'default', 'description': '', 'title': ''},
-        {'name': 'age', 'type': 'integer', 'format': 'default', 'description': '', 'title': ''},
-        {'name': 'name', 'type': 'string', 'format': 'default', 'description': '', 'title': ''},
+        {'name': 'id', 'type': 'integer', 'format': 'default'},
+        {'name': 'age', 'type': 'integer', 'format': 'default'},
+        {'name': 'name', 'type': 'string', 'format': 'default'},
     ],
     'missingValues': [''],
 }
@@ -32,18 +32,20 @@ def test_schema(apply_defaults):
 
 
 def test_schema_infer_tabulator():
-    assert Table('data/data_infer.csv').schema.descriptor == SCHEMA_CSV
+    table = Table('data/data_infer.csv')
+    table.infer()
+    assert table.schema.descriptor == SCHEMA_CSV
 
 
 @patch('tableschema.table.import_module')
 def test_schema_infer_storage(import_module, apply_defaults):
-    # Mocks
     import_module.return_value = Mock(Storage=Mock(return_value=Mock(
         describe = Mock(return_value=SCHEMA_MIN),
         iter = Mock(return_value=DATA_MIN[1:]),
     )))
-    # Assertions
-    actual = Table('table', backend='storage').schema.descriptor
+    table = Table('table', storage='storage')
+    table.infer()
+    actual = table.schema.descriptor
     expect = apply_defaults(SCHEMA_MIN)
     assert actual == expect
 
@@ -97,7 +99,8 @@ def test_read_storage(import_module):
         iter = Mock(return_value=DATA_MIN[1:]),
     )))
     # Tests
-    table = Table('table', backend='storage')
+    table = Table('table', storage='storage')
+    table.infer()
     expect = [['one', 1], ['two', 2]]
     actual = table.read()
     assert actual == expect
@@ -106,22 +109,13 @@ def test_read_storage(import_module):
 def test_processors():
     # Processor
     def skip_under_30(erows):
-        for number, headers, row in erows:
+        for row_number, headers, row in erows:
             krow = dict(zip(headers, row))
             if krow['age'] >= 30:
-                yield (number, headers, row)
+                yield (row_number, headers, row)
     # Create table
     table = Table('data/data_infer.csv', post_cast=[skip_under_30])
-    # Test stream
-    table.stream.open()
-    expect = [
-        ['1', '39', 'Paul'],
-        ['2', '23', 'Jimmy'],
-        ['3', '36', 'Jane'],
-        ['4', '28', 'Judy']]
-    actual = table.stream.read()
-    assert actual == expect
-    # Test table
+    table.infer()
     expect = [
         [1, 39, 'Paul'],
         [3, 36, 'Jane']]

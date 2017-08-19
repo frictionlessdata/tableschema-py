@@ -13,8 +13,8 @@ install:
 list:
 	@grep '^\.PHONY' Makefile | cut -d' ' -f2- | tr ' ' '\n'
 
-specs:
-	wget -O tableschema/specs/table-schema.json https://specs.frictionlessdata.io/schemas/table-schema.json
+profiles:
+	wget -O tableschema/profiles/table-schema.json https://specs.frictionlessdata.io/schemas/table-schema.json
 
 test:
 	pylama $(PACKAGE)

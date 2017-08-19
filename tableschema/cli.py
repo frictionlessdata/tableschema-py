@@ -28,11 +28,10 @@ def info():
 
 @main.command()
 @click.argument('data')
-@click.option('--row_limit', default=0, type=int)
+@click.option('--row_limit', default=100, type=int)
 @click.option('--encoding', default='utf-8')
 @click.option('--to_file')
 def infer(data, row_limit, encoding, to_file):
-
     """Infer a schema from data.
 
     * data must be a local filepath
@@ -41,43 +40,24 @@ def infer(data, row_limit, encoding, to_file):
       with --encoding
     * the first line of data must be headers
     * these constraints are just for the CLI
-
     """
-
-    if not row_limit:
-        row_limit = None
-
-    with io.open(data, mode='r+t', encoding=encoding) as stream:
-        try:
-            headers = stream.readline().rstrip('\n').split(',')
-            values = tableschema.compat.csv_reader(stream)
-        except UnicodeDecodeError:
-            response = "Could not decode the data file as {0}. " \
-                "Please specify an encoding to use with the " \
-                "--encoding argument.".format(encoding)
-        else:
-            response = tableschema.infer(
-                headers, values, row_limit=row_limit)
-
-        if to_file:
-            with io.open(to_file, mode='w+t', encoding='utf-8') as dest:
-                dest.write(json.dumps(response, ensure_ascii=False, indent=2))
-
-    click.echo(response)
+    descriptor = tableschema.infer(data, encoding=encoding, limit=row_limit)
+    if to_file:
+        with io.open(to_file, mode='w+t', encoding='utf-8') as dest:
+            dest.write(json.dumps(descriptor, ensure_ascii=False, indent=4))
+    click.echo(descriptor)
 
 
 @main.command()
 @click.argument('schema')
 def validate(schema):
-
     """Validate that a supposed schema is in fact a Table Schema."""
-
-    errors = [e.message for e in tableschema.validator.iter_errors(schema)]
-    if not errors:
+    try:
+        tableschema.validate(schema)
         click.echo(False)
-    else:
+    except tableschema.exceptions.ValidationError as exception:
         click.echo(True)
-        click.echo(errors)
+        click.echo(exception.errors)
 
 
 if __name__ == '__main__':

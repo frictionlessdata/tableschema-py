@@ -11,7 +11,7 @@ from ..config import ERROR
 
 # Module API
 
-def cast_duration(format, value):
+def cast_duration(format, value, **options):
     if not isinstance(value, isodate.Duration):
         if not isinstance(value, six.string_types):
             return ERROR
