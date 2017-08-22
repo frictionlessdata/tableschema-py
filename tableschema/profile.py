@@ -37,7 +37,8 @@ class Profile(object):
     def validate(self, descriptor):
         if self.name != 'table-schema':
             return jsonschema.validate(descriptor, self.jsonschema)
-        validator = _TableSchemaValidator(self.jsonschema)
+        validator = _TableSchemaValidator(
+            self.jsonschema, format_checker=jsonschema.FormatChecker())
         errors = list(validator.iter_errors(descriptor))
         if errors:
             message = 'There are %s validation errors (see exception.errors)' % len(errors)
