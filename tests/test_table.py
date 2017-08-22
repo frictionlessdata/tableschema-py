@@ -4,8 +4,10 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
+import pytest
+from copy import deepcopy
 from mock import Mock, patch
-from tableschema import Schema, Table
+from tableschema import Schema, Table, exceptions
 
 
 # Constants
@@ -121,3 +123,31 @@ def test_processors():
         [3, 36, 'Jane']]
     actual = table.read()
     assert actual == expect
+
+
+def test_unique_constraint_violation():
+    schema = deepcopy(SCHEMA_CSV)
+    schema['fields'][0]['constraints'] = {'unique': True}
+    source = [
+        ['id', 'age', 'name'],
+        [1, 39, 'Paul'],
+        [1, 36, 'Jane'],
+    ]
+    table = Table(source, schema=schema)
+    with pytest.raises(exceptions.TableSchemaException) as excinfo:
+        table.read()
+    assert 'duplicates' in str(excinfo.value)
+
+
+def test_unique_primary_key_violation():
+    schema = deepcopy(SCHEMA_CSV)
+    schema['primaryKey'] = 'id'
+    source = [
+        ['id', 'age', 'name'],
+        [1, 39, 'Paul'],
+        [1, 36, 'Jane'],
+    ]
+    table = Table(source, schema=schema)
+    with pytest.raises(exceptions.TableSchemaException) as excinfo:
+        table.read()
+    assert 'duplicates' in str(excinfo.value)
