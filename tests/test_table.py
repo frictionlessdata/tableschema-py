@@ -151,7 +151,7 @@ def test_unique_primary_key_violation():
     assert 'duplicates' in str(excinfo.value)
 
 
-def test_read_with_headers_field_names_missmathc():
+def test_read_with_headers_field_names_mismatch():
     source = [
         ['id', 'bad', 'name'],
         [1, 39, 'Paul'],
