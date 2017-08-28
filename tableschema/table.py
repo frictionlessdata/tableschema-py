@@ -78,59 +78,63 @@ class Table(object):
             if self.schema:
                 unique_fields_cache = _create_unique_fields_cache(self.schema)
 
-        with self.__stream as stream:
-            iterator = stream.iter(extended=True)
-            iterator = self.__apply_processors(iterator, cast=cast)
-            for row_number, headers, row in iterator:
+        # Open/iterate stream
+        self.__stream.open()
+        iterator = self.__stream.iter(extended=True)
+        iterator = self.__apply_processors(iterator, cast=cast)
+        for row_number, headers, row in iterator:
 
-                # Get headers
-                if not self.__headers:
-                    self.__headers = headers
+            # Get headers
+            if not self.__headers:
+                self.__headers = headers
 
-                # Check headers
-                if check:
-                    if self.schema and self.headers:
-                        if self.headers != self.schema.field_names:
-                            message = 'Table headers don\'t match schema field names'
+            # Check headers
+            if check:
+                if self.schema and self.headers:
+                    if self.headers != self.schema.field_names:
+                        message = 'Table headers don\'t match schema field names'
+                        raise exceptions.CheckError(message)
+
+            # Check unique
+            if check:
+                for index, cache in unique_fields_cache.items():
+                    if row[index] in cache:
+                        field_name = self.schema.fields[index].name
+                        message = 'Field "%s" duplicates in row "%s"'
+                        message = message % (field_name, row_number)
+                        raise exceptions.TableSchemaException(message)
+                    cache.add(row[index])
+
+            # Check foreign
+            if check:
+                if self.schema and self.schema.foreign_keys:
+                    keyed_row = dict(zip(headers, row))
+                    for fk in self.schema.foreign_keys:
+                        reference = self.__references.get(fk['reference']['resource'])
+                        if not reference:
+                            continue
+                        values = {}
+                        fields = zip(fk['fields'], fk['reference']['fields'])
+                        for field, ref_field in fields:
+                            if field and ref_field:
+                                values[ref_field] = keyed_row[field]
+                        empty = all(map(lambda value: value is None, values.values()))
+                        valid = any(map(partial(_is_match, values), reference))
+                        if not empty and not valid:
+                            message = 'Foreign key "%s" violation in row "%s"'
+                            message = message % (fk['fields'], row_number)
                             raise exceptions.CheckError(message)
 
-                # Check unique
-                if check:
-                    for index, cache in unique_fields_cache.items():
-                        if row[index] in cache:
-                            field_name = self.schema.fields[index].name
-                            message = 'Field "%s" duplicates in row "%s"'
-                            message = message % (field_name, row_number)
-                            raise exceptions.TableSchemaException(message)
-                        cache.add(row[index])
+            # Form row
+            if extended:
+                yield (row_number, headers, row)
+            elif keyed:
+                yield dict(zip(headers, row))
+            else:
+                yield row
 
-                # Check foreign
-                if check:
-                    if self.schema and self.schema.foreign_keys:
-                        keyed_row = dict(zip(headers, row))
-                        for fk in self.schema.foreign_keys:
-                            reference = self.__references.get(fk['reference']['resource'])
-                            if not reference:
-                                continue
-                            values = {}
-                            fields = zip(fk['fields'], fk['reference']['fields'])
-                            for field, ref_field in fields:
-                                if field and ref_field:
-                                    values[ref_field] = keyed_row[field]
-                            empty = all(map(lambda value: value is None, values.values()))
-                            valid = any(map(partial(_is_match, values), reference))
-                            if not empty and not valid:
-                                message = 'Foreign key "%s" violation in row "%s"'
-                                message = message % (fk['fields'], row_number)
-                                raise exceptions.CheckError(message)
-
-                # Form row
-                if extended:
-                    yield (row_number, headers, row)
-                elif keyed:
-                    yield dict(zip(headers, row))
-                else:
-                    yield row
+        # Close stream
+        self.__stream.close()
 
     def read(self, keyed=False, extended=False, cast=True, limit=None, check=True):
         """https://github.com/frictionlessdata/tableschema-py#schema
