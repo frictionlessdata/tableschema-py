@@ -29,7 +29,7 @@ class Table(object):
         self.__schema = None
         self.__headers = None
         self.__storage = None
-        self.__references = copy(references)
+        self.__references = references
         self.__post_cast = copy(post_cast)
 
         # Schema
