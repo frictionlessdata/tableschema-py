@@ -18,7 +18,7 @@ class Table(object):
 
     # Public
 
-    def __init__(self, source, schema=None, strict=False,
+    def __init__(self, source, schema=None, strict=False, references={},
                  post_cast=[], storage=None, **options):
         """https://github.com/frictionlessdata/tableschema-py#schema
         """
@@ -29,6 +29,7 @@ class Table(object):
         self.__schema = None
         self.__headers = None
         self.__storage = None
+        self.__references = copy(references)
         self.__post_cast = copy(post_cast)
 
         # Schema
@@ -62,29 +63,68 @@ class Table(object):
         """
         return self.__schema
 
-    def iter(self, keyed=False, extended=False, cast=True):
+    def iter(self, keyed=False, extended=False, cast=True, check=True):
         """https://github.com/frictionlessdata/tableschema-py#schema
         """
-        unique_cache = _create_unique_fields_cache(self.schema) if self.schema else {}
+
+        # Resolve references
+        if check:
+            if callable(self.__references):
+                self.__references = self.__references()
+
+        # Prepare unique checks
+        if check:
+            unique_fields_cache = {}
+            if self.schema:
+                unique_fields_cache = _create_unique_fields_cache(self.schema)
+
         with self.__stream as stream:
             iterator = stream.iter(extended=True)
             iterator = self.__apply_processors(iterator, cast=cast)
             for row_number, headers, row in iterator:
 
-                # Headers
+                # Get headers
                 if not self.__headers:
                     self.__headers = headers
 
-                # Unique
-                for index, cache in unique_cache.items():
-                    if row[index] in cache:
-                        field_name = self.schema.fields[index].name
-                        message = 'Field "%s" duplicates in row "%s"'
-                        message = message % (field_name, row_number)
-                        raise exceptions.TableSchemaException(message)
-                    cache.add(row[index])
+                # Check headers
+                if check:
+                    if self.schema and self.headers:
+                        if self.headers != self.schema.field_names:
+                            message = 'Table headers don\'t match schema field names'
+                            raise exceptions.CheckError(message)
 
-                # Form
+                # Check unique
+                if check:
+                    for index, cache in unique_fields_cache.items():
+                        if row[index] in cache:
+                            field_name = self.schema.fields[index].name
+                            message = 'Field "%s" duplicates in row "%s"'
+                            message = message % (field_name, row_number)
+                            raise exceptions.TableSchemaException(message)
+                        cache.add(row[index])
+
+                # Check foreign
+                if check:
+                    if self.schema and self.schema.foreign_keys:
+                        keyed_row = dict(zip(headers, row))
+                        for fk in self.schema.foreign_keys:
+                            reference = self.__references.get(fk['reference']['resource'])
+                            if not reference:
+                                continue
+                            values = {}
+                            fields = zip(fk['fields'], fk['reference']['fields'])
+                            for field, ref_field in fields:
+                                if field and ref_field:
+                                    values[ref_field] = keyed_row[field]
+                            empty = all(map(lambda value: value is None, values.values()))
+                            valid = any(map(partial(_is_match, values), reference))
+                            if not empty and not valid:
+                                message = 'Foreign key "%s" violation in row "%s"'
+                                message = message % (fk['fields'], row_number)
+                                raise exceptions.CheckError(message)
+
+                # Form row
                 if extended:
                     yield (row_number, headers, row)
                 elif keyed:
@@ -92,11 +132,11 @@ class Table(object):
                 else:
                     yield row
 
-    def read(self, keyed=False, extended=False, cast=True, limit=None):
+    def read(self, keyed=False, extended=False, cast=True, limit=None, check=True):
         """https://github.com/frictionlessdata/tableschema-py#schema
         """
         result = []
-        rows = self.iter(keyed=keyed, extended=extended, cast=cast)
+        rows = self.iter(keyed=keyed, extended=extended, cast=cast, check=check)
         for count, row in enumerate(rows, start=1):
             result.append(row)
             if count == limit:
@@ -170,3 +210,7 @@ def _create_unique_fields_cache(schema):
         if field.constraints.get('unique') or field.name in schema.primary_key:
             cache[index] = set()
     return cache
+
+
+def _is_match(subset, superset):
+    return set(subset.items()).issubset(set(superset.items()))

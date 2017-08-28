@@ -36,6 +36,10 @@ class CastError(TableSchemaException):
     pass
 
 
+class CheckError(TableSchemaException):
+    pass
+
+
 class StorageError(TableSchemaException):
     pass
 
