@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 
 # Module API
 
-class TableSchemaException(Exception):
+class DataPackageException(Exception):
 
     # Public
 
@@ -24,6 +24,10 @@ class TableSchemaException(Exception):
         return self.__errors
 
 
+class TableSchemaException(DataPackageException):
+    pass
+
+
 class LoadError(TableSchemaException):
     pass
 
@@ -33,6 +37,10 @@ class ValidationError(TableSchemaException):
 
 
 class CastError(TableSchemaException):
+    pass
+
+
+class CheckError(TableSchemaException):
     pass
 
 

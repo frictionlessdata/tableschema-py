@@ -162,9 +162,9 @@ table = Table('data.csv', schema='schema.json')
 
 It was onle basic introduction to the `Table` class. To learn more let's take a look on `Table` class API reference.
 
-#### `Table(source, schema=None, strict=False, post_cast=[], storage=None, **options})`
+#### `Table(source, schema=None, strict=False, references={}, post_cast=[], storage=None, **options})`
 
-Constructor to instantiate `Table` class.
+Constructor to instantiate `Table` class. If `references` argument is provided foreign keys will be checked on any reading operation.
 
 - `source (str/list[])` - data source (one of):
   - local file (path)
@@ -172,6 +172,7 @@ Constructor to instantiate `Table` class.
   - array of arrays representing the rows
 - `schema (any)` - data schema in all forms supported by `Schema` class
 - `strict (bool)` - strictness option to pass to `Schema` constructor
+- `references (dict/callable)` - dict of foreign key references in a form of `{resource1: [{field1: value1, field2: value2}, ...], ...}`. This argument could be a callable returning a dict.
 - `post_cast (function[])` - list of post cast processors
 - `storage (None/str)` - storage name like `sql` or `bigquery`
 - `options (dict)` - `tabulator` or storage options
@@ -186,26 +187,28 @@ Constructor to instantiate `Table` class.
 
 - `(Schema)` - returns schema class instance
 
-#### `table.iter(keyed=Fase, extended=False, cast=True)`
+#### `table.iter(keyed=Fase, extended=False, cast=True, check=True)`
 
 Iter through the table data and emits rows cast based on table schema. Data casting could be disabled.
 
 - `keyed (bool)` - iter keyed rows
 - `extended (bool)` - iter extended rows
 - `cast (bool)` - disable data casting if false
+- `check (bool)` - disable various checks if false
 - `(exceptions.TableSchemaException)` - raises any error occured in this process
 - `(any[]/any{})` - yields rows:
   - `[value1, value2]` - base
   - `{header1: value1, header2: value2}` - keyed
   - `[rowNumber, [header1, header2], [value1, value2]]` - extended
 
-#### `table.read(keyed=False, extended=False, cast=True, limit=None)`
+#### `table.read(keyed=False, extended=False, cast=True, check=True, limit=None)`
 
 Read the whole table and returns as array of rows. Count of rows could be limited.
 
 - `keyed (bool)` - flag to emit keyed rows
 - `extended (bool)` - flag to emit extended rows
 - `cast (bool)` - flag to disable data casting if false
+- `check (bool)` - disable various checks if false
 - `limit (int)` - integer limit of rows to return
 - `(exceptions.TableSchemaException)` - raises any error occured in this process
 - `(list[])` - returns array of rows (see `table.iter`)
@@ -569,6 +572,10 @@ All validation errors.
 #### `exceptions.CastError`
 
 All value cast errors.
+
+#### `exceptions.CheckError`
+
+All check errors like headers mismath check etc.
 
 #### `exceptions.StorageError`
 
