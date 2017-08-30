@@ -157,7 +157,7 @@ def test_read_with_headers_field_names_mismatch():
         [1, 39, 'Paul'],
     ]
     table = Table(source, schema=SCHEMA_CSV)
-    with pytest.raises(exceptions.CheckError) as excinfo:
+    with pytest.raises(exceptions.CastError) as excinfo:
         table.read()
     assert 'match schema field names' in str(excinfo.value)
 
@@ -183,7 +183,7 @@ FK_SCHEMA = {
     },
   ]
 }
-FK_REFERENCES = {
+FK_RELATIONS = {
   'people': [
     {'firstname': 'Alex', 'surname': 'Martin'},
     {'firstname': 'John', 'surname': 'Dockins'},
@@ -193,17 +193,20 @@ FK_REFERENCES = {
 
 
 def test_single_field_foreign_key():
-    table = Table(FK_SOURCE, schema=FK_SCHEMA, references=FK_REFERENCES)
-    rows = table.read()
-    assert len(rows) == 3
-
+    table = Table(FK_SOURCE, schema=FK_SCHEMA)
+    rows = table.read(relations=FK_RELATIONS)
+    assert rows == [
+      ['1', {'firstname': 'Alex', 'surname': 'Martin'}, 'Martin'],
+      ['2', {'firstname': 'John', 'surname': 'Dockins'}, 'Dockins'],
+      ['3', {'firstname': 'Walter', 'surname': 'White'}, 'White'],
+    ]
 
 def test_single_field_foreign_key_invalid():
-    references = deepcopy(FK_REFERENCES)
-    references['people'][2]['firstname'] = 'Max'
-    table = Table(FK_SOURCE, schema=FK_SCHEMA, references=references)
-    with pytest.raises(exceptions.CheckError) as excinfo:
-        table.read()
+    relations = deepcopy(FK_RELATIONS)
+    relations['people'][2]['firstname'] = 'Max'
+    table = Table(FK_SOURCE, schema=FK_SCHEMA)
+    with pytest.raises(exceptions.RelationError) as excinfo:
+        table.read(relations=relations)
     assert 'Foreign key' in str(excinfo.value)
 
 
@@ -211,26 +214,33 @@ def test_multi_field_foreign_key():
     schema = deepcopy(FK_SCHEMA)
     schema['foreignKeys'][0]['fields'] = ['name', 'surname']
     schema['foreignKeys'][0]['reference']['fields'] = ['firstname', 'surname']
-    table = Table(FK_SOURCE, schema=schema, references=FK_REFERENCES)
-    rows = table.read()
-    assert len(rows) == 3
-
+    table = Table(FK_SOURCE, schema=schema)
+    keyed_rows = table.read(keyed=True, relations=FK_RELATIONS)
+    assert keyed_rows == [
+      {
+          'id': '1',
+          'name': {'firstname': 'Alex', 'surname': 'Martin'},
+          'surname': {'firstname': 'Alex', 'surname': 'Martin'},
+      },
+      {
+          'id': '2',
+          'name': {'firstname': 'John', 'surname': 'Dockins'},
+          'surname': {'firstname': 'John', 'surname': 'Dockins'},
+      },
+      {
+          'id': '3',
+          'name': {'firstname': 'Walter', 'surname': 'White'},
+          'surname': {'firstname': 'Walter', 'surname': 'White'},
+      },
+    ]
 
 def test_multi_field_foreign_key_invalid():
     schema = deepcopy(FK_SCHEMA)
     schema['foreignKeys'][0]['fields'] = ['name', 'surname']
     schema['foreignKeys'][0]['reference']['fields'] = ['firstname', 'surname']
-    references = deepcopy(FK_REFERENCES)
-    del references['people'][2]
-    table = Table(FK_SOURCE, schema=schema, references=references)
-    with pytest.raises(exceptions.CheckError) as excinfo:
-        table.read()
+    relations = deepcopy(FK_RELATIONS)
+    del relations['people'][2]
+    table = Table(FK_SOURCE, schema=schema)
+    with pytest.raises(exceptions.RelationError) as excinfo:
+        table.read(relations=relations)
     assert 'Foreign key' in str(excinfo.value)
-
-
-
-def test_single_field_foreign_key_with_references_function():
-    references = lambda: FK_REFERENCES
-    table = Table(FK_SOURCE, schema=FK_SCHEMA, references=references)
-    rows = table.read()
-    assert len(rows) == 3
