@@ -572,9 +572,9 @@ All validation errors.
 
 All value cast errors.
 
-#### `exceptions.CheckError`
+#### `exceptions.RelationError`
 
-All check errors like headers mismath check etc.
+All integrity errors.
 
 #### `exceptions.StorageError`
 
