@@ -8,6 +8,7 @@ from copy import copy
 from tabulator import Stream
 from functools import partial
 from importlib import import_module
+from collections import OrderedDict
 from .schema import Schema
 from . import exceptions
 
@@ -18,7 +19,7 @@ class Table(object):
 
     # Public
 
-    def __init__(self, source, schema=None, strict=False, references={},
+    def __init__(self, source, schema=None, strict=False,
                  post_cast=[], storage=None, **options):
         """https://github.com/frictionlessdata/tableschema-py#schema
         """
@@ -29,7 +30,6 @@ class Table(object):
         self.__schema = None
         self.__headers = None
         self.__storage = None
-        self.__references = references
         self.__post_cast = copy(post_cast)
 
         # Schema
@@ -63,17 +63,12 @@ class Table(object):
         """
         return self.__schema
 
-    def iter(self, keyed=False, extended=False, cast=True, check=True):
+    def iter(self, keyed=False, extended=False, cast=True, relations=False):
         """https://github.com/frictionlessdata/tableschema-py#schema
         """
 
-        # Resolve references
-        if check:
-            if callable(self.__references):
-                self.__references = self.__references()
-
         # Prepare unique checks
-        if check:
+        if cast:
             unique_fields_cache = {}
             if self.schema:
                 unique_fields_cache = _create_unique_fields_cache(self.schema)
@@ -89,41 +84,35 @@ class Table(object):
                 self.__headers = headers
 
             # Check headers
-            if check:
+            if cast:
                 if self.schema and self.headers:
                     if self.headers != self.schema.field_names:
+                        self.__stream.close()
                         message = 'Table headers don\'t match schema field names'
-                        raise exceptions.CheckError(message)
+                        raise exceptions.CastError(message)
 
             # Check unique
-            if check:
+            if cast:
                 for index, cache in unique_fields_cache.items():
                     if row[index] in cache:
+                        self.__stream.close()
                         field_name = self.schema.fields[index].name
                         message = 'Field "%s" duplicates in row "%s"'
                         message = message % (field_name, row_number)
-                        raise exceptions.TableSchemaException(message)
-                    cache.add(row[index])
+                        raise exceptions.CastError(message)
+                    if row[index] is not None:
+                        cache.add(row[index])
 
-            # Check foreign
-            if check:
-                if self.schema and self.schema.foreign_keys:
-                    keyed_row = dict(zip(headers, row))
-                    for fk in self.schema.foreign_keys:
-                        reference = self.__references.get(fk['reference']['resource'])
-                        if not reference:
-                            continue
-                        values = {}
-                        fields = zip(fk['fields'], fk['reference']['fields'])
-                        for field, ref_field in fields:
-                            if field and ref_field:
-                                values[ref_field] = keyed_row[field]
-                        empty = all(map(lambda value: value is None, values.values()))
-                        valid = any(map(partial(_is_match, values), reference))
-                        if not empty and not valid:
+            # Resolve relations
+            if relations:
+                if self.schema:
+                    for foreign_key in self.schema.foreign_keys:
+                        row = _resolve_relations(row, headers, relations, foreign_key)
+                        if row is None:
+                            self.__stream.close()
                             message = 'Foreign key "%s" violation in row "%s"'
-                            message = message % (fk['fields'], row_number)
-                            raise exceptions.CheckError(message)
+                            message = message % (foreign_key['fields'], row_number)
+                            raise exceptions.RelationError(message)
 
             # Form row
             if extended:
@@ -136,11 +125,11 @@ class Table(object):
         # Close stream
         self.__stream.close()
 
-    def read(self, keyed=False, extended=False, cast=True, limit=None, check=True):
+    def read(self, keyed=False, extended=False, cast=True, relations=False, limit=None):
         """https://github.com/frictionlessdata/tableschema-py#schema
         """
         result = []
-        rows = self.iter(keyed=keyed, extended=extended, cast=cast, check=check)
+        rows = self.iter(keyed=keyed, extended=extended, cast=cast, relations=relations)
         for count, row in enumerate(rows, start=1):
             result.append(row)
             if count == limit:
@@ -216,5 +205,31 @@ def _create_unique_fields_cache(schema):
     return cache
 
 
-def _is_match(subset, superset):
-    return set(subset.items()).issubset(set(superset.items()))
+def _resolve_relations(row, headers, relations, foreign_key):
+
+    # Prepare helpers - needed data structures
+    keyed_row = OrderedDict(zip(headers, row))
+    fields = list(zip(foreign_key['fields'], foreign_key['reference']['fields']))
+    reference = relations.get(foreign_key['reference']['resource'])
+    if not reference:
+        return row
+
+    # Collect values - valid if all None
+    values = {}
+    valid = True
+    for field, ref_field in fields:
+        if field and ref_field:
+            values[ref_field] = keyed_row[field]
+            if keyed_row[field] is not None:
+                valid = False
+
+    # Resolve values - valid if match found
+    if not valid:
+        for refValues in reference:
+            if set(values.items()).issubset(set(refValues.items())):
+                for field, ref_field in fields:
+                    keyed_row[field] = refValues
+                valid = True
+                break
+
+    return list(keyed_row.values()) if valid else None
