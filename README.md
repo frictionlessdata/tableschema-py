@@ -582,17 +582,79 @@ All storage errors.
 
 ### Storage
 
-> It's a provisional API excluded from SemVer. If you use it as a part of other program please pin concrete `tableschema` version to your requirements file.
+The library includes interface declaration to implement tabular `Storage`. This interface allow to use different data storage systems like SQL with `tableschema.Table` class (load/save) as well as on the data package level:
 
-The library includes interface declaration to implement tabular `Storage`:
+![Storage](https://raw.githubusercontent.com/frictionlessdata/tableschema-py/master/data/storage.png)
 
-![Storage](data/storage.png)
+An implementor should follow `tableschema.Storage` interface to write his own storage backend. Concrete storage backends could include additional functionality specific to conrete storage system. See `plugins` system below to know how to integrate custom storage plugin into your workflow.
 
-An implementor should follow `tableschema.Storage` interface to write his own storage backend. This backend could be used with `Table` class. See `plugins` system below to know how to integrate custom storage plugin.
+#### `<<Interface>>Storage(**options)`
+
+Create tabular `storage`. Implementations should fully implement this interface to be compatible to `Storage` API.
+
+- `options (dict)` - concrete backend options
+- `(exceptions.StorageError)` - raises on any error
+- `(Storage)` - returns `Storage` instance
+
+#### `storage.buckets`
+
+Return list of storage bucket names. A `bucket` is a special term which has almost the same meaning as the term `table`. You should consider `bucket` as a `table` stored in the `storage`.
+
+- `(exceptions.StorageError)` - raises on any error
+- `str[]` - return list of bucket names
+
+#### `create(bucket, descriptor, force=False)`
+
+Create one/multiple buckets.
+
+- `bucket (str/list)` - bucket name or list of bucket names
+- `descriptor (dict/dict[])` - schema descriptor or list of descriptors
+- `force (bool)` - delete and re-create already existent buckets
+- `(exceptions.StorageError)` - raises on any error
+
+#### `delete(bucket=None, ignore=False)`
+
+Delete one/multiple/all buckets.
+
+- `bucket (str/list/None)` - bucket name or list of bucket names to delete. If None all buckets will be deleted
+- `descriptor (dict/dict[])` - schema descriptor or list of descriptors
+- `ignore (bool)` - don't raise an error on non-existent bucket deletion from storage
+- `(exceptions.StorageError)` - raises on any error
+
+#### `describe(bucket, descriptor=None)`
+
+Get/set bucket's Table Schema descriptor.
+
+- `bucket (str)` - bucket name
+- `descriptor (dict/None)` - schema descriptor to set
+- `(exceptions.StorageError)` - raises on any error
+- `(dict)` - returns Table Schema descriptor
+
+#### `iter(bucket)`
+
+This method should iter typed values based on the schema of this bucket.
+
+- `bucket (str)` - bucket name
+- `(exceptions.StorageError)` - raises on any error
+- `(list[])` - yields data rows
+
+#### `read(bucket)`
+
+This method should read typed values based on the schema of this bucket.
+
+- `bucket (str)` - bucket name
+- `(exceptions.StorageError)` - raises on any error
+- `(list[])` - returns data rows
+
+#### `write(bucket, rows)`
+
+This method writes data rows into the `storage`. It should store values of unsupported types as strings internally (like csv does).
+
+- `bucket (str)` - bucket name
+- `rows (list[])` - data rows to write
+- `(exceptions.StorageError)` - raises on any error
 
 ### Plugins
-
-> It's a provisional API excluded from SemVer. If you use it as a part of other program please pin concrete `tableschema` version to your requirements file.
 
 Table Schema has a plugin system.  Any package with the name like `tableschema_<name>` could be imported as:
 
@@ -602,10 +664,13 @@ from tableschema.plugins import <name>
 
 If a plugin is not installed `ImportError` will be raised with a message describing how to install the plugin.
 
-A list of officially supported plugins:
-- BigQuery Storage - https://github.com/frictionlessdata/tableschema-bigquery-py
-- Pandas Storage - https://github.com/frictionlessdata/tableschema-pandas-py
-- SQL Storage - https://github.com/frictionlessdata/tableschema-sql-py
+#### Official plugins
+
+- [BigQuery Storage](https://github.com/frictionlessdata/tableschema-bigquery-py)
+- [Elasticsearch Storage](https://github.com/frictionlessdata/tableschema-elasticsearch-py)
+- [Pandas Storage](https://github.com/frictionlessdata/tableschema-pandas-py)
+- [SQL Storageh](ttps://github.com/frictionlessdata/tableschema-sql-py)
+- [SPSS Storage](https://github.com/frictionlessdata/tableschema-spss-py)
 
 ### CLI
 
