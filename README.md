@@ -669,7 +669,7 @@ If a plugin is not installed `ImportError` will be raised with a message describ
 - [BigQuery Storage](https://github.com/frictionlessdata/tableschema-bigquery-py)
 - [Elasticsearch Storage](https://github.com/frictionlessdata/tableschema-elasticsearch-py)
 - [Pandas Storage](https://github.com/frictionlessdata/tableschema-pandas-py)
-- [SQL Storageh](ttps://github.com/frictionlessdata/tableschema-sql-py)
+- [SQL Storage](https://github.com/frictionlessdata/tableschema-sql-py)
 - [SPSS Storage](https://github.com/frictionlessdata/tableschema-spss-py)
 
 ### CLI
