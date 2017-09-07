@@ -120,7 +120,7 @@ class _TableSchemaValidator(validator_for(_PROFILES['table-schema'])):
                 # ensure that `foreignKey.reference.fields`
                 # matches outer `fields`
                 if isinstance(fk.get('fields'), six.string_types):
-                    fields = fk.get('reference', {}).get('fields', {}), six.string_types
+                    fields = fk.get('reference', {}).get('fields', {})
                     if not isinstance(fields, six.string_types):
                         yield exceptions.SchemaValidationError(
                             'A JSON Table Schema foreignKey.reference.fields '
