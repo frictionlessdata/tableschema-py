@@ -93,15 +93,15 @@ class Table(object):
 
             # Check unique
             if cast:
-                for index, cache in unique_fields_cache.items():
-                    if row[index] in cache:
-                        self.__stream.close()
-                        field_name = self.schema.fields[index].name
-                        message = 'Field "%s" duplicates in row "%s"'
-                        message = message % (field_name, row_number)
-                        raise exceptions.CastError(message)
-                    if row[index] is not None:
-                        cache.add(row[index])
+                for indexes, cache in unique_fields_cache.items():
+                    values = tuple(value for i, value in enumerate(row) if i in indexes)
+                    if not all(map(lambda value: value is None, values)):
+                        if values in cache['data']:
+                            self.__stream.close()
+                            message = 'Field(s) "%s" duplicates in row "%s"'
+                            message = message % (cache['name'], row_number)
+                            raise exceptions.CastError(message)
+                        cache['data'].add(values)
 
             # Resolve relations
             if relations:
@@ -198,10 +198,26 @@ class Table(object):
 # Internal
 
 def _create_unique_fields_cache(schema):
+    primary_key_indexes = []
     cache = {}
+
+    # Unique
     for index, field in enumerate(schema.fields):
-        if field.constraints.get('unique') or field.name in schema.primary_key:
-            cache[index] = set()
+        if field.name in schema.primary_key:
+            primary_key_indexes.append(index)
+        if field.constraints.get('unique'):
+            cache[tuple([index])] = {
+                'name': field.name,
+                'data': set(),
+            }
+
+    # Primary key
+    if primary_key_indexes:
+        cache[tuple(primary_key_indexes)] = {
+            'name': ', '.join(schema.primary_key),
+            'data': set(),
+        }
+
     return cache
 
 
