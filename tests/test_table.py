@@ -234,6 +234,7 @@ def test_multi_field_foreign_key():
       },
     ]
 
+
 def test_multi_field_foreign_key_invalid():
     schema = deepcopy(FK_SCHEMA)
     schema['foreignKeys'][0]['fields'] = ['name', 'surname']
@@ -244,3 +245,41 @@ def test_multi_field_foreign_key_invalid():
     with pytest.raises(exceptions.RelationError) as excinfo:
         table.read(relations=relations)
     assert 'Foreign key' in str(excinfo.value)
+
+
+# Issues
+
+def test_composite_primary_key_issue_194():
+    source = [
+        ['id1', 'id2'],
+        ['a', '1'],
+        ['a', '2'],
+    ]
+    schema = {
+        'fields': [
+            {'name': 'id1'},
+            {'name': 'id2'},
+        ],
+        'primaryKey': ['id1', 'id2']
+    }
+    table = Table(source, schema=schema)
+    assert table.read() == source[1:]
+
+
+def test_composite_primary_key_fails_unique_issue_194():
+    source = [
+        ['id1', 'id2'],
+        ['a', '1'],
+        ['a', '1'],
+    ]
+    schema = {
+        'fields': [
+            {'name': 'id1'},
+            {'name': 'id2'},
+        ],
+        'primaryKey': ['id1', 'id2']
+    }
+    table = Table(source, schema=schema)
+    with pytest.raises(exceptions.CastError) as excinfo:
+        table.read()
+    assert 'duplicates' in str(excinfo.value)
