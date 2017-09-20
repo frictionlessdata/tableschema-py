@@ -93,3 +93,18 @@ def test_schema_multiple_errors_no_fail_fast_true():
     with pytest.raises(exceptions.ValidationError) as excinfo:
         valid = validate('data/schema_invalid_multiple_errors.json')
     assert len(excinfo.value.errors) == 5
+
+
+def test_validate_error_message():
+    descriptor = {
+        'fields': [
+            {'name': 'name', 'type': 'other'},
+        ],
+    }
+    with pytest.raises(exceptions.ValidationError) as excinfo:
+        validate(descriptor)
+    message = str(excinfo.value.errors[0])
+    assert 'Descriptor validation error' in message
+    assert 'at "fields/0" in descriptor' in message
+    assert 'at "properties/fields/items/anyOf" in profile' in message
+
