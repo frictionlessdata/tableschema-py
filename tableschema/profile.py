@@ -35,14 +35,34 @@ class Profile(object):
         return self.__jsonschema
 
     def validate(self, descriptor):
+
+        # Other profiles
         if self.name != 'table-schema':
             return jsonschema.validate(descriptor, self.jsonschema)
+
+        # Collect errors
+        errors = []
         validator = _TableSchemaValidator(
             self.jsonschema, format_checker=jsonschema.FormatChecker())
-        errors = list(validator.iter_errors(descriptor))
+        for error in validator.iter_errors(descriptor):
+            if isinstance(error, jsonschema.exceptions.ValidationError):
+                message = str(error.message)
+                if six.PY2:
+                    message = message.replace('u\'', '\'')
+                descriptor_path = '/'.join(map(str, error.path))
+                profile_path = '/'.join(map(str, error.schema_path))
+                error = exceptions.ValidationError(
+                    'Descriptor validation error: %s '
+                    'at "%s" in descriptor and '
+                    'at "%s" in profile'
+                    % (message, descriptor_path, profile_path))
+            errors.append(error)
+
+        # Railse error
         if errors:
             message = 'There are %s validation errors (see exception.errors)' % len(errors)
             raise exceptions.ValidationError(message, errors=errors)
+
         return True
 
 
@@ -90,13 +110,13 @@ class _TableSchemaValidator(validator_for(_PROFILES['table-schema'])):
             # ensure that the primary key matches field names
             if isinstance(instance['primaryKey'], six.string_types):
                 if not instance['primaryKey'] in field_names:
-                    yield exceptions.SchemaValidationError(
+                    yield exceptions.ValidationError(
                         'A JSON Table Schema primaryKey value must be found in'
                         ' the schema field names')
             elif isinstance(instance['primaryKey'], list):
                 for k in instance['primaryKey']:
                     if k not in field_names:
-                        yield exceptions.SchemaValidationError(
+                        yield exceptions.ValidationError(
                             'A JSON Table Schema primaryKey value must be '
                             'found in the schema field names')
 
@@ -107,13 +127,13 @@ class _TableSchemaValidator(validator_for(_PROFILES['table-schema'])):
                 # ensure that `foreignKey.fields` match field names
                 if isinstance(fk.get('fields'), six.string_types):
                     if fk.get('fields') not in field_names:
-                        yield exceptions.SchemaValidationError(
+                        yield exceptions.ValidationError(
                             'A JSON Table Schema foreignKey.fields value must '
                             'correspond with field names.')
                 elif isinstance(fk.get('fields', []), list):
                     for field in fk.get('fields'):
                         if field not in field_names:
-                            yield exceptions.SchemaValidationError(
+                            yield exceptions.ValidationError(
                                 'A JSON Table Schema foreignKey.fields value '
                                 'must correspond with field names.')
 
@@ -122,18 +142,18 @@ class _TableSchemaValidator(validator_for(_PROFILES['table-schema'])):
                 if isinstance(fk.get('fields'), six.string_types):
                     fields = fk.get('reference', {}).get('fields', {})
                     if not isinstance(fields, six.string_types):
-                        yield exceptions.SchemaValidationError(
+                        yield exceptions.ValidationError(
                             'A JSON Table Schema foreignKey.reference.fields '
                             'must match field names.')
                 else:
                     if isinstance(fk['reference']['fields'], six.string_types):
-                        yield exceptions.SchemaValidationError(
+                        yield exceptions.ValidationError(
                             'A JSON Table Schema foreignKey.fields cannot '
                             'be a string when foreignKey.reference.fields.'
                             'is a string')
                     if not (len(fk.get('fields')) ==
                             len(fk['reference']['fields'])):
-                        yield exceptions.SchemaValidationError(
+                        yield exceptions.ValidationError(
                             'A JSON Table Schema foreignKey.fields must '
                             'contain the same number entries as '
                             'foreignKey.reference.fields.')
