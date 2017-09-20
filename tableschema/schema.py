@@ -135,20 +135,16 @@ class Schema(object):
         if len(row) != len(self.fields):
             message = 'Row length %s doesn\'t match fields count %s'
             message = message % (len(row), len(self.fields))
-            exception = exceptions.CastError(message)
-            if fail_fast:
-                raise exception
-            errors.append(exception)
+            raise exceptions.CastError(message)
 
         # Cast row
-        if not errors:
-            for field, value in zip(self.fields, row):
-                try:
-                    result.append(field.cast_value(value))
-                except exceptions.CastError as exception:
-                    if fail_fast:
-                        raise
-                    errors.append(exception)
+        for field, value in zip(self.fields, row):
+            try:
+                result.append(field.cast_value(value))
+            except exceptions.CastError as exception:
+                if fail_fast:
+                    raise
+                errors.append(exception)
 
         # Raise errors
         if errors:
