@@ -140,7 +140,7 @@ class Schema(object):
                 raise exception
             errors.append(exception)
 
-        # Cast
+        # Cast row
         if not errors:
             for field, value in zip(self.fields, row):
                 try:
@@ -150,7 +150,7 @@ class Schema(object):
                         raise
                     errors.append(exception)
 
-        # Raise
+        # Raise errors
         if errors:
             message = 'There are %s cast errors (see exception.errors)' % len(errors)
             raise exceptions.CastError(message, errors=errors)
