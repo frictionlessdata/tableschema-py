@@ -128,6 +128,7 @@ class Schema(object):
         """
 
         # Prepare
+        result = []
         errors = []
 
         # Check row length
@@ -140,7 +141,6 @@ class Schema(object):
             errors.append(exception)
 
         # Cast
-        result = []
         if not errors:
             for field, value in zip(self.fields, row):
                 try:
