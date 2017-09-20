@@ -36,11 +36,11 @@ class Profile(object):
 
     def validate(self, descriptor):
 
-        # General validation
+        # Other profiles
         if self.name != 'table-schema':
             return jsonschema.validate(descriptor, self.jsonschema)
 
-        # Table schema validation
+        # Collect errors
         errors = []
         validator = _TableSchemaValidator(
             self.jsonschema, format_checker=jsonschema.FormatChecker())
@@ -54,6 +54,8 @@ class Profile(object):
                     'at "%s" in profile'
                     % (error.message, path, schema_path))
             errors.append(error)
+
+        # Railse error
         if errors:
             message = 'There are %s validation errors (see exception.errors)' % len(errors)
             raise exceptions.ValidationError(message, errors=errors)
