@@ -46,13 +46,16 @@ class Profile(object):
             self.jsonschema, format_checker=jsonschema.FormatChecker())
         for error in validator.iter_errors(descriptor):
             if isinstance(error, jsonschema.exceptions.ValidationError):
-                path = '/'.join(map(str, error.path))
-                schema_path = '/'.join(map(str, error.schema_path))
+                message = str(error.message)
+                if six.PY2:
+                    message = message.replace('u\'', '\'')
+                descriptor_path = '/'.join(map(str, error.path))
+                profile_path = '/'.join(map(str, error.schema_path))
                 error = exceptions.ValidationError(
                     'Descriptor validation error: %s '
                     'at "%s" in descriptor and '
                     'at "%s" in profile'
-                    % (error.message, path, schema_path))
+                    % (message, descriptor_path, profile_path))
             errors.append(error)
 
         # Railse error
