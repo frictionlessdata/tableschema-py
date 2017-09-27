@@ -13,6 +13,8 @@ from ..config import ERROR
 
 def cast_array(format, value, **options):
     if not isinstance(value, list):
+        if isinstance(value, tuple):
+            return list(value)
         if not isinstance(value, six.string_types):
             return ERROR
         try:

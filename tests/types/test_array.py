@@ -13,8 +13,10 @@ from tableschema.config import ERROR
 
 @pytest.mark.parametrize('format, value, result', [
     ('default', [], []),
+    ('default', (), []),
     ('default', '[]', []),
     ('default', ['key', 'value'], ['key', 'value']),
+    ('default', ('key', 'value'), ['key', 'value']),
     ('default', '["key", "value"]', ['key', 'value']),
     ('default', {'key': 'value'}, ERROR),
     ('default', '{"key": "value"}', ERROR),
