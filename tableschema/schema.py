@@ -229,8 +229,8 @@ class Schema(object):
     def __build(self):
 
         # Process descriptor
-        self.__current_descriptor = helpers.expand_schema_descriptor(
-            self.__current_descriptor)
+        expand = helpers.expand_schema_descriptor
+        self.__current_descriptor = expand(self.__current_descriptor)
         self.__next_descriptor = deepcopy(self.__current_descriptor)
 
         # Validate descriptor
