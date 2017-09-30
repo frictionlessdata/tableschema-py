@@ -162,7 +162,7 @@ table = Table('data.csv', schema='schema.json')
 
 It was onle basic introduction to the `Table` class. To learn more let's take a look on `Table` class API reference.
 
-#### `Table(source, schema=None, strict=False, post_cast=[], storage=None, **options})`
+#### `Table(source, schema=None, strict=False, post_cast=[], storage=None, **options)`
 
 Constructor to instantiate `Table` class. If `references` argument is provided foreign keys will be checked on any reading operation.
 
