@@ -44,7 +44,7 @@ class Table(object):
         # Stream (storage)
         else:
             if not isinstance(storage, Storage):
-                storage = Storage(storage, **options)
+                storage = Storage.connect(storage, **options)
             if self.__schema:
                 storage.describe(source, self.__schema.descriptor)
             headers = Schema(storage.describe(source)).field_names
@@ -173,7 +173,7 @@ class Table(object):
         # Save (storage)
         else:
             if not isinstance(storage, Storage):
-                storage = Storage(storage, **options)
+                storage = Storage.connect(storage, **options)
             storage.create(target, self.__schema.descriptor, force=True)
             storage.write(target, self.iter())
             return storage
