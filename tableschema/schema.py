@@ -107,9 +107,9 @@ class Schema(object):
     def add_field(self, descriptor):
         """https://github.com/frictionlessdata/tableschema-py#schema
         """
-        self.__next_descriptor.setdefault('fields', [])
-        self.__next_descriptor['fields'].append(descriptor)
-        self.commit()
+        self.__current_descriptor.setdefault('fields', [])
+        self.__current_descriptor['fields'].append(descriptor)
+        self.__build()
         return self.__fields[-1]
 
     def remove_field(self, name):
@@ -118,9 +118,9 @@ class Schema(object):
         field = self.get_field(name)
         if field:
             predicat = lambda field: field.get('name') != name
-            self.__next_descriptor['fields'] = filter(
-                predicat, self.__next_descriptor['fields'])
-            self.commit()
+            self.__current_descriptor['fields'] = filter(
+                predicat, self.__current_descriptor['fields'])
+            self.__build()
         return field
 
     def cast_row(self, row, fail_fast=False):
@@ -195,9 +195,9 @@ class Schema(object):
             rv = resolver.get(results)
             descriptor['fields'][index].update(**rv)
 
-        # Commit descriptor
-        self.__next_descriptor = descriptor
-        self.commit()
+        # Save descriptor
+        self.__current_descriptor = descriptor
+        self.__build()
 
         return descriptor
 
