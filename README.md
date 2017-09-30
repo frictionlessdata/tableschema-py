@@ -586,13 +586,25 @@ The library includes interface declaration to implement tabular `Storage`. This 
 
 ![Storage](https://raw.githubusercontent.com/frictionlessdata/tableschema-py/master/data/storage.png)
 
+For instantiation of concrete storage instances `tableschema.Storage` provides a unified constructor (under the hood the plugin system will be used):
+
+```python
+# pip install tableschema_sql
+from tableschema import Storage
+
+storage = Storage('sql', **options)
+storage.create('bucket', descriptor)
+storage.write('bucket', rows)
+storage.read('bucket')
+```
+
 An implementor should follow `tableschema.Storage` interface to write his own storage backend. Concrete storage backends could include additional functionality specific to conrete storage system. See `plugins` system below to know how to integrate custom storage plugin into your workflow.
 
 #### `<<Interface>>Storage(**options)`
 
 Create tabular `storage`. Implementations should fully implement this interface to be compatible to `Storage` API.
 
-- `options (dict)` - concrete backend options
+- `options (dict)` - concrete storage options
 - `(exceptions.StorageError)` - raises on any error
 - `(Storage)` - returns `Storage` instance
 

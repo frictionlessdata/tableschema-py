@@ -38,7 +38,7 @@ def test_schema_infer_tabulator():
     assert table.schema.descriptor == SCHEMA_CSV
 
 
-@patch('tableschema.table.import_module')
+@patch('tableschema.storage.import_module')
 def test_schema_infer_storage(import_module, apply_defaults):
     import_module.return_value = Mock(Storage=Mock(return_value=Mock(
         describe=Mock(return_value=SCHEMA_MIN),
@@ -91,7 +91,7 @@ def test_read_limit():
     assert actual == expect
 
 
-@patch('tableschema.table.import_module')
+@patch('tableschema.storage.import_module')
 def test_read_storage(import_module):
     # Mocks
     import_module.return_value = Mock(Storage=Mock(return_value=Mock(

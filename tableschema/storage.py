@@ -5,6 +5,7 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 
 from six import add_metaclass
+from importlib import import_module
 from abc import ABCMeta, abstractmethod
 
 
@@ -14,6 +15,15 @@ from abc import ABCMeta, abstractmethod
 class Storage(object):
 
     # Public
+
+    def __new__(cls, *args, **kwargs):
+        """https://github.com/frictionlessdata/tableschema-py#storage
+        """
+        if cls is Storage:
+            module = 'tableschema.plugins.%s' % args[0]
+            storage = import_module(module).Storage(*args[1:], **kwargs)
+            return storage
+        return object.__new__(cls)
 
     @abstractmethod
     def __init__(self, **options):
