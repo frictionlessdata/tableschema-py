@@ -7,7 +7,7 @@ from __future__ import unicode_literals
 import pytest
 from copy import deepcopy
 from mock import Mock, patch
-from tableschema import Schema, Table, exceptions
+from tableschema import Schema, Table, Storage, exceptions
 
 
 # General
@@ -41,8 +41,8 @@ def test_schema_infer_tabulator():
 @patch('tableschema.table.import_module')
 def test_schema_infer_storage(import_module, apply_defaults):
     import_module.return_value = Mock(Storage=Mock(return_value=Mock(
-        describe = Mock(return_value=SCHEMA_MIN),
-        iter = Mock(return_value=DATA_MIN[1:]),
+        describe=Mock(return_value=SCHEMA_MIN),
+        iter=Mock(return_value=DATA_MIN[1:]),
     )))
     table = Table('table', storage='storage')
     table.infer()
@@ -95,11 +95,26 @@ def test_read_limit():
 def test_read_storage(import_module):
     # Mocks
     import_module.return_value = Mock(Storage=Mock(return_value=Mock(
-        describe = Mock(return_value=SCHEMA_MIN),
-        iter = Mock(return_value=DATA_MIN[1:]),
+        describe=Mock(return_value=SCHEMA_MIN),
+        iter=Mock(return_value=DATA_MIN[1:]),
     )))
     # Tests
     table = Table('table', storage='storage')
+    table.infer()
+    expect = [['one', 1], ['two', 2]]
+    actual = table.read()
+    assert actual == expect
+
+
+def test_read_storage_passed_as_instance():
+    # Mocks
+    storage = Mock(
+        describe=Mock(return_value=SCHEMA_MIN),
+        iter=Mock(return_value=DATA_MIN[1:]),
+        spec=Storage,
+    )
+    # Tests
+    table = Table('table', storage=storage)
     table.infer()
     expect = [['one', 1], ['two', 2]]
     actual = table.read()

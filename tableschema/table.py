@@ -9,6 +9,7 @@ from tabulator import Stream
 from functools import partial
 from importlib import import_module
 from collections import OrderedDict
+from .storage import Storage
 from .schema import Schema
 from . import exceptions
 
@@ -43,8 +44,9 @@ class Table(object):
 
         # Stream (storage)
         else:
-            module = 'tableschema.plugins.%s' % storage
-            storage = import_module(module).Storage(**options)
+            if not isinstance(storage, Storage):
+                module = 'tableschema.plugins.%s' % storage
+                storage = import_module(module).Storage(**options)
             if self.__schema:
                 storage.describe(source, self.__schema.descriptor)
             headers = Schema(storage.describe(source)).field_names
@@ -172,8 +174,9 @@ class Table(object):
 
         # Save (storage)
         else:
-            module = 'tableschema.plugins.%s' % storage
-            storage = import_module(module).Storage(**options)
+            if not isinstance(storage, Storage):
+                module = 'tableschema.plugins.%s' % storage
+                storage = import_module(module).Storage(**options)
             storage.create(target, self.__schema.descriptor, force=True)
             storage.write(target, self.iter())
             return storage
