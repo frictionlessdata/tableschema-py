@@ -175,7 +175,7 @@ class Table(object):
             if not isinstance(storage, Storage):
                 storage = Storage.connect(storage, **options)
             storage.create(target, self.__schema.descriptor, force=True)
-            storage.write(target, self.iter())
+            storage.write(target, self.iter(cast=False))
             return storage
 
     # Private
