@@ -4,9 +4,11 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
+from mock import patch
 import pytest
 from tableschema import types
 from tableschema.config import ERROR
+from tableschema.profile import Profile
 
 
 # Tests
@@ -38,3 +40,18 @@ from tableschema.config import ERROR
 ])
 def test_cast_geojson(format, value, result):
     assert types.cast_geojson(format, value) == result
+
+
+@pytest.mark.parametrize('format, value, validates', [
+    ('default', '', False),
+    ('default', '""', False),
+    ('default', '3.14', False),
+    ('default', '{}', True),
+    ('default', {}, True),
+])
+def test_validation(format, value, validates):
+    """Only json object shaped inputs call Profile.validate()."""
+    err = Exception('fake validation error')
+    with patch.object(Profile, 'validate', side_effect=err) as mock_validate:
+        assert types.cast_geojson(format, value) == ERROR
+        assert mock_validate.call_count == int(validates)
