@@ -16,6 +16,7 @@ from tableschema.config import ERROR
     ('default', '', ''),
     ('default', 0, ERROR),
     ('uri', 'http://google.com', 'http://google.com'),
+    ('uri', '://no-scheme.test', ERROR),
     ('uri', 'string', ERROR),
     ('uri', '', ERROR),
     ('uri', 0, ERROR),
