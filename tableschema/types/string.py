@@ -8,7 +8,9 @@ import re
 import six
 import uuid
 import base64
-import rfc3986
+import rfc3986.exceptions
+import rfc3986.validators
+import rfc3986.uri
 from ..config import ERROR
 
 
@@ -18,7 +20,10 @@ def cast_string(format, value, **options):
     if not isinstance(value, six.string_types):
         return ERROR
     if format == 'uri':
-        if not rfc3986.is_valid_uri(value, require_scheme=True):
+        uri = _uri_from_string(value)
+        try:
+            _uri_validator.validate(uri)
+        except rfc3986.exceptions.ValidationError:
             return ERROR
     elif format == 'email':
         if not re.match(_EMAIL_PATTERN, value):
@@ -39,3 +44,5 @@ def cast_string(format, value, **options):
 # Internal
 
 _EMAIL_PATTERN = re.compile(r'[^@]+@[^@]+\.[^@]+')
+_uri_from_string = rfc3986.uri.URIReference.from_string
+_uri_validator = rfc3986.validators.Validator().require_presence_of('scheme')
