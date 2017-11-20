@@ -13,21 +13,20 @@ from ..profile import Profile
 # Module API
 
 def cast_geojson(format, value, **options):
-    if not isinstance(value, dict):
-        if not isinstance(value, six.string_types):
-            return ERROR
+    if isinstance(value, six.string_types):
         try:
             value = json.loads(value)
         except Exception:
             return ERROR
+    if not isinstance(value, dict):
+        return ERROR
     if format == 'default':
         try:
             _profile.validate(value)
         except Exception:
             return ERROR
     elif format == 'topojson':
-        if not isinstance(value, dict):
-            return ERROR
+        pass  # Accept any dict as possibly topojson for now
     return value
 
 
