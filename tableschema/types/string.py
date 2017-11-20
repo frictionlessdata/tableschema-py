@@ -14,10 +14,6 @@ import rfc3986.uri
 from ..config import ERROR
 
 
-_uri_from_string = rfc3986.uri.URIReference.from_string
-_uri_validator = rfc3986.validators.Validator().require_presence_of('scheme')
-
-
 # Module API
 
 def cast_string(format, value, **options):
@@ -48,3 +44,5 @@ def cast_string(format, value, **options):
 # Internal
 
 _EMAIL_PATTERN = re.compile(r'[^@]+@[^@]+\.[^@]+')
+_uri_from_string = rfc3986.uri.URIReference.from_string
+_uri_validator = rfc3986.validators.Validator().require_presence_of('scheme')
