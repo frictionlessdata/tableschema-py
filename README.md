@@ -8,8 +8,6 @@
 
 A library for working with [Table Schema](http://specs.frictionlessdata.io/table-schema/) in Python.
 
-> Version v1.0 includes various important changes. Please read a [migration guide](#v10).
-
 ## Features
 
 - `Table` to work with data tables described by Table Schema
@@ -755,15 +753,3 @@ tox -e py27 -- -v tests/<path>
 
 Under the hood `tox` uses `pytest` configured in `pytest.ini`, `coverage`
 and `mock` packages. This packages are available only in tox envionments.
-
-## Changelog
-
-Here described only breaking and the most important changes. The full changelog and documentation for all released versions could be found in nicely formatted [commit history](https://github.com/frictionlessdata/tableschema-py/commits/master).
-
-### v1.0
-
-This version includes various big changes. **A migration guide is under development and will be published here**.
-
-### v0.10
-
-Last pre-v1 stable version of the library.
