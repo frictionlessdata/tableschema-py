@@ -1,4 +1,4 @@
-.PHONY: all install list specs test version
+.PHONY: all install list profiles test version
 
 
 PACKAGE := $(shell grep '^PACKAGE =' setup.py | cut -d "'" -f2)
