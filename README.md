@@ -30,7 +30,7 @@ $ pip install tableschema
 
 ### Examples
 
-Code examples in this readme requires Python 3.3+ interpreter. You could see even more example in [examples](https://github.com/frictionlessdata/tableschema-py/tree/master/examples) directory.
+Code examples in this readme requires Python 3.4+ interpreter. You could see even more example in [examples](https://github.com/frictionlessdata/tableschema-py/tree/master/examples) directory.
 
 ```python
 from tableschema import Table
@@ -753,3 +753,11 @@ tox -e py27 -- -v tests/<path>
 
 Under the hood `tox` uses `pytest` configured in `pytest.ini`, `coverage`
 and `mock` packages. This packages are available only in tox envionments.
+
+## Changelog
+
+Here described only breaking and the most important changes. The full changelog and documentation for all released versions could be found in nicely formatted [commit history](https://github.com/frictionlessdata/tableschema-py/commits/master).
+
+### v1.0
+
+- The library has been rebased on the Frictionless Data specs v1 - https://frictionlessdata.io/specs/table-schema/
