@@ -18,4 +18,4 @@ from tableschema.profile import Profile
 def test_specs_table_schema_is_up_to_date():
     profile = Profile('table-schema')
     jsonschema = requests.get('https://specs.frictionlessdata.io/schemas/table-schema.json').json()
-    assert profile.jsonschema == jsonschema, 'run `make specs` to update specs'
+    assert profile.jsonschema == jsonschema, 'run `make profiles` to update profiles'
