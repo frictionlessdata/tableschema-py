@@ -5,6 +5,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import six
+import datetime
 import isodate
 from ..config import ERROR
 
@@ -12,7 +13,7 @@ from ..config import ERROR
 # Module API
 
 def cast_duration(format, value, **options):
-    if not isinstance(value, isodate.Duration):
+    if not isinstance(value, (isodate.Duration, datetime.timedelta)):
         if not isinstance(value, six.string_types):
             return ERROR
         try:
