@@ -172,7 +172,7 @@ def test_infer():
     assert schema.descriptor == {
         'fields': [
             {'format': 'default', 'name': 'id', 'type': 'integer'},
-            {'format': 'default', 'name': 'age', 'type': 'integer'},
+            {'format': 'default', 'name': 'age', 'type': 'string'},
             {'format': 'default', 'name': 'name', 'type': 'string'}],
         'missingValues': ['']}
 

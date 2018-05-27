@@ -187,9 +187,9 @@ class Schema(object):
             for index, value in enumerate(row):
                 rv = guesser.cast(value)
                 if type_matches.get(index):
-                    type_matches[index].append(rv)
+                    type_matches[index].extend(rv)
                 else:
-                    type_matches[index] = [rv]
+                    type_matches[index] = list(rv)
         # choose a type/format for each column based on the matches
         for index, results in type_matches.items():
             rv = resolver.get(results)
@@ -284,11 +284,11 @@ class _TypeGuesser(object):
     # Public
 
     def cast(self, value):
-        for name in _INFER_TYPE_ORDER:
+        for priority, name in enumerate(_INFER_TYPE_ORDER):
             cast = getattr(types, 'cast_%s' % name)
             result = cast('default', value)
             if result != config.ERROR:
-                return (name, 'default')
+                yield (name, 'default', priority)
 
 
 class _TypeResolver(object):
@@ -299,7 +299,7 @@ class _TypeResolver(object):
 
     @staticmethod
     def _sort_key(item):
-        return (item[1], _INFER_TYPE_ORDER.index(item[0][0]))
+        return (item[1], -item[0][2])
 
     def get(self, results):
         variants = set(results)
