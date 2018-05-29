@@ -153,7 +153,7 @@ class Schema(object):
 
         return result
 
-    def infer(self, rows, headers=1):
+    def infer(self, rows, headers=1, confidence=0.75):
         """https://github.com/frictionlessdata/tableschema-py#schema
         """
 
@@ -187,12 +187,12 @@ class Schema(object):
             for index, value in enumerate(row):
                 rv = guesser.cast(value)
                 if type_matches.get(index):
-                    type_matches[index].append(rv)
+                    type_matches[index].extend(rv)
                 else:
-                    type_matches[index] = [rv]
+                    type_matches[index] = list(rv)
         # choose a type/format for each column based on the matches
         for index, results in type_matches.items():
-            rv = resolver.get(results)
+            rv = resolver.get(results, confidence)
             descriptor['fields'][index].update(**rv)
 
         # Save descriptor
@@ -284,11 +284,11 @@ class _TypeGuesser(object):
     # Public
 
     def cast(self, value):
-        for name in _INFER_TYPE_ORDER:
+        for priority, name in enumerate(_INFER_TYPE_ORDER):
             cast = getattr(types, 'cast_%s' % name)
             result = cast('default', value)
             if result != config.ERROR:
-                return (name, 'default')
+                yield (name, 'default', priority)
 
 
 class _TypeResolver(object):
@@ -297,11 +297,7 @@ class _TypeResolver(object):
 
     # Public
 
-    @staticmethod
-    def _sort_key(item):
-        return (item[1], _INFER_TYPE_ORDER.index(item[0][0]))
-
-    def get(self, results):
+    def get(self, results, confidence):
         variants = set(results)
         # only one candidate... that's easy.
         if len(variants) == 1:
@@ -314,6 +310,15 @@ class _TypeResolver(object):
                 else:
                     counts[result] = 1
             # tuple representation of `counts` dict sorted by values
-            sorted_counts = sorted(counts.items(), key=self._sort_key, reverse=True)
+            sorted_counts = sorted(counts.items(),
+                                   key=lambda item: item[1],
+                                   reverse=True)
+            # Allow also counts that are not the max, based on the confidence
+            max_count = sorted_counts[0][1]
+            sorted_counts = filter(lambda item: item[1] >= max_count * confidence,
+                                   sorted_counts)
+            # Choose the most specific data type
+            sorted_counts = sorted(sorted_counts,
+                                   key=lambda item: item[0][2])
             rv = {'type': sorted_counts[0][0][0], 'format': sorted_counts[0][0][1]}
         return rv

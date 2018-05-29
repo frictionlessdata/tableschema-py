@@ -210,11 +210,12 @@ Read the whole table and returns as array of rows. Count of rows could be limite
 - `(exceptions.TableSchemaException)` - raises any error occured in this process
 - `(list[])` - returns array of rows (see `table.iter`)
 
-#### `table.infer(limit=100)`
+#### `table.infer(limit=100, confidence=0.75)`
 
 Infer a schema for the table. It will infer and set Table Schema to `table.schema` based on table data.
 
-- `limit (int)` - limit rows samle size
+- `limit (int)` - limit rows sample size
+- `confidence (float)` - how many casting errors are allowed (as a ratio, between 0 and 1)
 - `(dict)` - returns Table Schema descriptor
 
 #### `table.save(target, storage=None, **options)`
@@ -360,7 +361,7 @@ Cast row based on field types and formats.
 - `row (any[])` - data row as an array of values
 - `(any[])` - returns cast data row
 
-#### `schema.infer(rows, headers=1)`
+#### `schema.infer(rows, headers=1, confidence=0.75)`
 
 Infer and set `schema.descriptor` based on data sample.
 
@@ -368,6 +369,7 @@ Infer and set `schema.descriptor` based on data sample.
 - `headers (int/str[])` - data sample headers (one of):
   - row number containing headers (`rows` should contain headers rows)
   - array of headers (`rows` should NOT contain headers rows)
+- `confidence (float)` - how many casting errors are allowed (as a ratio, between 0 and 1)
 - `{dict}` - returns Table Schema descriptor
 
 #### `schema.commit(strict=None)`
@@ -533,12 +535,13 @@ descriptor = infer('data_to_infer.csv')
 
 The number of rows used by `infer` can be limited with the `limit` argument.
 
-#### `infer(source, headers=1, limit=100, **options)`
+#### `infer(source, headers=1, limit=100, confidence=0.75, **options)`
 
 Infer source schema.
 
 - `source (any)` - source as path, url or inline data
 - `headers (int/str[])` - headers rows number or headers list
+- `confidence (float)` - how many casting errors are allowed (as a ratio, between 0 and 1)
 - `(exceptions.TableSchemaException)` - raises any error occured in the process
 - `(dict)` - returns schema descriptor
 
