@@ -161,14 +161,30 @@ def test_save(tmpdir, apply_defaults):
 
 
 def test_infer():
-    schema = Schema()
-    schema.infer([
+    data = [
       ['id', 'age', 'name'],
       ['1','39','Paul'],
       ['2','23','Jimmy'],
       ['3','36','Jane'],
       ['4','N/A','Judy'],
-    ])
+    ]
+    schema = Schema()
+    schema.infer(data)
+    assert schema.descriptor == {
+        'fields': [
+            {'format': 'default', 'name': 'id', 'type': 'integer'},
+            {'format': 'default', 'name': 'age', 'type': 'integer'},
+            {'format': 'default', 'name': 'name', 'type': 'string'}],
+        'missingValues': ['']}
+    data = [
+      ['id', 'age', 'name'],
+      ['1','39','Paul'],
+      ['2','23','Jimmy'],
+      ['3','36','Jane'],
+      ['4','N/A','Judy'],
+    ]
+    schema = Schema()
+    schema.infer(data, confidence=0.8)
     assert schema.descriptor == {
         'fields': [
             {'format': 'default', 'name': 'id', 'type': 'integer'},

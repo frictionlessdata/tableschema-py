@@ -29,9 +29,10 @@ def info():
 @main.command()
 @click.argument('data')
 @click.option('--row_limit', default=100, type=int)
+@click.option('--confidence', default=0.75, type=float)
 @click.option('--encoding', default='utf-8')
 @click.option('--to_file')
-def infer(data, row_limit, encoding, to_file):
+def infer(data, row_limit, confidence, encoding, to_file):
     """Infer a schema from data.
 
     * data must be a local filepath
@@ -41,7 +42,10 @@ def infer(data, row_limit, encoding, to_file):
     * the first line of data must be headers
     * these constraints are just for the CLI
     """
-    descriptor = tableschema.infer(data, encoding=encoding, limit=row_limit)
+    descriptor = tableschema.infer(data,
+                                   encoding=encoding,
+                                   limit=row_limit,
+                                   confidence=confidence)
     if to_file:
         with io.open(to_file, mode='w+t', encoding='utf-8') as dest:
             dest.write(json.dumps(descriptor, ensure_ascii=False, indent=4))

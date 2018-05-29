@@ -11,7 +11,7 @@ from .table import Table
 
 # Module API
 
-def infer(source, headers=1, limit=100, **options):
+def infer(source, headers=1, limit=100, confidence=0.75, **options):
     """https://github.com/frictionlessdata/tableschema-py#schema
     """
 
@@ -22,5 +22,5 @@ def infer(source, headers=1, limit=100, **options):
         source, headers = headers, source
 
     table = Table(source, headers=headers, **options)
-    descriptor = table.infer(limit=limit)
+    descriptor = table.infer(limit=limit, confidence=confidence)
     return descriptor
