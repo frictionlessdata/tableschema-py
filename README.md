@@ -761,6 +761,10 @@ and `mock` packages. This packages are available only in tox envionments.
 
 Here described only breaking and the most important changes. The full changelog and documentation for all released versions could be found in nicely formatted [commit history](https://github.com/frictionlessdata/tableschema-py/commits/master).
 
+### v1.1
+
+- Added the `confidence` parameter to `infer`
+
 ### v1.0
 
 - The library has been rebased on the Frictionless Data specs v1 - https://frictionlessdata.io/specs/table-schema/
