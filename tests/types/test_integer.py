@@ -15,6 +15,7 @@ from tableschema.config import ERROR
     ('default', 1, 1, {}),
     ('default', 1 << 63, 1 << 63, {}),
     ('default', '1', 1, {}),
+    ('default', 1.0, 1, {}),
     ('default', '1$', 1, {'bareNumber': False}),
     ('default', 'ab1$', 1, {'bareNumber': False}),
     ('default', '3.14', ERROR, {}),
