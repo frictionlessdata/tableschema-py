@@ -26,13 +26,11 @@ def cast_integer(format, value, **options):
         except Exception:
             return ERROR
 
-    elif isinstance(value, float):
-        if value.is_integer():
-            value = int(value)
+    elif isinstance(value, float) and value.is_integer():
+        value = int(value)
 
-    elif isinstance(value, Decimal):
-        if value % 1 == 0:
-            value = int(value)
+    elif isinstance(value, Decimal) and value % 1 == 0:
+        value = int(value)
 
     else:
         return ERROR
