@@ -135,7 +135,8 @@ class Schema(object):
         if len(row) != len(self.fields):
             message = 'Row length %s doesn\'t match fields count %s'
             message = message % (len(row), len(self.fields))
-            raise exceptions.CastError(message)
+            raise exceptions.CastError(message,
+                                       row_length=len(row), field_count=len(self.fields))
 
         # Cast row
         for field, value in zip(self.fields, row):

@@ -84,7 +84,10 @@ class Field(object):
                 raise exceptions.CastError((
                     'Field "{field.name}" can\'t cast value "{value}" '
                     'for type "{field.type}" with format "{field.format}"'
-                    ).format(field=self, value=value))
+                    ).format(field=self, value=value),
+                    field=dict(name=self.name, type=self.type, format=self.format),
+                    value=value
+                )
 
         # Check value
         if constraints:
@@ -97,7 +100,10 @@ class Field(object):
                     raise exceptions.CastError((
                         'Field "{field.name}" has constraint "{name}" '
                         'which is not satisfied for value "{value}"'
-                        ).format(field=self, name=name, value=value))
+                        ).format(field=self, name=name, value=value),
+                        field=dict(name=self.name, type=self.type, format=self.format),
+                        value=value
+                    )
 
         return cast_value
 

@@ -58,8 +58,14 @@ def test_cast_value():
 
 
 def test_cast_value_constraint_error():
-    with pytest.raises(exceptions.CastError):
+    try:
         Field(DESCRIPTOR_MAX).cast_value('')
+        assert False
+    except exceptions.CastError as e:
+        assert e.metadata['field']['name'] == DESCRIPTOR_MAX['name']
+        assert e.metadata['field']['format'] == DESCRIPTOR_MAX['format']
+        assert e.metadata['field']['type'] == DESCRIPTOR_MAX['type']
+        assert e.metadata['value'] is None
 
 
 def test_cast_value_constraints_false():

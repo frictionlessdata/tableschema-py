@@ -11,8 +11,9 @@ class DataPackageException(Exception):
 
     # Public
 
-    def __init__(self, message, errors=[]):
+    def __init__(self, message, errors=[], **metadata):
         self.__errors = errors
+        self.__metadata = metadata
         super(Exception, self).__init__(message)
 
     @property
@@ -22,6 +23,10 @@ class DataPackageException(Exception):
     @property
     def errors(self):
         return self.__errors
+
+    @property
+    def metadata(self):
+        return self.__metadata
 
 
 class TableSchemaException(DataPackageException):

@@ -89,7 +89,9 @@ class Table(object):
                     if self.headers != self.schema.field_names:
                         self.__stream.close()
                         message = 'Table headers don\'t match schema field names'
-                        raise exceptions.CastError(message)
+                        raise exceptions.CastError(message,
+                                                   table_headers=self.headers,
+                                                   schema_field_names=self.schema.field_names)
 
             # Check unique
             if cast:
@@ -100,7 +102,9 @@ class Table(object):
                             self.__stream.close()
                             message = 'Field(s) "%s" duplicates in row "%s"'
                             message = message % (cache['name'], row_number)
-                            raise exceptions.CastError(message)
+                            raise exceptions.CastError(message,
+                                                       duplicate_field=cache['name'],
+                                                       duplicate_row=row_number)
                         cache['data'].add(values)
 
             # Resolve relations
