@@ -32,6 +32,8 @@ from tableschema.config import ERROR
     ('default', 'No', ERROR, {}),
     ('default', 0, ERROR, {}),
     ('default', 1, ERROR, {}),
+    ('default', 0, False, {'falseValues': [0], 'trueValues': [1]}),
+    ('default', 1, True, {'falseValues': [0], 'trueValues': [1]}),
     ('default', '3.14', ERROR, {}),
     ('default', '', ERROR, {}),
     ('default', 'Yes', ERROR, {'trueValues': ['yes']}),
