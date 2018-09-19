@@ -12,9 +12,8 @@ from ..config import ERROR
 
 def cast_boolean(format, value, **options):
     if not isinstance(value, bool):
-        if not isinstance(value, six.string_types):
-            return ERROR
-        value = value.strip()
+        if isinstance(value, six.string_types):
+            value = value.strip()
         if value in options.get('trueValues', _TRUE_VALUES):
             value = True
         elif value in options.get('falseValues', _FALSE_VALUES):
