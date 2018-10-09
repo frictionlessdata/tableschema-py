@@ -49,6 +49,15 @@ def test_infer_schema_greek():
     assert schema_model.get_field('age').type == 'integer'
     assert schema_model.get_field('name').type == 'string'
 
+def test_validate_schema():
+    runner = CliRunner()
+    result = runner.invoke(cli.validate, ['data/schema_valid_simple.json'])
+    assert result.output.splitlines()[0] == 'Schema is valid'
+    assert result.exit_code == 0
+    result = runner.invoke(cli.validate, ['data/schema_invalid_pk_no_fields.json'])
+    assert result.output.splitlines()[0] == 'Schema is not valid'
+    assert result.exit_code == 1
+
 
 @pytest.mark.skip
 def test_infer_schema_greek_no_encoding_defined():

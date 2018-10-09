@@ -5,6 +5,7 @@ from __future__ import print_function
 
 import os
 import io
+import sys
 import json
 import click
 import tableschema
@@ -58,10 +59,12 @@ def validate(schema):
     """Validate that a supposed schema is in fact a Table Schema."""
     try:
         tableschema.validate(schema)
-        click.echo(False)
+        click.echo("Schema is valid")
+        sys.exit(0)
     except tableschema.exceptions.ValidationError as exception:
-        click.echo(True)
+        click.echo("Schema is not valid")
         click.echo(exception.errors)
+        sys.exit(1)
 
 
 if __name__ == '__main__':
