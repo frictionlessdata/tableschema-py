@@ -158,13 +158,15 @@ class Schema(object):
         """
 
         # Get headers
-        if not isinstance(headers, list):
+        if isinstance(headers, int):
             headers_row = headers
             while True:
                 headers_row -= 1
                 headers = rows.pop(0)
                 if not headers_row:
                     break
+        elif not isinstance(headers, list):
+            headers = []
 
         # Get descriptor
         guesser = _TypeGuesser()
