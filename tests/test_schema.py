@@ -193,7 +193,6 @@ def test_infer():
         'missingValues': ['']}
 
 
-
 def test_add_remove_field():
     schema = Schema()
     schema.add_field({'name': 'name'})
