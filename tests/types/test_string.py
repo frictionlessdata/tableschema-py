@@ -14,21 +14,21 @@ from tableschema.config import ERROR
 @pytest.mark.parametrize('format, value, result', [
     ('default', 'string', 'string'),
     ('default', '', ''),
-    ('default', 0, ERROR),
+    ('default', 0, '0'),
     ('uri', 'http://google.com', 'http://google.com'),
     ('uri', '://no-scheme.test', ERROR),
     ('uri', 'string', ERROR),
     ('uri', '', ERROR),
-    ('uri', 0, ERROR),
+    ('uri', 0, '0'),
     ('email', 'name@gmail.com', 'name@gmail.com'),
     ('email', 'http://google.com', ERROR),
     ('email', 'string', ERROR),
     ('email', '', ERROR),
-    ('email', 0, ERROR),
+    ('email', 0, '0'),
     ('binary', 'dGVzdA==', 'dGVzdA=='),
     ('binary', '', ''),
     ('binary', 'string', ERROR),
-    ('binary', 0, ERROR),
+    ('binary', 0, '0'),
 ])
 def test_cast_string(format, value, result):
     assert types.cast_string(format, value) == result
