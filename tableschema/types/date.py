@@ -14,13 +14,15 @@ from ..config import ERROR
 # Module API
 
 def cast_date(format, value, **options):
-    if isinstance(value, date):
-        return value
-
     if isinstance(value, datetime):
         value_time = value.time()
         if value_time.hour == 0 and value_time.minute == 0 and value_time.second == 0:
-            return value.date()
+            return datetime(value.year, value.month, value.day).date()
+        else:
+            return ERROR
+
+    if isinstance(value, date):
+        return value
 
     if not isinstance(value, six.string_types):
         return ERROR
@@ -28,7 +30,7 @@ def cast_date(format, value, **options):
     # Parse string date
     try:
         if format == 'default':
-            value = datetime.strptime(value, _DEFAULT_PATTERN)
+            value = datetime.strptime(value, _DEFAULT_PATTERN).date()
         elif format == 'any':
             value = parse(value).date()
         else:
