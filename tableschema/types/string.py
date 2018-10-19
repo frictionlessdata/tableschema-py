@@ -18,7 +18,7 @@ from ..config import ERROR
 
 def cast_string(format, value, **options):
     if isinstance(value, (int, float)):
-        return str(value)
+        value = str(value)
     if not isinstance(value, six.string_types):
         return ERROR
     if format == 'uri':
