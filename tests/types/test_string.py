@@ -14,7 +14,7 @@ from tableschema.config import ERROR
 @pytest.mark.parametrize('format, value, result', [
     ('default', 'string', 'string'),
     ('default', '', ''),
-    ('default', 0, '0'),
+    ('default', 0, ERROR),
     ('uri', 'http://google.com', 'http://google.com'),
     ('uri', '://no-scheme.test', ERROR),
     ('uri', 'string', ERROR),
