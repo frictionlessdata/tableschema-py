@@ -5,7 +5,7 @@ from __future__ import absolute_import
 from __future__ import unicode_literals
 
 import pytest
-from datetime import date
+from datetime import date, datetime
 from tableschema import types
 from tableschema.config import ERROR
 
@@ -19,6 +19,8 @@ from tableschema.config import ERROR
     ('default', 'invalid', ERROR),
     ('default', True, ERROR),
     ('default', '', ERROR),
+    ('default', datetime(2018, 1, 1), date(2018, 1, 1)),
+    ('default', datetime(2018, 3, 1, 8, 30, 23), ERROR),
     ('any', date(2019, 1, 1), date(2019, 1, 1)),
     ('any', '2019-01-01', date(2019, 1, 1)),
     ('any', '10th Jan 1969', date(1969, 1, 10)),
@@ -28,17 +30,17 @@ from tableschema.config import ERROR
     ('any', '', ERROR),
     ('%d/%m/%y', date(2019, 1, 1), date(2019, 1, 1)),
     ('%d/%m/%y', '21/11/06', date(2006, 11, 21)),
-    ('%y/%m/%d','21/11/06 16:30', ERROR),
-    ('%d/%m/%y','invalid', ERROR),
-    ('%d/%m/%y',True, ERROR),
+    ('%y/%m/%d', '21/11/06 16:30', ERROR),
+    ('%d/%m/%y', 'invalid', ERROR),
+    ('%d/%m/%y', True, ERROR),
     ('%d/%m/%y', '', ERROR),
-    ('invalid','21/11/06 16:30', ERROR),
+    ('invalid', '21/11/06 16:30', ERROR),
     # Deprecated
     ('fmt:%d/%m/%y', date(2019, 1, 1), date(2019, 1, 1)),
     ('fmt:%d/%m/%y', '21/11/06', date(2006, 11, 21)),
-    ('fmt:%y/%m/%d','21/11/06 16:30', ERROR),
-    ('fmt:%d/%m/%y','invalid', ERROR),
-    ('fmt:%d/%m/%y',True, ERROR),
+    ('fmt:%y/%m/%d', '21/11/06 16:30', ERROR),
+    ('fmt:%d/%m/%y', 'invalid', ERROR),
+    ('fmt:%d/%m/%y', True, ERROR),
     ('fmt:%d/%m/%y', '', ERROR),
 ])
 def test_cast_date(format, value, result):
