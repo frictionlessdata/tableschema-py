@@ -112,6 +112,15 @@ class Schema(object):
         self.__build()
         return self.__fields[-1]
 
+    def update_field(self, name, update):
+        """https://github.com/frictionlessdata/tableschema-py#schema
+        """
+        for field in self.__next_descriptor['fields']:
+            if field['name'] == name:
+                field.update(update)
+                return True
+        return False
+
     def remove_field(self, name):
         """https://github.com/frictionlessdata/tableschema-py#schema
         """
