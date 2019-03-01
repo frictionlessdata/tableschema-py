@@ -381,14 +381,14 @@ Update schema instance if there are in-place changes in the descriptor.
 - `(bool)` - returns true on success and false if not modified
 
 ```python
-descriptor = {'fields': [{'name': 'field', 'type': 'string'}]}
+descriptor = {'fields': [{'name': 'my_field', 'type': 'string'}]}
 schema = Schema(descriptor)
 
-schema.getField('name')['type'] # string
-schema.descriptor.fields[0]['type'] = 'number'
-schema.getField('name')['type'] # string
+schema.get_field('my_field').descriptor['type'] # string
+schema.descriptor['fields'][0]['type'] = 'number'
+schema.get_field('my_field').descriptor['type'] # string
 schema.commit()
-schema.getField('name')['type'] # number
+schema.get_field('my_field').descriptor['type'] # number
 ```
 
 #### `schema.save(target)`
