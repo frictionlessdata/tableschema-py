@@ -7,6 +7,7 @@ from __future__ import unicode_literals
 import re
 COMPILED_RE = type(re.compile(""))
 
+
 # Module API
 
 def check_pattern(constraint, value):
