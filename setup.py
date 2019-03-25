@@ -22,7 +22,7 @@ PACKAGE = 'tableschema'
 NAME = PACKAGE.replace('_', '-')
 INSTALL_REQUIRES = [
     'six>=1.9,<2.0',
-    'click>=3.3,<7.0',
+    'click>=3.3,<8.0',
     'requests>=2.5,<3.0',
     'python-dateutil>=2.4,<3.0',
     'jsonschema>=2.5,<3.0',
@@ -56,6 +56,7 @@ setup(
     },
     zip_safe=False,
     long_description=README,
+    long_description_content_type="text/markdown",
     description='A utility library for working with Table Schema in Python',
     author='Open Knowledge Foundation',
     author_email='info@okfn.org',

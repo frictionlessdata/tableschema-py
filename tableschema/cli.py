@@ -5,6 +5,7 @@ from __future__ import print_function
 
 import os
 import io
+import sys
 import json
 import click
 import tableschema
@@ -29,9 +30,10 @@ def info():
 @main.command()
 @click.argument('data')
 @click.option('--row_limit', default=100, type=int)
+@click.option('--confidence', default=0.75, type=float)
 @click.option('--encoding', default='utf-8')
 @click.option('--to_file')
-def infer(data, row_limit, encoding, to_file):
+def infer(data, row_limit, confidence, encoding, to_file):
     """Infer a schema from data.
 
     * data must be a local filepath
@@ -41,7 +43,10 @@ def infer(data, row_limit, encoding, to_file):
     * the first line of data must be headers
     * these constraints are just for the CLI
     """
-    descriptor = tableschema.infer(data, encoding=encoding, limit=row_limit)
+    descriptor = tableschema.infer(data,
+                                   encoding=encoding,
+                                   limit=row_limit,
+                                   confidence=confidence)
     if to_file:
         with io.open(to_file, mode='w+t', encoding='utf-8') as dest:
             dest.write(json.dumps(descriptor, ensure_ascii=False, indent=4))
@@ -54,10 +59,12 @@ def validate(schema):
     """Validate that a supposed schema is in fact a Table Schema."""
     try:
         tableschema.validate(schema)
-        click.echo(False)
+        click.echo("Schema is valid")
+        sys.exit(0)
     except tableschema.exceptions.ValidationError as exception:
-        click.echo(True)
+        click.echo("Schema is not valid")
         click.echo(exception.errors)
+        sys.exit(1)
 
 
 if __name__ == '__main__':

@@ -138,7 +138,7 @@ class Table(object):
                 break
         return result
 
-    def infer(self, limit=100):
+    def infer(self, limit=100, confidence=0.75):
         """https://github.com/frictionlessdata/tableschema-py#schema
         """
         if self.__schema is None or self.__headers is None:
@@ -148,7 +148,9 @@ class Table(object):
                 with self.__stream as stream:
                     if self.__schema is None:
                         self.__schema = Schema()
-                        self.__schema.infer(stream.sample[:limit], headers=stream.headers)
+                        self.__schema.infer(stream.sample[:limit],
+                                            headers=stream.headers,
+                                            confidence=confidence)
                     if self.__headers is None:
                         self.__headers = stream.headers
 

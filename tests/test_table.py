@@ -57,6 +57,15 @@ def test_schema_infer_storage(import_module, apply_defaults):
     assert table.schema.descriptor == apply_defaults(SCHEMA_MIN)
 
 
+def test_infer_schema_empty_file():
+    s = Table('data/empty.csv')
+    d = s.infer()
+    assert d == {
+        'fields': [],
+        'missingValues': [''],
+    }
+
+
 def test_iter():
     table = Table(DATA_MIN, schema=SCHEMA_MIN)
     expect = [['one', 1], ['two', 2]]
