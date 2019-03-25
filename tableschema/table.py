@@ -33,7 +33,9 @@ class Table(object):
         self.__post_cast = copy(post_cast)
 
         # Schema
-        if schema is not None:
+        if isinstance(schema, Schema):
+            self.__schema = schema
+        elif schema is not None:
             self.__schema = Schema(schema)
 
         # Stream (tabulator)
