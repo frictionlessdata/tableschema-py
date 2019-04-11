@@ -223,7 +223,7 @@ class Schema(object):
         self.__build()
         return True
 
-    def save(self, target):
+    def save(self, target, ensure_ascii=True):
         """https://github.com/frictionlessdata/tableschema-py#schema
         """
         mode = 'w'
@@ -233,7 +233,7 @@ class Schema(object):
             encoding = None
         helpers.ensure_dir(target)
         with io.open(target, mode=mode, encoding=encoding) as file:
-            json.dump(self.__current_descriptor, file, indent=4)
+            json.dump(self.__current_descriptor, file, indent=4, ensure_ascii=ensure_ascii)
 
     # Internal
 

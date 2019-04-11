@@ -25,7 +25,14 @@ SCHEMA_CSV = {
 }
 
 
-def test_schema(apply_defaults):
+def test_schema_instance(apply_defaults):
+    schema_instance = Schema(SCHEMA_MIN)
+    actual = Table(DATA_MIN, schema=schema_instance).schema.descriptor
+    expect = apply_defaults(SCHEMA_MIN)
+    assert actual == expect
+
+
+def test_schema_descriptor(apply_defaults):
     actual = Table(DATA_MIN, schema=SCHEMA_MIN).schema.descriptor
     expect = apply_defaults(SCHEMA_MIN)
     assert actual == expect
