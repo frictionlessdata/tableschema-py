@@ -399,12 +399,12 @@ schema = Schema(descriptor)
 print(schema.get_field('my_field').descriptor['type']) # string
 
 # Update descriptor by field position
-schema.descriptor['fields'][0]['type'] = 'number' 
+schema.descriptor['fields'][0]['type'] = 'number'
 # Update descriptor by field name
 schema.update_field('my_field', {'title': 'My Pretty Field'}) # True
 
 # Change are not committed
-print(schema.get_field('my_field').descriptor['type']) # string  
+print(schema.get_field('my_field').descriptor['type']) # string
 print(schema.get_field('my_field').descriptor['title']) # My Field
 
 
@@ -784,6 +784,10 @@ and `mock` packages. This packages are available only in tox envionments.
 ## Changelog
 
 Here described only breaking and the most important changes. The full changelog and documentation for all released versions could be found in nicely formatted [commit history](https://github.com/frictionlessdata/tableschema-py/commits/master).
+
+### v1.4
+
+- Added `schema.update_field` method
 
 ### v1.3
 
