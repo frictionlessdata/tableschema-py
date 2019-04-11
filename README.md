@@ -335,6 +335,8 @@ Constructor to instantiate `Schema` class.
 
 Get schema field by name.
 
+Note : use `update_field` if you want to modify the field descriptor
+
 - `name (str)` - schema field name
 - `(Field/None)` - returns `Field` instance or null if not found
 
@@ -345,6 +347,16 @@ Add new field to schema. The schema descriptor will be validated with newly adde
 - `descriptor (dict)` - field descriptor
 - `(exceptions.TableSchemaException)` - raises any error occured in the process
 - `(Field/None)` - returns added `Field` instance or null if not added
+
+#### `schema.update_field(name, update)`
+
+Update existing descriptor field by name
+
+- `name (str)` - schema field name
+- `update (dict)` - update to apply to field's descriptor
+- `(bool)` - returns true on success and false if no field is found to be modified
+
+cf [`schema.commit()`](#schemacommitstrictnone) example
 
 #### `schema.remove_field(name)`
 
@@ -381,14 +393,26 @@ Update schema instance if there are in-place changes in the descriptor.
 - `(bool)` - returns true on success and false if not modified
 
 ```python
-descriptor = {'fields': [{'name': 'field', 'type': 'string'}]}
+from tableschema import Schema
+descriptor = {'fields': [{'name': 'my_field', 'title': 'My Field', 'type': 'string'}]}
 schema = Schema(descriptor)
+print(schema.get_field('my_field').descriptor['type']) # string
 
-schema.getField('name')['type'] # string
-schema.descriptor.fields[0]['type'] = 'number'
-schema.getField('name')['type'] # string
+# Update descriptor by field position
+schema.descriptor['fields'][0]['type'] = 'number' 
+# Update descriptor by field name
+schema.update_field('my_field', {'title': 'My Pretty Field'}) # True
+
+# Change are not committed
+print(schema.get_field('my_field').descriptor['type']) # string  
+print(schema.get_field('my_field').descriptor['title']) # My Field
+
+
+# Commit change
 schema.commit()
-schema.getField('name')['type'] # number
+print(schema.get_field('my_field').descriptor['type']) # number
+print(schema.get_field('my_field').descriptor['title']) # My Pretty Field
+
 ```
 
 #### `schema.save(target)`
@@ -405,7 +429,7 @@ Save schema descriptor to target destination.
 from tableschema import Field
 
 # Init field
-field = Field({'name': 'name', type': 'number'})
+field = Field({'name': 'name', 'type': 'number'})
 
 # Cast a value
 field.cast_value('12345') # -> 12345

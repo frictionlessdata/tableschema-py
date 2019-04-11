@@ -75,6 +75,7 @@ def test_descriptor_applied_defaults():
         'missingValues': [''],
     }
 
+
 def test_cast_row():
     schema = Schema(DESCRIPTOR_MAX)
     source = ['string', '10.0', '1', 'string', 'string']
@@ -129,6 +130,16 @@ def test_get_field():
     assert schema.get_field('id').name == 'id'
     assert schema.get_field('height').name == 'height'
     assert schema.get_field('undefined') is None
+
+
+def test_update_field():
+    schema = Schema(DESCRIPTOR_MIN)
+    assert schema.update_field('id', {'type': 'number'}) is True
+    assert schema.update_field('height', {'type': 'number'}) is True
+    assert schema.update_field('unknown', {'type': 'number'}) is False
+    schema.commit()
+    assert schema.get_field('id').type == 'number'
+    assert schema.get_field('height').type == 'number'
 
 
 def test_has_field():
