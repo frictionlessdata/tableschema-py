@@ -373,7 +373,7 @@ Cast row based on field types and formats.
 - `row (any[])` - data row as an array of values
 - `(any[])` - returns cast data row
 
-#### `schema.infer(rows, headers=1, confidence=0.75)`
+#### `schema.infer(rows, headers=1, confidence=0.75, guesser_cls=None, resolver_cls=None)`
 
 Infer and set `schema.descriptor` based on data sample.
 
@@ -382,6 +382,7 @@ Infer and set `schema.descriptor` based on data sample.
   - row number containing headers (`rows` should contain headers rows)
   - array of headers (`rows` should NOT contain headers rows)
 - `confidence (float)` - how many casting errors are allowed (as a ratio, between 0 and 1)
+- `guesser_cls` & `resolver_cls` - you can implement inferring strategies by providing type guessing and type resolving classes [experimental]
 - `{dict}` - returns Table Schema descriptor
 
 #### `schema.commit(strict=None)`

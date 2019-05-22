@@ -162,7 +162,8 @@ class Schema(object):
 
         return result
 
-    def infer(self, rows, headers=1, confidence=0.75):
+    def infer(self, rows, headers=1, confidence=0.75,
+              guesser_cls=None, resolver_cls=None):
         """https://github.com/frictionlessdata/tableschema-py#schema
         """
 
@@ -178,8 +179,8 @@ class Schema(object):
             headers = []
 
         # Get descriptor
-        guesser = _TypeGuesser()
-        resolver = _TypeResolver()
+        guesser = (guesser_cls or _TypeGuesser)()
+        resolver = (resolver_cls or _TypeResolver)()
         descriptor = {'fields': []}
         type_matches = {}
         for header in headers:
