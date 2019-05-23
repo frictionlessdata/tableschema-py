@@ -202,6 +202,30 @@ def test_infer():
             {'format': 'default', 'name': 'age', 'type': 'string'},
             {'format': 'default', 'name': 'name', 'type': 'string'}],
         'missingValues': ['']}
+    
+    class AllStrings():
+        def cast(self, value):
+            return [('string', 'default', 0)]
+    data = [
+      ['id', 'age', 'name'],
+      ['1','39','Paul'],
+      ['2','23','Jimmy'],
+      ['3','36','Jane'],
+      ['4','100','Judy'],
+    ]
+
+    schema = Schema()
+    schema.infer(data, confidence=0.8, guesser_cls=AllStrings)
+    assert schema.descriptor['fields'] == [
+            {'format': 'default', 'name': 'id', 'type': 'string'},
+            {'format': 'default', 'name': 'age', 'type': 'string'},
+            {'format': 'default', 'name': 'name', 'type': 'string'}]
+    assert schema.descriptor == {
+        'fields': [
+            {'format': 'default', 'name': 'id', 'type': 'string'},
+            {'format': 'default', 'name': 'age', 'type': 'string'},
+            {'format': 'default', 'name': 'name', 'type': 'string'}],
+        'missingValues': ['']}
 
 
 def test_add_remove_field():
