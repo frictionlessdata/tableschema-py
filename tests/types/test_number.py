@@ -36,6 +36,7 @@ from tableschema.config import ERROR
     ('default', '1#000', Decimal(1000), {'groupChar': '#', 'decimalChar': '@'}),
     ('default', '10,000.00', Decimal(10000), {'groupChar': ',', 'bareNumber': False}),
     ('default', '10,000,000.00', Decimal(10000000), {'groupChar': ',', 'bareNumber': False}),
+    ('default', '10.000.000,00', Decimal(10000000), {'groupChar': '.', 'decimalChar': ','}),
     ('default', '$10000.00', Decimal(10000), {'bareNumber': False}),
     ('default', '  10,000.00 €', Decimal(10000), {'groupChar': ',', 'bareNumber': False}),
     ('default', '10 000,00', Decimal(10000), {'groupChar': ' ', 'decimalChar': ','}),
