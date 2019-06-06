@@ -18,8 +18,9 @@ def cast_number(format, value, **options):
     if not isinstance(value, Decimal):
         if isinstance(value, six.string_types):
             value = re.sub(r'\s', '', value)
-            value = value.replace(decimal_char, '.')
+            value = value.replace(decimal_char, '__decimal_char__')
             value = value.replace(group_char, '')
+            value = value.replace('__decimal_char__', '.')
             if not options.get('bareNumber', _DEFAULT_BARE_NUMBER):
                 value = re.sub(r'((^\D*)|(\D*$))', '', value)
         elif not isinstance(value, six.integer_types + (float,)):
