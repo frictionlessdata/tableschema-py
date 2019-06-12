@@ -21,23 +21,22 @@ from . import config
 def retrieve_descriptor(source):
 
     try:
-
         # Inline
         if isinstance(source, (dict, list)):
             return deepcopy(source)
 
-        # Remote
-        if six.moves.urllib.parse.urlparse(source).scheme in config.REMOTE_SCHEMES:
-            return requests.get(source).json()
-
-        # Local
+        # String
         if isinstance(source, six.string_types):
+            # Remote
+            if six.moves.urllib.parse.urlparse(source).scheme in config.REMOTE_SCHEMES:
+                return requests.get(source).json()
+
+            # Local
             with io.open(source, encoding='utf-8') as file:
                 return json.load(file)
 
         # Stream
-        else:
-            return json.load(source)
+        return json.load(source)
 
     except Exception:
         raise exceptions.LoadError('Can\'t load descriptor')
