@@ -26,6 +26,8 @@ def cast_number(format, value, **options):
         elif not isinstance(value, six.integer_types + (float,)):
             return ERROR
         try:
+            if isinstance(value, float):
+                value = str(value)
             value = Decimal(value)
         except Exception:
             return ERROR

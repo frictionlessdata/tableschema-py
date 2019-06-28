@@ -20,6 +20,7 @@ from tableschema.config import ERROR
     ('default', '1', Decimal(1), {}),
     ('default', '10.00', Decimal(10), {}),
     ('default', '10.50', Decimal(10.5), {}),
+    ('default', 24.122667, Decimal('24.122667'), {}),
     ('default', '100%', Decimal(100), {'bareNumber': False}),
     ('default', '1000‰', Decimal(1000), {'bareNumber': False}),
     ('default', '-1000', Decimal(-1000), {}),
