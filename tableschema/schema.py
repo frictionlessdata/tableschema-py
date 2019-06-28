@@ -260,8 +260,11 @@ class Schema(object):
             missing_values = self.__current_descriptor['missingValues']
             try:
                 field = Field(field, missing_values=missing_values)
-            except Exception:
-                field = False
+            except exceptions.TableSchemaException as e:
+                if self.__strict:
+                    raise e
+                else:
+                    field = False
             self.__fields.append(field)
 
     # Deprecated
