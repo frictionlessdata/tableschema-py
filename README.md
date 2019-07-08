@@ -786,6 +786,10 @@ and `mock` packages. This packages are available only in tox envionments.
 
 Here described only breaking and the most important changes. The full changelog and documentation for all released versions could be found in nicely formatted [commit history](https://github.com/frictionlessdata/tableschema-py/commits/master).
 
+### v1.6
+
+- In `strict` mode raise an exception if there are problems in field construction
+
 ### v1.5
 
 - Allow providing custom guesser and resolver to schema infer
