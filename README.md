@@ -18,6 +18,31 @@ A library for working with [Table Schema](http://specs.frictionlessdata.io/table
 - built-in command-line interface to validate and infer schemas
 - storage/plugins system to connect tables to different storage backends like SQL Database
 
+## Contents
+
+<!--TOC-->
+
+- [tableschema-py](#tableschema-py)
+  - [Features](#features)
+  - [Contents](#contents)
+  - [Gettings Started](#gettings-started)
+    - [Installation](#installation)
+    - [Examples](#examples)
+  - [Documentation](#documentation)
+    - [Table](#table)
+    - [Schema](#schema)
+    - [Field](#field)
+    - [validate](#validate)
+    - [infer](#infer)
+    - [Exceptions](#exceptions)
+    - [Storage](#storage)
+    - [Plugins](#plugins)
+    - [CLI](#cli)
+  - [Contributing](#contributing)
+  - [Changelog](#changelog)
+
+<!--TOC-->
+
 ## Gettings Started
 
 ### Installation
@@ -786,30 +811,30 @@ and `mock` packages. This packages are available only in tox envionments.
 
 Here described only breaking and the most important changes. The full changelog and documentation for all released versions could be found in nicely formatted [commit history](https://github.com/frictionlessdata/tableschema-py/commits/master).
 
-### v1.6
+#### v1.6
 
 - In `strict` mode raise an exception if there are problems in field construction
 
-### v1.5
+#### v1.5
 
 - Allow providing custom guesser and resolver to schema infer
 
-### v1.4
+#### v1.4
 
 - Added `schema.update_field` method
 
-### v1.3
+#### v1.3
 
 - Support datetime with no time for date casting
 
-### v1.2
+#### v1.2
 
 - Support floats like 1.0 for integer casting
 
-### v1.1
+#### v1.1
 
 - Added the `confidence` parameter to `infer`
 
-### v1.0
+#### v1.0
 
 - The library has been rebased on the Frictionless Data specs v1 - https://frictionlessdata.io/specs/table-schema/
