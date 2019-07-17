@@ -22,9 +22,6 @@ A library for working with [Table Schema](http://specs.frictionlessdata.io/table
 
 <!--TOC-->
 
-- [tableschema-py](#tableschema-py)
-  - [Features](#features)
-  - [Contents](#contents)
   - [Gettings Started](#gettings-started)
     - [Installation](#installation)
     - [Examples](#examples)

@@ -18,6 +18,7 @@ profiles:
 
 readme:
 	md_toc -p README.md github --header-levels 3
+	sed -i '/(#tableschema-py)/,+2d' README.md
 
 test:
 	pylama $(PACKAGE)
