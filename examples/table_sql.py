@@ -11,10 +11,11 @@ SCHEMA = {'fields': [{'name': 'id', 'type': 'integer'}, {'name': 'age', 'type': 
 
 # Open from WEB save to SQL database
 table = Table(SOURCE, schema=SCHEMA)
-table.save('articles', backend='sql', engine=db)
+table.save('articles', storage='sql', engine=db)
 
 # Open from SQL save to DRIVE
-table = Table('articles', backend='sql', engine=db)
+table = Table('articles', storage='sql', engine=db)
+table.infer()
 table.schema.save('tmp/articles.json')
 table.save('tmp/articles.csv')
 

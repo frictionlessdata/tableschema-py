@@ -14,7 +14,7 @@ def skip_under_30(erows):
 
 # Export to pandas
 table = Table(SOURCE, post_convert=[skip_under_30])
-storage = table.save('persons', backend='pandas')
+storage = table.save('persons', storage='pandas')
 pprint(storage['persons'])
 # Will print (if use skip_under_30 filter)
 # id age name
