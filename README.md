@@ -83,7 +83,7 @@ paris,"48.85,2.30"
 rome,N/A
 ```
 
-Let's create and read a table instance. We use the static `Table.load` and `Table.read` methods with the `keyed` option to get an array of keyed rows:
+Let's create and read a table instance. We use the static `Table.load` method and the `table.read` method with the `keyed` option to get an array of keyed rows:
 
 ```python
 table = Table('data.csv')
