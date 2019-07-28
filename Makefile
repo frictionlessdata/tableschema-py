@@ -9,7 +9,6 @@ all: list
 
 install:
 	pip install --upgrade -e .[develop]
-	pip install pytest mock md_toc || true
 
 list:
 	@grep '^\.PHONY' Makefile | cut -d' ' -f2- | tr ' ' '\n'
@@ -18,6 +17,7 @@ profiles:
 	wget -O tableschema/profiles/table-schema.json https://specs.frictionlessdata.io/schemas/table-schema.json
 
 readme:
+	pip install md_toc
 	md_toc -p README.md github --header-levels 3
 	sed -i '/(#tableschema-py)/,+2d' README.md
 

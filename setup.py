@@ -33,8 +33,9 @@ INSTALL_REQUIRES = [
 ]
 TESTS_REQUIRE = [
     'pylama',
+    'pytest',
+    'mock',
     'tox',
-    'md-toc',
 ]
 README = read('README.md')
 VERSION = read(PACKAGE, 'VERSION')
