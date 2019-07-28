@@ -9,6 +9,7 @@ all: list
 
 install:
 	pip install --upgrade -e .[develop]
+	pip install pytest mock md_toc || true
 
 list:
 	@grep '^\.PHONY' Makefile | cut -d' ' -f2- | tr ' ' '\n'
