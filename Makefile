@@ -19,7 +19,7 @@ profiles:
 readme:
 	pip install md-toc
 	md_toc -p README.md github --header-levels 3
-	sed -i '/(#tableschema-py)/,+2d' README.md
+	sed -i '/(#$(PACKAGE)-py)/,+2d' README.md
 
 test:
 	pylama $(PACKAGE)
