@@ -17,7 +17,7 @@ profiles:
 	wget -O tableschema/profiles/table-schema.json https://specs.frictionlessdata.io/schemas/table-schema.json
 
 readme:
-	pip install md_toc
+	pip install md-toc
 	md_toc -p README.md github --header-levels 3
 	sed -i '/(#tableschema-py)/,+2d' README.md
 
