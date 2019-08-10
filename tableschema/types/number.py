@@ -1,16 +1,18 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 import re
-import six
 from decimal import Decimal
+
+import six
+
 from ..config import ERROR
 
+_format = format
 
 # Module API
+
 
 def cast_number(format, value, **options):
     group_char = options.get('groupChar', _DEFAULT_GROUP_CHAR)
@@ -32,6 +34,20 @@ def cast_number(format, value, **options):
         except Exception:
             return ERROR
     return value
+
+
+def uncast_number(format, value, **options):
+    if not isinstance(value, Decimal):
+        return ERROR
+    group_char = options.get('groupChar', _DEFAULT_GROUP_CHAR)
+    decimal_char = options.get('decimalChar', _DEFAULT_DECIMAL_CHAR)
+    if group_char:
+        uncast = _format(value, '03,').replace(',', group_char)
+    else:
+        uncast = str(value)
+    if decimal_char != '.':
+        uncast = uncast.replace('.', decimal_char)
+    return uncast
 
 
 # Internal

@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
-import re
-import six
-import uuid
 import base64
+import re
+import uuid
+
 import rfc3986.exceptions
-import rfc3986.validators
 import rfc3986.uri
+import rfc3986.validators
+import six
+
 from ..config import ERROR
 
-
 # Module API
+
 
 def cast_string(format, value, **options):
     if not isinstance(value, six.string_types):
@@ -40,6 +40,8 @@ def cast_string(format, value, **options):
             return ERROR
     return value
 
+
+uncast_string = cast_string
 
 # Internal
 

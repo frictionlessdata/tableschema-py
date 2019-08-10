@@ -1,17 +1,17 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
-import six
 import warnings
 from datetime import datetime
+
+import six
 from dateutil.parser import parse
+
 from ..config import ERROR
 
-
 # Module API
+
 
 def cast_datetime(format, value, **options):
     if not isinstance(value, datetime):
@@ -33,6 +33,25 @@ def cast_datetime(format, value, **options):
         except Exception:
             return ERROR
     return value
+
+
+def uncast_datetime(format, value, **options):
+    if not isinstance(value, datetime):
+        return ERROR
+
+    if format.startswith('fmt:'):
+        warnings.warn(
+            'Format "fmt:<PATTERN>" is deprecated. '
+            'Please use "<PATTERN>" without "fmt:" prefix.',
+            UserWarning)
+        format = format.replace('fmt:', '')
+    elif format == 'default' or format == 'any':
+        format = _DEFAULT_PATTERN
+
+    try:
+        return value.strftime(format)
+    except Exception:
+        return error
 
 
 # Internal

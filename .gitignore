@@ -72,3 +72,4 @@ jsontableschema_bigquery
 jsontableschema_pandas
 README.rst
 .pytest_cache/
+.vscode

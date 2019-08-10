@@ -1,14 +1,13 @@
 # -*- coding: utf-8 -*-
-from __future__ import absolute_import
-from __future__ import division
-from __future__ import print_function
-from __future__ import unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
 
 import six
+
 from ..config import ERROR
 
-
 # Module API
+
 
 def cast_boolean(format, value, **options):
     if not isinstance(value, bool):
@@ -21,6 +20,15 @@ def cast_boolean(format, value, **options):
         else:
             return ERROR
     return value
+
+
+def uncast_boolean(format, value, **options):
+    if not isinstance(value, bool):
+        return ERROR
+    if value:
+        return options.get('trueValues', _TRUE_VALUES)[0]
+    else:
+        return options.get('falseValues', _FALSE_VALUES)[0]
 
 
 # Internal

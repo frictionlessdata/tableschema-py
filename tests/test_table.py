@@ -1,20 +1,20 @@
 # -*- coding: utf-8 -*-
-from __future__ import division
-from __future__ import print_function
-from __future__ import absolute_import
-from __future__ import unicode_literals
+from __future__ import (absolute_import, division, print_function,
+                        unicode_literals)
+
+from copy import deepcopy
 
 import pytest
-from copy import deepcopy
 from mock import Mock, patch
-from tableschema import Schema, Table, Storage, exceptions
 
+from tableschema import Schema, Storage, Table, exceptions
 
 # General
 
 BASE_URL = 'https://raw.githubusercontent.com/frictionlessdata/tableschema-py/master/%s'
 DATA_MIN = [('key', 'value'), ('one', '1'), ('two', '2')]
-SCHEMA_MIN = {'fields': [{'name': 'key'}, {'name': 'value', 'type': 'integer'}]}
+SCHEMA_MIN = {'fields': [{'name': 'key'},
+                         {'name': 'value', 'type': 'integer'}]}
 SCHEMA_CSV = {
     'fields': [
         {'name': 'id', 'type': 'integer', 'format': 'default'},
@@ -23,6 +23,16 @@ SCHEMA_CSV = {
     ],
     'missingValues': [''],
 }
+"""
+SCHEMA_ALL_SPEC_TYPES_CSV = {
+    'fields': [
+        {'name': 'id', 'type': 'integer', 'format': 'default'},
+        {'name': 'age', 'type': 'integer', 'format': 'default'},
+        {'name': 'name', 'type': 'string', 'format': 'default'},
+    ],
+    'missingValues': [''],
+}
+"""
 
 
 def test_schema_instance(apply_defaults):
@@ -70,18 +80,37 @@ def test_iter():
     table = Table(DATA_MIN, schema=SCHEMA_MIN)
     expect = [['one', 1], ['two', 2]]
     actual = list(table.iter())
+    assert actual == expect
 
 
 def test_iter_csv():
     table = Table('data/data_infer.csv', schema=SCHEMA_CSV)
-    expect = [[1, 39, 'Paul'], [2, 23, 'Jimmy'], [3, 36, 'Jane'], [4, 28, 'Judy']]
+    expect = [[1, 39, 'Paul'], [2, 23, 'Jimmy'],
+              [3, 36, 'Jane'], [4, 28, 'Judy']]
+    actual = list(table.iter())
+    assert actual == expect
+
+
+def test_save_csv():
+    table = Table('data/data_infer.csv', schema=SCHEMA_CSV)
+    expect = [[1, 39, 'Paul'], [2, 23, 'Jimmy'],
+              [3, 36, 'Jane'], [4, 28, 'Judy']]
+    actual = list(table.iter())
+    assert actual == expect
+
+
+def test_save_all_spec_types_csv():
+    table = Table('data/data_all_spec_types.csv', schema=SCHEMA_CSV)
+    expect = [[1, 39, 'Paul'], [2, 23, 'Jimmy'],
+              [3, 36, 'Jane'], [4, 28, 'Judy']]
     actual = list(table.iter())
     assert actual == expect
 
 
 def test_iter_web_csv():
     table = Table(BASE_URL % 'data/data_infer.csv', schema=SCHEMA_CSV)
-    expect = [[1, 39, 'Paul'], [2, 23, 'Jimmy'], [3, 36, 'Jane'], [4, 28, 'Judy']]
+    expect = [[1, 39, 'Paul'], [2, 23, 'Jimmy'],
+              [3, 36, 'Jane'], [4, 28, 'Judy']]
     actual = list(table.iter())
     assert actual == expect
 
@@ -196,30 +225,30 @@ def test_read_with_headers_field_names_mismatch():
 # Foreign keys
 
 FK_SOURCE = [
-  ['id', 'name', 'surname'],
-  ['1', 'Alex', 'Martin'],
-  ['2', 'John', 'Dockins'],
-  ['3', 'Walter', 'White'],
+    ['id', 'name', 'surname'],
+    ['1', 'Alex', 'Martin'],
+    ['2', 'John', 'Dockins'],
+    ['3', 'Walter', 'White'],
 ]
 FK_SCHEMA = {
-  'fields': [
-    {'name': 'id'},
-    {'name': 'name'},
-    {'name': 'surname'},
-  ],
-  'foreignKeys': [
-    {
-      'fields': 'name',
-      'reference': {'resource': 'people', 'fields': 'firstname'},
-    },
-  ]
+    'fields': [
+        {'name': 'id'},
+        {'name': 'name'},
+        {'name': 'surname'},
+    ],
+    'foreignKeys': [
+        {
+            'fields': 'name',
+            'reference': {'resource': 'people', 'fields': 'firstname'},
+        },
+    ]
 }
 FK_RELATIONS = {
-  'people': [
-    {'firstname': 'Alex', 'surname': 'Martin'},
-    {'firstname': 'John', 'surname': 'Dockins'},
-    {'firstname': 'Walter', 'surname': 'White'},
-  ]
+    'people': [
+        {'firstname': 'Alex', 'surname': 'Martin'},
+        {'firstname': 'John', 'surname': 'Dockins'},
+        {'firstname': 'Walter', 'surname': 'White'},
+    ]
 }
 
 
@@ -227,10 +256,11 @@ def test_single_field_foreign_key():
     table = Table(FK_SOURCE, schema=FK_SCHEMA)
     rows = table.read(relations=FK_RELATIONS)
     assert rows == [
-      ['1', {'firstname': 'Alex', 'surname': 'Martin'}, 'Martin'],
-      ['2', {'firstname': 'John', 'surname': 'Dockins'}, 'Dockins'],
-      ['3', {'firstname': 'Walter', 'surname': 'White'}, 'White'],
+        ['1', {'firstname': 'Alex', 'surname': 'Martin'}, 'Martin'],
+        ['2', {'firstname': 'John', 'surname': 'Dockins'}, 'Dockins'],
+        ['3', {'firstname': 'Walter', 'surname': 'White'}, 'White'],
     ]
+
 
 def test_single_field_foreign_key_invalid():
     relations = deepcopy(FK_RELATIONS)
@@ -248,21 +278,21 @@ def test_multi_field_foreign_key():
     table = Table(FK_SOURCE, schema=schema)
     keyed_rows = table.read(keyed=True, relations=FK_RELATIONS)
     assert keyed_rows == [
-      {
-          'id': '1',
-          'name': {'firstname': 'Alex', 'surname': 'Martin'},
-          'surname': {'firstname': 'Alex', 'surname': 'Martin'},
-      },
-      {
-          'id': '2',
-          'name': {'firstname': 'John', 'surname': 'Dockins'},
-          'surname': {'firstname': 'John', 'surname': 'Dockins'},
-      },
-      {
-          'id': '3',
-          'name': {'firstname': 'Walter', 'surname': 'White'},
-          'surname': {'firstname': 'Walter', 'surname': 'White'},
-      },
+        {
+            'id': '1',
+            'name': {'firstname': 'Alex', 'surname': 'Martin'},
+            'surname': {'firstname': 'Alex', 'surname': 'Martin'},
+        },
+        {
+            'id': '2',
+            'name': {'firstname': 'John', 'surname': 'Dockins'},
+            'surname': {'firstname': 'John', 'surname': 'Dockins'},
+        },
+        {
+            'id': '3',
+            'name': {'firstname': 'Walter', 'surname': 'White'},
+            'surname': {'firstname': 'Walter', 'surname': 'White'},
+        },
     ]
 
 
