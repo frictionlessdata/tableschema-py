@@ -202,7 +202,7 @@ def test_infer():
             {'format': 'default', 'name': 'age', 'type': 'string'},
             {'format': 'default', 'name': 'name', 'type': 'string'}],
         'missingValues': ['']}
-    
+
     class AllStrings():
         def cast(self, value):
             return [('string', 'default', 0)]
@@ -267,6 +267,12 @@ def test_primary_foreign_keys_as_string():
         'fields': ['parent_id'],
         'reference': {'resource': 'resource', 'fields': ['id']}
     }]
+
+
+def test_fields_have_public_backreference_to_schema():
+    schema = Schema('data/schema_valid_full.json')
+    assert schema.get_field('first_name').schema == schema
+    assert schema.get_field('last_name').schema == schema
 
 
 # Issues

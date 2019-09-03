@@ -21,7 +21,11 @@ class Field(object):
 
     # Public
 
-    def __init__(self, descriptor, missing_values=config.DEFAULT_MISSING_VALUES):
+    def __init__(self, descriptor, missing_values=config.DEFAULT_MISSING_VALUES,
+                 # Internal
+                 schema=None):
+        """https://github.com/frictionlessdata/tableschema-py#field
+        """
 
         # Process descriptor
         descriptor = helpers.expand_field_descriptor(descriptor)
@@ -29,8 +33,15 @@ class Field(object):
         # Set attributes
         self.__descriptor = descriptor
         self.__missing_values = missing_values
+        self.__schema = schema
         self.__cast_function = self.__get_cast_function()
         self.__check_functions = self.__get_check_functions()
+
+    @property
+    def schema(self):
+        """https://github.com/frictionlessdata/tableschema-py#field
+        """
+        return self.__schema
 
     @property
     def name(self):

@@ -259,7 +259,7 @@ class Schema(object):
         for field in self.__current_descriptor.get('fields', []):
             missing_values = self.__current_descriptor['missingValues']
             try:
-                field = Field(field, missing_values=missing_values)
+                field = Field(field, missing_values=missing_values, schema=self)
             except exceptions.TableSchemaException as e:
                 if self.__strict:
                     raise e
