@@ -475,6 +475,10 @@ Constructor to instantiate `Field` class.
 - `(exceptions.TableSchemaException)` - raises any error that occurs during the process
 - `(Field)` - returns field class instance
 
+#### `field.schema`
+
+- `(Schema)` - returns a schema instance if the field belongs to some schema
+
 #### `field.name`
 
 - `(str)` - returns field name
@@ -807,6 +811,10 @@ and `mock` packages. These packages are available only in tox envionments.
 ## Changelog
 
 Here described only breaking and the most important changes. The full changelog and documentation for all released versions can be found in the nicely formatted [commit history](https://github.com/frictionlessdata/tableschema-py/commits/master).
+
+#### v1.7
+
+- Added `field.schema` property
 
 #### v1.6
 
