@@ -11,4 +11,4 @@ ERROR = 'tableschema.error'
 DEFAULT_FIELD_TYPE = 'string'
 DEFAULT_FIELD_FORMAT = 'default'
 DEFAULT_MISSING_VALUES = ['']
-REMOTE_SCHEMES = ['http', 'https', 'ftp', 'ftps']
+REMOTE_SCHEMES = ['http', 'https', 'ftp', 'ftps', 's3']
