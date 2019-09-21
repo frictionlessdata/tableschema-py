@@ -32,9 +32,10 @@ INSTALL_REQUIRES = [
     'tabulator>=1.20',
 ]
 TESTS_REQUIRE = [
+    'mock',
     'pylama',
     'pytest',
-    'mock',
+    'pytest-cov',
     'tox',
 ]
 README = read('README.md')
