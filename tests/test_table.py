@@ -314,3 +314,58 @@ def test_composite_primary_key_fails_unique_issue_194():
     with pytest.raises(exceptions.CastError) as excinfo:
         table.read()
     assert 'duplicates' in str(excinfo.value)
+
+def test_multiple_foreign_keys_same_field():
+    schema = deepcopy(FK_SCHEMA)
+    relations = deepcopy(FK_RELATIONS)
+    relations['gender'] = [
+        {'firstname': 'Alex', 'gender': 'male/female'},
+        {'firstname': 'John', 'gender': 'male'},
+        {'firstname': 'Walter', 'gender': 'male'},
+        {'firstname': 'Alice', 'gender': 'female'}
+    ]
+    # the main ressource now has tow foreignKeys using the same 'name' field
+    schema['foreignKeys'].append({
+            'fields': 'name',
+            'reference': {'resource': 'gender', 'fields': 'firstname'},
+          })
+    table = Table(FK_SOURCE, schema=schema)
+    keyed_rows = table.read(keyed=True, relations=relations)
+    assert keyed_rows == [
+      {
+          'id': '1',
+          'name': {'firstname': 'Alex', 'surname': 'Martin' ,'gender': 'male/female'},
+          'surname': 'Martin'
+      },
+      {
+          'id': '2',
+          'name': {'firstname': 'John', 'surname': 'Dockins', 'gender': 'male'},
+          'surname': 'Dockins'
+      },
+      {
+          'id': '3',
+          'name': {'firstname': 'Walter', 'surname': 'White', 'gender': 'male'},
+          'surname': 'White'
+      },
+    ]
+
+
+def test_multiple_foreign_keys_same_field_invalid():
+    schema = deepcopy(FK_SCHEMA)
+    relations = deepcopy(FK_RELATIONS)
+    relations['gender'] = [
+        {'firstname': 'Alex', 'gender': 'male/female'},
+        {'firstname': 'Johny', 'gender': 'male'},
+        {'firstname': 'Walter', 'gender': 'male'},
+        {'firstname': 'Alice', 'gender': 'female'}
+    ]
+    # the main ressource now has tow foreignKeys using the same 'name' field
+    schema['foreignKeys'].append({
+            'fields': 'name',
+            'reference': {'resource': 'gender', 'fields': 'firstname'},
+          })
+    table = Table(FK_SOURCE, schema=schema)
+    with pytest.raises(exceptions.RelationError) as excinfo:
+        table.read(relations=relations)
+    assert 'Foreign key' in str(excinfo.value)    
+    
