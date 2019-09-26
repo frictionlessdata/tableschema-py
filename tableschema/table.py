@@ -65,7 +65,7 @@ class Table(object):
         """
         return self.__schema
 
-    def iter(self, keyed=False, extended=False, cast=True, relations=False):
+    def iter(self, keyed=False, extended=False, cast=True, relations=False, foreign_keys_values=False):
         """https://github.com/frictionlessdata/tableschema-py#schema
         """
 
@@ -106,15 +106,21 @@ class Table(object):
                         cache['data'].add(values)
 
             # Resolve relations
-            if relations:
+            if relations or foreign_keys_values:
                 if self.schema:
                     row_with_relations = dict(zip(headers, copy(row)))
                     for foreign_key in self.schema.foreign_keys:
-                        refValue = _resolve_relations(row, headers, relations, foreign_key)
+                        if relations:
+                            refValue = _resolve_relations(row, headers, relations, foreign_key)
+                        elif foreign_keys_values:
+                            refValue = _resolve_foreign_keys(row, headers, foreign_keys_values, foreign_key)
                         if refValue is None:
                             self.__stream.close()
-                            message = 'Foreign key "%s" violation in row "%s"'
-                            message = message % (foreign_key['fields'], row_number)
+                            keyed_row = OrderedDict(zip(headers, row))
+                            # local values of the FK
+                            local_values = tuple(keyed_row[f] for f in foreign_key['fields'])
+                            message = 'Foreign key "%s" violation in row "%s": %s not found in %s'
+                            message = message % (foreign_key['fields'], row_number, local_values, foreign_key['reference']['resource'])
                             raise exceptions.RelationError(message)
                         else:
                             for field in foreign_key['fields']:
@@ -138,11 +144,11 @@ class Table(object):
         # Close stream
         self.__stream.close()
 
-    def read(self, keyed=False, extended=False, cast=True, relations=False, limit=None):
+    def read(self, keyed=False, extended=False, cast=True, relations=False, limit=None, foreign_keys_values=False):
         """https://github.com/frictionlessdata/tableschema-py#schema
         """
         result = []
-        rows = self.iter(keyed=keyed, extended=extended, cast=cast, relations=relations)
+        rows = self.iter(keyed=keyed, extended=extended, cast=cast, relations=relations, foreign_keys_values=foreign_keys_values)
         for count, row in enumerate(rows, start=1):
             result.append(row)
             if count == limit:
@@ -243,7 +249,8 @@ def _resolve_relations(row, headers, relations, foreign_key):
     fields = list(zip(foreign_key['fields'], foreign_key['reference']['fields']))
     reference = relations.get(foreign_key['reference']['resource'])
     if not reference:
-        return row
+        # if no reference there are none relations
+        return None
 
     # Collect values - valid if all None
     values = {}
@@ -267,3 +274,19 @@ def _resolve_relations(row, headers, relations, foreign_key):
         return refValues
     else:
         return None
+
+def _resolve_foreign_keys(row, headers, foreign_keys_values, foreign_key):
+    # alternative version of _resolve_relations
+    
+    # Prepare helpers - needed data structures
+    keyed_row = OrderedDict(zip(headers, row))
+    # local values of the FK
+    local_values = tuple(keyed_row[f] for f in foreign_key['fields'])
+    # test existence into the foreign
+    foreign_values = foreign_keys_values[foreign_key['reference']['resource']][tuple(foreign_key['reference']['fields'])]
+    if local_values in foreign_values:
+        return foreign_values[local_values]
+    else:
+        return None
+
+    
