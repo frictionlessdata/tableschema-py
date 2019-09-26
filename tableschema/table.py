@@ -108,13 +108,24 @@ class Table(object):
             # Resolve relations
             if relations:
                 if self.schema:
+                    row_with_relations = dict(zip(headers, copy(row)))
                     for foreign_key in self.schema.foreign_keys:
-                        row = _resolve_relations(row, headers, relations, foreign_key)
-                        if row is None:
+                        refValue = _resolve_relations(row, headers, relations, foreign_key)
+                        if refValue is None:
                             self.__stream.close()
                             message = 'Foreign key "%s" violation in row "%s"'
                             message = message % (foreign_key['fields'], row_number)
                             raise exceptions.RelationError(message)
+                        else:
+                            for field in foreign_key['fields']:
+                                if type(row_with_relations[field]) is not dict:
+                                    # no previous refValues injected on this field
+                                    row_with_relations[field] = refValue
+                                else:
+                                    # alreayd one ref, merging
+                                    row_with_relations[field].update(refValue)
+                    #  mutate row now that we are done, in the right order
+                    row = [row_with_relations[f] for f in headers]
 
             # Form row
             if extended:
@@ -251,5 +262,8 @@ def _resolve_relations(row, headers, relations, foreign_key):
                     keyed_row[field] = refValues
                 valid = True
                 break
-
-    return list(keyed_row.values()) if valid else None
+    if valid:
+        # return the correct reference values
+        return refValues
+    else:
+        return None
