@@ -244,7 +244,7 @@ def _resolve_relations(row, headers, relations, foreign_key):
     fields = list(zip(foreign_key['fields'], foreign_key['reference']['fields']))
     reference = relations.get(foreign_key['reference']['resource'])
     if not reference:
-        #should an exception beeing raised here ?
+        # should an exception beeing raised here ?
         return None
 
     # Collect values - valid if all None
