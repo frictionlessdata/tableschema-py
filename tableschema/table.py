@@ -116,7 +116,7 @@ class Table(object):
                             message = 'Foreign key "%s" violation in row "%s"'
                             message = message % (foreign_key['fields'], row_number)
                             raise exceptions.RelationError(message)
-                        else:
+                        elif type(refValue) is dict:
                             for field in foreign_key['fields']:
                                 if type(row_with_relations[field]) is not dict:
                                     # no previous refValues injected on this field
@@ -124,6 +124,7 @@ class Table(object):
                                 else:
                                     # alreayd one ref, merging
                                     row_with_relations[field].update(refValue)
+
                     #  mutate row now that we are done, in the right order
                     row = [row_with_relations[f] for f in headers]
 
@@ -243,27 +244,26 @@ def _resolve_relations(row, headers, relations, foreign_key):
     fields = list(zip(foreign_key['fields'], foreign_key['reference']['fields']))
     reference = relations.get(foreign_key['reference']['resource'])
     if not reference:
-        return row
+        return None
 
     # Collect values - valid if all None
     values = {}
-    valid = True
+    empty_row = True
     for field, ref_field in fields:
         if field and ref_field:
             values[ref_field] = keyed_row[field]
             if keyed_row[field] is not None:
-                valid = False
+                empty_row = False
 
     # Resolve values - valid if match found
-    if not valid:
+    if not empty_row:
         for refValues in reference:
             if set(values.items()).issubset(set(refValues.items())):
-                for field, ref_field in fields:
-                    keyed_row[field] = refValues
-                valid = True
-                break
-    if valid:
-        # return the correct reference values
-        return refValues
+                # return the correct reference values
+                return refValues
+                
+    if empty_row:
+        # return the orignal row if empty
+        return row
     else:
         return None
