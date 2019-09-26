@@ -244,6 +244,7 @@ def _resolve_relations(row, headers, relations, foreign_key):
     fields = list(zip(foreign_key['fields'], foreign_key['reference']['fields']))
     reference = relations.get(foreign_key['reference']['resource'])
     if not reference:
+        #should an exception beeing raised here ?
         return None
 
     # Collect values - valid if all None
@@ -261,7 +262,7 @@ def _resolve_relations(row, headers, relations, foreign_key):
             if set(values.items()).issubset(set(refValues.items())):
                 # return the correct reference values
                 return refValues
-                
+
     if empty_row:
         # return the orignal row if empty
         return row
