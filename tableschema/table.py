@@ -11,6 +11,7 @@ from collections import OrderedDict
 from .storage import Storage
 from .schema import Schema
 from . import exceptions
+from collections import defaultdict
 
 
 # Module API
@@ -65,7 +66,8 @@ class Table(object):
         """
         return self.__schema
 
-    def iter(self, keyed=False, extended=False, cast=True, relations=False, foreign_keys_values=False):
+    def iter(self, keyed=False, extended=False, cast=True, relations=False,
+             foreign_keys_values=False):
         """https://github.com/frictionlessdata/tableschema-py#schema
         """
 
@@ -74,6 +76,11 @@ class Table(object):
             unique_fields_cache = {}
             if self.schema:
                 unique_fields_cache = _create_unique_fields_cache(self.schema)
+        # Prepare relation checks
+        if relations and not foreign_keys_values:
+            # we have to test relations but the index has not been precomputed
+            # prepare the index to boost validation process
+            foreign_keys_values = self.index_foreign_keys_values(relations)
 
         # Open/iterate stream
         self.__stream.open()
@@ -106,21 +113,22 @@ class Table(object):
                         cache['data'].add(values)
 
             # Resolve relations
-            if relations or foreign_keys_values:
+            if relations:
                 if self.schema:
                     row_with_relations = dict(zip(headers, copy(row)))
                     for foreign_key in self.schema.foreign_keys:
-                        if relations:
-                            refValue = _resolve_relations(row, headers, relations, foreign_key)
-                        elif foreign_keys_values:
-                            refValue = _resolve_foreign_keys(row, headers, foreign_keys_values, foreign_key)
+                        refValue = _resolve_relations(row, headers, foreign_keys_values,
+                                                      foreign_key)
                         if refValue is None:
                             self.__stream.close()
                             keyed_row = OrderedDict(zip(headers, row))
                             # local values of the FK
                             local_values = tuple(keyed_row[f] for f in foreign_key['fields'])
                             message = 'Foreign key "%s" violation in row "%s": %s not found in %s'
-                            message = message % (foreign_key['fields'], row_number, local_values, foreign_key['reference']['resource'])
+                            message = message % (foreign_key['fields'],
+                                                row_number,
+                                                local_values,
+                                                foreign_key['reference']['resource'])
                             raise exceptions.RelationError(message)
                         elif type(refValue) is dict:
                             for field in foreign_key['fields']:
@@ -130,6 +138,11 @@ class Table(object):
                                 else:
                                     # alreayd one ref, merging
                                     row_with_relations[field].update(refValue)
+                        else:
+                            # case when all original value of the FK are empty
+                            # refValue == row, there is nothing to do
+                            # an empty dict might be a better returned value for this case ?
+                            pass
 
                     #  mutate row now that we are done, in the right order
                     row = [row_with_relations[f] for f in headers]
@@ -145,11 +158,13 @@ class Table(object):
         # Close stream
         self.__stream.close()
 
-    def read(self, keyed=False, extended=False, cast=True, relations=False, limit=None, foreign_keys_values=False):
+    def read(self, keyed=False, extended=False, cast=True, relations=False, limit=None,
+             foreign_keys_values=False):
         """https://github.com/frictionlessdata/tableschema-py#schema
         """
         result = []
-        rows = self.iter(keyed=keyed, extended=extended, cast=cast, relations=relations, foreign_keys_values=foreign_keys_values)
+        rows = self.iter(keyed=keyed, extended=extended, cast=cast, relations=relations,
+                         foreign_keys_values=foreign_keys_values)
         for count, row in enumerate(rows, start=1):
             result.append(row)
             if count == limit:
@@ -200,6 +215,32 @@ class Table(object):
             storage.write(target, self.iter(cast=False))
             return storage
 
+    def index_foreign_keys_values(self, relations):
+        # we dont need to load the complete reference table to test relations
+        # we can lower payload AND optimize testing foreign keys
+        # by preparing the right index based on the foreign key definition
+        # foreign_keys are sets of tuples of all possible values in the foreign table
+        # foreign keys =
+        # [reference] [foreign_keys tuple] = { (foreign_keys_values, ) : one_keyedrow, ... }
+        foreign_keys = defaultdict(dict)
+        if self.schema:
+            for fk in self.schema.foreign_keys:
+                # load relation data
+                relation = fk['reference']['resource']
+
+                # create a set of foreign keys
+                # to optimize we prepare index of existing values
+                # this index should use reference + foreign_keys as key
+                # cause many foreign keys may use the same reference
+                foreign_keys[relation][tuple(fk['reference']['fields'])] = {}
+                for row in relations[relation]:
+                    key = tuple([row[foreign_field] for foreign_field in fk['reference']['fields']])
+                    # here we should chose to pick the first or nth row which match
+                    # previous implementation picked the first, so be it
+                    if key not in foreign_keys[relation][tuple(fk['reference']['fields'])]:
+                        foreign_keys[relation][tuple(fk['reference']['fields'])][key] = row
+        return foreign_keys
+
     # Private
 
     def __apply_processors(self, iterator, cast=True):
@@ -243,50 +284,21 @@ def _create_unique_fields_cache(schema):
     return cache
 
 
-def _resolve_relations(row, headers, relations, foreign_key):
+def _resolve_relations(row, headers, foreign_keys_values, foreign_key):
 
-    # Prepare helpers - needed data structures
-    keyed_row = OrderedDict(zip(headers, row))
-    fields = list(zip(foreign_key['fields'], foreign_key['reference']['fields']))
-    reference = relations.get(foreign_key['reference']['resource'])
-    if not reference:
-        # should an exception beeing raised here ?
-        return None
-
-    # Collect values - valid if all None
-    values = {}
-    empty_row = True
-    for field, ref_field in fields:
-        if field and ref_field:
-            values[ref_field] = keyed_row[field]
-            if keyed_row[field] is not None:
-                empty_row = False
-
-    # Resolve values - valid if match found
-    if not empty_row:
-        for refValues in reference:
-            if set(values.items()).issubset(set(refValues.items())):
-                # return the correct reference values
-                return refValues
-
-    if empty_row:
-        # return the orignal row if empty
-        return row
-    else:
-        return None
-
-def _resolve_foreign_keys(row, headers, foreign_keys_values, foreign_key):
-    # alternative version of _resolve_relations
-    
     # Prepare helpers - needed data structures
     keyed_row = OrderedDict(zip(headers, row))
     # local values of the FK
     local_values = tuple(keyed_row[f] for f in foreign_key['fields'])
-    # test existence into the foreign
-    foreign_values = foreign_keys_values[foreign_key['reference']['resource']][tuple(foreign_key['reference']['fields'])]
-    if local_values in foreign_values:
-        return foreign_values[local_values]
+    if len([l for l in local_values if l]) > 0:
+        # test existence into the foreign
+        relation = foreign_key['reference']['resource']
+        keys = tuple(foreign_key['reference']['fields'])
+        foreign_values = foreign_keys_values[relation][keys]
+        if local_values in foreign_values:
+            return foreign_values[local_values]
+        else:
+            return None
     else:
-        return None
-
-    
+        # empty values for all keys, return original values
+        return row
