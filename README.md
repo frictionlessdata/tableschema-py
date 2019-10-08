@@ -206,21 +206,22 @@ Constructor to instantiate `Table` class. If `references` argument is provided, 
 
 - `(Schema)` - returns schema class instance
 
-#### `table.iter(keyed=Fase, extended=False, cast=True, relations=False)`
+#### `table.iter(keyed=Fase, extended=False, cast=True, relations=False, foreign_keys_values=False)`
 
 Iterates through the table data and emits rows cast based on table schema. Data casting can be disabled.
 
 - `keyed (bool)` - iterate keyed rows
 - `extended (bool)` - iterate extended rows
 - `cast (bool)` - disable data casting if false
-- `relations (dict)` - dictionary of foreign key references in a form of `{resource1: [{field1: value1, field2: value2}, ...], ...}`. If provided, foreign key fields will checked and resolved to their references
+- `relations (dict)` - dictionary of foreign key references in a form of `{resource1: [{field1: value1, field2: value2}, ...], ...}`. If provided, foreign key fields will checked and resolved to one of their references (/!\ one-to-many fk are not completely resolved).
+- `foreign_keys_values (dict)` - three-level dictionary of foreign key references optimized to speed up validation process in a form of `{resource1: { (foreign_key_field1, foreign_key_field2) : { (value1, value2) : {one_keyedrow}, ... }}}`. If not provided but relations is true, it will be created before the validation process by *index_foreign_keys_values* method
 - `(exceptions.TableSchemaException)` - raises any error that occurs during this process
 - `(any[]/any{})` - yields rows:
   - `[value1, value2]` - base
   - `{header1: value1, header2: value2}` - keyed
   - `[rowNumber, [header1, header2], [value1, value2]]` - extended
 
-#### `table.read(keyed=False, extended=False, cast=True, relations=False, limit=None)`
+#### `table.read(keyed=False, extended=False, cast=True, relations=False, limit=None, foreign_keys_values=False)`
 
 Read the whole table and returns as array of rows. Count of rows could be limited.
 
@@ -229,6 +230,7 @@ Read the whole table and returns as array of rows. Count of rows could be limite
 - `cast (bool)` - flag to disable data casting if false
 - `relations (dict)` - dict of foreign key references in a form of `{resource1: [{field1: value1, field2: value2}, ...], ...}`. If provided foreign key fields will checked and resolved to its references
 - `limit (int)` - integer limit of rows to return
+- `foreign_keys_values (dict)` - three-level dictionary of foreign key references optimized to speed up validation process in a form of `{resource1: { (foreign_key_field1, foreign_key_field2) : { (value1, value2) : {one_keyedrow}, ... }}}`
 - `(exceptions.TableSchemaException)` - raises any error that occurs during this process
 - `(list[])` - returns array of rows (see `table.iter`)
 
@@ -251,6 +253,18 @@ Save data source to file locally in CSV format with `,` (comma) delimiter
 - `options (dict)` - `tabulator` or storage options
 - `(exceptions.TableSchemaException)` - raises an error if there is saving problem
 - `(True/Storage)` - returns true or storage instance
+
+#### `table.index_foreign_keys_values(relations)`
+
+Creates a three-level dictionary of foreign key references optimized to speed up validation process in a form of `{resource1: { (foreign_key_field1, foreign_key_field2) : { (value1, value2) : {one_keyedrow}, ... }}}`. 
+For each foreign key of the schema it will iterate through the corresponding `relations['resource']` to create an index (i.e. a dict) of existing values for the foreign fields and store on keyed row for each value combination.
+The optimization relies on the indexation of possible values for one foreign key in a hashmap to later speed up resolution.
+This method is public to allow creating the index once to apply it on multiple tables charing the same schema (typically [grouped resources in datapackage](https://github.com/frictionlessdata/datapackage-py#group))
+Note 1: the second key of the output is a tuple of the foreign fields, a proxy identifier of the foreign key
+Note 2: the same relation resource can be indexed multiple times as a schema can contain more than one Foreign Keys pointing to the same resource
+
+- `relations (dict)` - dict of foreign key references in a form of `{resource1: [{field1: value1, field2: value2}, ...], ...}`. It must contain all resources pointed in the foreign keys schema definition.
+- `({resource1: { (foreign_key_field1, foreign_key_field2) : { (value1, value2) : {one_keyedrow}, ... }}})` - returns a three-level dictionary of foreign key references optimized to speed up validation process
 
 ### Schema
 
