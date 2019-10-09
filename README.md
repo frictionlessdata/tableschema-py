@@ -256,7 +256,7 @@ Save data source to file locally in CSV format with `,` (comma) delimiter
 
 #### `table.index_foreign_keys_values(relations)`
 
-Creates a three-level dictionary of foreign key references optimized to speed up validation process in a form of `{resource1: { (foreign_key_field1, foreign_key_field2) : { (value1, value2) : {one_keyedrow}, ... }}}`. 
+Creates a three-level dictionary of foreign key references optimized to speed up validation process in a form of `{resource1: { (foreign_key_field1, foreign_key_field2) : { (value1, value2) : {one_keyedrow}, ... }}}`.
 For each foreign key of the schema it will iterate through the corresponding `relations['resource']` to create an index (i.e. a dict) of existing values for the foreign fields and store on keyed row for each value combination.
 The optimization relies on the indexation of possible values for one foreign key in a hashmap to later speed up resolution.
 This method is public to allow creating the index once to apply it on multiple tables charing the same schema (typically [grouped resources in datapackage](https://github.com/frictionlessdata/datapackage-py#group))
@@ -825,6 +825,10 @@ and `mock` packages. These packages are available only in tox envionments.
 ## Changelog
 
 Here described only breaking and the most important changes. The full changelog and documentation for all released versions can be found in the nicely formatted [commit history](https://github.com/frictionlessdata/tableschema-py/commits/master).
+
+#### v1.8
+
+- Added `table.index_foreign_keys_values` and improved foreign key checks performance
 
 #### v1.7
 
