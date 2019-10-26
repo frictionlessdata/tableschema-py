@@ -31,12 +31,10 @@ jobs:
   include:
     - stage: release
       if: tag IS present
-      script: echo "Releasing the package..."
       python: 3.8
       deploy:
         provider: pypi
         user: roll
-        on: master
         distributions: sdist bdist_wheel
         skip_cleanup: true
         password:
