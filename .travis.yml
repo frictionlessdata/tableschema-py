@@ -37,5 +37,7 @@ jobs:
         user: roll
         distributions: sdist bdist_wheel
         skip_cleanup: true
+        on:
+          tags: true
         password:
           secure: WofAaa4zh8wXQWLjfm8w0IxxGZUCgMRBsqhUoUJLLvMraGNUMV9hHp9DS7XfCGvlrIUQXHpTvgM1t7pUIJRE/PqTQR8FOocqN+ZmH8BqDDXsIoyQexDUtWDDbFXNaKJ4D2efIdoqWwDc9do2zt+EWRkt4xQcnbm7O6GUXlxUyTI=
