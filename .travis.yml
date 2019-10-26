@@ -27,12 +27,17 @@ script:
 after_success:
   - coveralls
 
-deploy:
-  provider: pypi
-  user: roll
-  distributions: sdist bdist_wheel
-  skip_cleanup: true
-  on:
-    tags: true
-  password:
-    secure: WofAaa4zh8wXQWLjfm8w0IxxGZUCgMRBsqhUoUJLLvMraGNUMV9hHp9DS7XfCGvlrIUQXHpTvgM1t7pUIJRE/PqTQR8FOocqN+ZmH8BqDDXsIoyQexDUtWDDbFXNaKJ4D2efIdoqWwDc9do2zt+EWRkt4xQcnbm7O6GUXlxUyTI=
+jobs:
+  include:
+    - stage: release
+      if: tag IS present
+      script: echo "Releasing the package..."
+      python: 3.8
+      deploy:
+        provider: pypi
+        user: roll
+        on: master
+        distributions: sdist bdist_wheel
+        skip_cleanup: true
+        password:
+          secure: WofAaa4zh8wXQWLjfm8w0IxxGZUCgMRBsqhUoUJLLvMraGNUMV9hHp9DS7XfCGvlrIUQXHpTvgM1t7pUIJRE/PqTQR8FOocqN+ZmH8BqDDXsIoyQexDUtWDDbFXNaKJ4D2efIdoqWwDc9do2zt+EWRkt4xQcnbm7O6GUXlxUyTI=
