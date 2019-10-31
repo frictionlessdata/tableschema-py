@@ -22,7 +22,7 @@ class Table(object):
 
     def __init__(self, source, schema=None, strict=False,
                  post_cast=[], storage=None, **options):
-        """https://github.com/frictionlessdata/tableschema-py#schema
+        """https://github.com/frictionlessdata/tableschema-py#table
         """
 
         # Set attributes
@@ -56,19 +56,33 @@ class Table(object):
 
     @property
     def headers(self):
-        """https://github.com/frictionlessdata/tableschema-py#schema
+        """https://github.com/frictionlessdata/tableschema-py#table
         """
         return self.__headers
 
     @property
     def schema(self):
-        """https://github.com/frictionlessdata/tableschema-py#schema
+        """https://github.com/frictionlessdata/tableschema-py#table
         """
         return self.__schema
 
+    @property
+    def size(self):
+        """https://github.com/frictionlessdata/tableschema-py#table
+        """
+        if self.__stream:
+            return self.__stream.size
+
+    @property
+    def hash(self):
+        """https://github.com/frictionlessdata/tableschema-py#table
+        """
+        if self.__stream:
+            return self.__stream.hash
+
     def iter(self, keyed=False, extended=False, cast=True, relations=False,
              foreign_keys_values=False):
-        """https://github.com/frictionlessdata/tableschema-py#schema
+        """https://github.com/frictionlessdata/tableschema-py#table
         """
 
         # Prepare unique checks
@@ -160,7 +174,7 @@ class Table(object):
 
     def read(self, keyed=False, extended=False, cast=True, relations=False, limit=None,
              foreign_keys_values=False):
-        """https://github.com/frictionlessdata/tableschema-py#schema
+        """https://github.com/frictionlessdata/tableschema-py#table
         """
         result = []
         rows = self.iter(keyed=keyed, extended=extended, cast=cast, relations=relations,
@@ -172,7 +186,7 @@ class Table(object):
         return result
 
     def infer(self, limit=100, confidence=0.75):
-        """https://github.com/frictionlessdata/tableschema-py#schema
+        """https://github.com/frictionlessdata/tableschema-py#table
         """
         if self.__schema is None or self.__headers is None:
 
@@ -198,7 +212,7 @@ class Table(object):
         return self.__schema.descriptor
 
     def save(self, target, storage=None, **options):
-        """https://github.com/frictionlessdata/tableschema-py#schema
+        """https://github.com/frictionlessdata/tableschema-py#table
         """
 
         # Save (tabulator)

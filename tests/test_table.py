@@ -4,6 +4,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
+import six
 import pytest
 from copy import deepcopy
 from mock import Mock, patch
@@ -193,6 +194,56 @@ def test_read_with_headers_field_names_mismatch():
     assert 'match schema field names' in str(excinfo.value)
 
 
+# Stats
+
+def test_size():
+    table = Table('data/data.csv')
+    table.read()
+    assert table.size == 63
+
+
+@pytest.mark.skipif(six.PY2, reason='Support only for Python3')
+def test_size_compressed():
+    table = Table('data/data.csv.zip')
+    table.read()
+    assert table.size == 63
+
+
+def test_size_remote():
+    table = Table(BASE_URL % 'data/data.csv')
+    table.read()
+    assert table.size == 63
+
+
+def test_size_not_read():
+    table = Table(BASE_URL % 'data/data.csv')
+    assert table.size is None
+
+
+def test_hash():
+    table = Table('data/data.csv')
+    table.read()
+    assert table.hash == '328adab247692a1a405e83c2625d52e366389eabf8a1824931187877e8644774'
+
+
+@pytest.mark.skipif(six.PY2, reason='Support only for Python3')
+def test_hash_compressed():
+    table = Table('data/data.csv.zip')
+    table.read()
+    assert table.hash == '328adab247692a1a405e83c2625d52e366389eabf8a1824931187877e8644774'
+
+
+def test_hash_remote():
+    table = Table(BASE_URL % 'data/data.csv')
+    table.read()
+    assert table.hash == '328adab247692a1a405e83c2625d52e366389eabf8a1824931187877e8644774'
+
+
+def test_hash():
+    table = Table(BASE_URL % 'data/data.csv')
+    assert table.hash is None
+
+
 # Foreign keys
 
 FK_SOURCE = [
@@ -367,5 +418,5 @@ def test_multiple_foreign_keys_same_field_invalid():
     table = Table(FK_SOURCE, schema=schema)
     with pytest.raises(exceptions.RelationError) as excinfo:
         table.read(relations=relations)
-    assert 'Foreign key' in str(excinfo.value)    
-    
+    assert 'Foreign key' in str(excinfo.value)
+

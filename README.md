@@ -206,6 +206,14 @@ Constructor to instantiate `Table` class. If `references` argument is provided, 
 
 - `(Schema)` - returns schema class instance
 
+#### `table.size`
+
+- `(int/None)` - returns the table's size in BYTES if it's already read using e.g. `table.read`, otherwise returns `None`. In the middle of an iteration it returns size of already read contents
+
+#### `table.hash`
+
+- `(str/None)` - returns the table's SHA256 hash if it's already read using e.g. `table.read`, otherwise returns `None`. In the middle of an iteration it returns hash of already read contents
+
 #### `table.iter(keyed=Fase, extended=False, cast=True, relations=False, foreign_keys_values=False)`
 
 Iterates through the table data and emits rows cast based on table schema. Data casting can be disabled.
