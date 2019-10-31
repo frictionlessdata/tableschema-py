@@ -834,6 +834,10 @@ and `mock` packages. These packages are available only in tox envionments.
 
 Here described only breaking and the most important changes. The full changelog and documentation for all released versions can be found in the nicely formatted [commit history](https://github.com/frictionlessdata/tableschema-py/commits/master).
 
+#### v1.9
+
+- Implemented the `table.size` and `table.hash` properties
+
 #### v1.8
 
 - Added `table.index_foreign_keys_values` and improved foreign key checks performance
