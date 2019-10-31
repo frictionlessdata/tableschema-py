@@ -40,6 +40,10 @@ class CastError(TableSchemaException):
     pass
 
 
+class IntegrityError(TableSchemaException):
+    pass
+
+
 class RelationError(TableSchemaException):
     pass
 

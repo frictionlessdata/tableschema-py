@@ -214,13 +214,14 @@ Constructor to instantiate `Table` class. If `references` argument is provided, 
 
 - `(str/None)` - returns the table's SHA256 hash if it's already read using e.g. `table.read`, otherwise returns `None`. In the middle of an iteration it returns hash of already read contents
 
-#### `table.iter(keyed=Fase, extended=False, cast=True, relations=False, foreign_keys_values=False)`
+#### `table.iter(keyed=Fase, extended=False, cast=True, integrity=False, relations=False, foreign_keys_values=False)`
 
 Iterates through the table data and emits rows cast based on table schema. Data casting can be disabled.
 
 - `keyed (bool)` - iterate keyed rows
 - `extended (bool)` - iterate extended rows
 - `cast (bool)` - disable data casting if false
+- `integrity` (dict) - dictionary in a form of `{'size': <bytes>, 'hash': '<sha256>'}` to check integrity of the table when it's read completely. Both keys are optional.
 - `relations (dict)` - dictionary of foreign key references in a form of `{resource1: [{field1: value1, field2: value2}, ...], ...}`. If provided, foreign key fields will checked and resolved to one of their references (/!\ one-to-many fk are not completely resolved).
 - `foreign_keys_values (dict)` - three-level dictionary of foreign key references optimized to speed up validation process in a form of `{resource1: { (foreign_key_field1, foreign_key_field2) : { (value1, value2) : {one_keyedrow}, ... }}}`. If not provided but relations is true, it will be created before the validation process by *index_foreign_keys_values* method
 - `(exceptions.TableSchemaException)` - raises any error that occurs during this process
@@ -229,13 +230,14 @@ Iterates through the table data and emits rows cast based on table schema. Data 
   - `{header1: value1, header2: value2}` - keyed
   - `[rowNumber, [header1, header2], [value1, value2]]` - extended
 
-#### `table.read(keyed=False, extended=False, cast=True, relations=False, limit=None, foreign_keys_values=False)`
+#### `table.read(keyed=False, extended=False, cast=True, integrity=False, relations=False, limit=None, foreign_keys_values=False)`
 
 Read the whole table and returns as array of rows. Count of rows could be limited.
 
 - `keyed (bool)` - flag to emit keyed rows
 - `extended (bool)` - flag to emit extended rows
 - `cast (bool)` - flag to disable data casting if false
+- `integrity` (dict) - dictionary in a form of `{'size': <bytes>, 'hash': '<sha256>'}` to check integrity of the table when it's read completely. Both keys are optional.
 - `relations (dict)` - dict of foreign key references in a form of `{resource1: [{field1: value1, field2: value2}, ...], ...}`. If provided foreign key fields will checked and resolved to its references
 - `limit (int)` - integer limit of rows to return
 - `foreign_keys_values (dict)` - three-level dictionary of foreign key references optimized to speed up validation process in a form of `{resource1: { (foreign_key_field1, foreign_key_field2) : { (value1, value2) : {one_keyedrow}, ... }}}`
@@ -646,9 +648,13 @@ All validation errors.
 
 All value cast errors.
 
-#### `exceptions.RelationError`
+#### `exceptions.IntegrityError`
 
 All integrity errors.
+
+#### `exceptions.RelationError`
+
+All relations errors.
 
 #### `exceptions.StorageError`
 
