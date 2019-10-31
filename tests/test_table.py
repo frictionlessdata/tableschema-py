@@ -194,25 +194,28 @@ def test_read_with_headers_field_names_mismatch():
     assert 'match schema field names' in str(excinfo.value)
 
 
-# Stats
+# Stats/integrity
+
+SIZE = 63
+HASH = '328adab247692a1a405e83c2625d52e366389eabf8a1824931187877e8644774'
 
 def test_size():
     table = Table('data/data.csv')
     table.read()
-    assert table.size == 63
+    assert table.size == SIZE
 
 
 @pytest.mark.skipif(six.PY2, reason='Support only for Python3')
 def test_size_compressed():
     table = Table('data/data.csv.zip')
     table.read()
-    assert table.size == 63
+    assert table.size == SIZE
 
 
 def test_size_remote():
     table = Table(BASE_URL % 'data/data.csv')
     table.read()
-    assert table.size == 63
+    assert table.size == SIZE
 
 
 def test_size_not_read():
@@ -223,25 +226,64 @@ def test_size_not_read():
 def test_hash():
     table = Table('data/data.csv')
     table.read()
-    assert table.hash == '328adab247692a1a405e83c2625d52e366389eabf8a1824931187877e8644774'
+    assert table.hash == HASH
 
 
 @pytest.mark.skipif(six.PY2, reason='Support only for Python3')
 def test_hash_compressed():
     table = Table('data/data.csv.zip')
     table.read()
-    assert table.hash == '328adab247692a1a405e83c2625d52e366389eabf8a1824931187877e8644774'
+    assert table.hash == HASH
 
 
 def test_hash_remote():
     table = Table(BASE_URL % 'data/data.csv')
     table.read()
-    assert table.hash == '328adab247692a1a405e83c2625d52e366389eabf8a1824931187877e8644774'
+    assert table.hash == HASH
 
 
 def test_hash():
     table = Table(BASE_URL % 'data/data.csv')
     assert table.hash is None
+
+
+def test_read_integrity():
+    table = Table('data/data.csv')
+    table.read(integrity={'size': SIZE, 'hash': HASH})
+    assert True
+
+def test_read_integrity_error():
+    table = Table('data/data.csv')
+    with pytest.raises(exceptions.IntegrityError) as excinfo:
+        table.read(integrity={'size': SIZE + 1, 'hash': HASH + 'a'})
+    assert str(SIZE) in str(excinfo.value)
+    assert HASH in str(excinfo.value)
+
+
+def test_read_integrity_size():
+    table = Table('data/data.csv')
+    table.read(integrity={'size': SIZE})
+    assert True
+
+
+def test_read_integrity_size_error():
+    table = Table('data/data.csv')
+    with pytest.raises(exceptions.IntegrityError) as excinfo:
+        table.read(integrity={'size': SIZE + 1})
+    assert str(SIZE) in str(excinfo.value)
+
+
+def test_read_integrity_hash():
+    table = Table('data/data.csv')
+    table.read(integrity={'hash': HASH})
+    assert True
+
+
+def test_read_integrity_hash_error():
+    table = Table('data/data.csv')
+    with pytest.raises(exceptions.IntegrityError) as excinfo:
+        table.read(integrity={'hash': HASH + 'a'})
+    assert HASH in str(excinfo.value)
 
 
 # Foreign keys

@@ -80,7 +80,8 @@ class Table(object):
         if self.__stream:
             return self.__stream.hash
 
-    def iter(self, keyed=False, extended=False, cast=True, relations=False,
+    def iter(self, keyed=False, extended=False, cast=True,
+             integrity=False, relations=False,
              foreign_keys_values=False):
         """https://github.com/frictionlessdata/tableschema-py#table
         """
@@ -169,16 +170,31 @@ class Table(object):
             else:
                 yield row
 
+        # Check integrity
+        if integrity:
+            violations = []
+            size = integrity.get('size')
+            hash = integrity.get('hash')
+            if size and size != self.__stream.size:
+                violations.append('size "%s"' % self.__stream.size)
+            if hash and hash != self.__stream.hash:
+                violations.append('hash "%s"' % self.__stream.hash)
+            if violations:
+                message = 'Calculated %s differ(s) from declared value(s)'
+                raise exceptions.IntegrityError(message % ' and '.join(violations))
+
         # Close stream
         self.__stream.close()
 
-    def read(self, keyed=False, extended=False, cast=True, relations=False, limit=None,
+    def read(self, keyed=False, extended=False, cast=True, limit=None,
+             integrity=False, relations=False,
              foreign_keys_values=False):
         """https://github.com/frictionlessdata/tableschema-py#table
         """
         result = []
-        rows = self.iter(keyed=keyed, extended=extended, cast=cast, relations=relations,
-                         foreign_keys_values=foreign_keys_values)
+        rows = self.iter(keyed=keyed, extended=extended, cast=cast,
+            integrity=integrity, relations=relations,
+            foreign_keys_values=foreign_keys_values)
         for count, row in enumerate(rows, start=1):
             result.append(row)
             if count == limit:
