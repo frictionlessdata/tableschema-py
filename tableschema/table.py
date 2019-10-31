@@ -180,7 +180,7 @@ class Table(object):
             if hash and hash != self.__stream.hash:
                 violations.append('hash "%s"' % self.__stream.hash)
             if violations:
-                message = 'Calculated %s differs from declared values'
+                message = 'Calculated %s differ(s) from declared value(s)'
                 raise exceptions.IntegrityError(message % ' and '.join(violations))
 
         # Close stream
