@@ -840,6 +840,10 @@ and `mock` packages. These packages are available only in tox envionments.
 
 Here described only breaking and the most important changes. The full changelog and documentation for all released versions can be found in the nicely formatted [commit history](https://github.com/frictionlessdata/tableschema-py/commits/master).
 
+#### v1.10
+
+- Added an ability to check table's integrity while reading
+
 #### v1.9
 
 - Implemented the `table.size` and `table.hash` properties
