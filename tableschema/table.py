@@ -11,7 +11,6 @@ from collections import OrderedDict
 from .storage import Storage
 from .schema import Schema
 from . import exceptions
-from . import helpers
 from collections import defaultdict
 
 
@@ -91,6 +90,7 @@ class Table(object):
         # in all situations, see comment below.
         if exc_handler is None:
             stream = self.__stream
+
             def exc_handler(exc, *args, **kwargs):
                 stream.close()
                 raise exc
