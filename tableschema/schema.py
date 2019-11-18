@@ -7,7 +7,9 @@ from __future__ import unicode_literals
 import io
 import six
 import json
+from collections import OrderedDict
 from copy import deepcopy
+from six.moves import zip_longest
 from .profile import Profile
 from .field import Field
 from . import exceptions
@@ -132,19 +134,44 @@ class Schema(object):
             self.__build()
         return field
 
-    def cast_row(self, row, fail_fast=False):
+    def cast_row(self, row, fail_fast=False, row_number=None,
+                 exc_handler=None):
         """https://github.com/frictionlessdata/tableschema-py#schema
         """
+        exc_handler = helpers.default_exc_handler if exc_handler is None else \
+            exc_handler
 
         # Prepare
         result = []
         errors = []
-
+        if row_number is not None:
+            row_number_info = ' for row "%s"' % row_number
+        else:
+            row_number_info = ''
         # Check row length
         if len(row) != len(self.fields):
-            message = 'Row length %s doesn\'t match fields count %s'
-            message = message % (len(row), len(self.fields))
-            raise exceptions.CastError(message)
+            message = (
+                'Row length %s doesn\'t match fields count %s' +
+                row_number_info) % (len(row), len(self.fields))
+            exc = exceptions.CastError(message)
+            # Some preparations for error reporting, relevant if custom error
+            # handling is in place.
+            if len(row) < len(self.fields):
+                # Treat missing col values as None
+                keyed_row = OrderedDict(
+                    zip_longest((field.name for field in self.fields), row))
+                # Use added None values for further processing
+                row = list(keyed_row.values())
+            else:
+                fields = self.fields
+                keyed_row = OrderedDict(
+                    # Use extra column number if value index exceeds fields
+                    (fields[i].name if fields[i:]
+                     else 'tableschema-cast-error-extra-col-{}'.format(i+1),
+                     value)
+                    for (i, value) in enumerate(row))
+            exc_handler(exc, row_number=row_number, row_data=keyed_row,
+                        error_data=keyed_row)
 
         # Cast row
         for field, value in zip(self.fields, row):
@@ -153,12 +180,22 @@ class Schema(object):
             except exceptions.CastError as exception:
                 if fail_fast:
                     raise
+                # Wrap original value in a FailedCast object to be able to
+                # further process/yield values and to distinguish uncasted
+                # values on the consuming side.
+                result.append(FailedCast(value))
                 errors.append(exception)
 
         # Raise errors
         if errors:
-            message = 'There are %s cast errors (see exception.errors)' % len(errors)
-            raise exceptions.CastError(message, errors=errors)
+            message = (
+                'There are %s cast errors (see exception.errors)' +
+                row_number_info) % len(errors)
+            keyed_row = OrderedDict(zip(self.headers, row))
+            exc_handler(
+                exceptions.CastError(message, errors=errors),
+                row_number=row_number, row_data=keyed_row,
+                error_data=keyed_row)
 
         return result
 
@@ -271,6 +308,56 @@ class Schema(object):
 
     headers = field_names
     has_field = get_field
+
+
+class FailedCast(object):
+    """Wrap an original data field value that failed to be properly casted.
+
+    FailedCast allows for further processing/yielding values but still be able
+    to distinguish uncasted values on the consuming side.
+
+    Delegates attribute access and the basic rich comparison methods to the
+    underlying object. Supports default user-defined classes hashability i.e.
+    is hashable based on object identity (not based on the wrapped value). 
+    """
+
+    # Make this "reasonably immutable": Don't support setting other attributes,
+    # don't support modifying re-setting value
+    __slots__ = ('_value',)
+
+    def __init__(self, value):
+        self._value = value
+
+    @property
+    def value(self):
+        return self._value
+
+    def __repr__(self):
+        return 'FailedCast(%r)' % self._value
+
+    def __getattr__(self, name):
+        return getattr(self._value, name)
+
+    def __lt__(self, other):
+        return self._value < other
+
+    def __le__(self, other):
+        return self._value <= other
+
+    def __eq__(self, other):
+        return self._value == other
+
+    def __ne__(self, other):
+        return self._value != other
+
+    def __gt__(self, other):
+        return self._value > other
+
+    def __ge__(self, other):
+        return self._value >= other
+
+    def __hash__(self):
+        return object.__hash__(self)
 
 
 # Internal

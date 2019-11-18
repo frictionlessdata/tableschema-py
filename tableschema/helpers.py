@@ -84,6 +84,12 @@ def normalize_value(value):
     return cast(value).lower()
 
 
+def default_exc_handler(exc, *args, **kwargs):
+    """Default exception handler function: raise exc, ignore other arguments.
+    """
+    raise exc
+
+
 class PluginImporter(object):
     """Plugin importer.
 

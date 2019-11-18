@@ -8,6 +8,7 @@ from __future__ import unicode_literals
 # Module API
 
 from .schema import Schema
+from .schema import FailedCast
 from .field import Field
 from .table import Table
 from .storage import Storage
