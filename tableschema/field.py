@@ -79,12 +79,15 @@ class Field(object):
         """
         return self.__descriptor
 
-    def cast_value(self, value, constraints=True):
+    def cast_value(self, value, constraints=True, preserve_missing_values=False):
         """https://github.com/frictionlessdata/tableschema-py#field
         """
 
         # Null value
         if value in self.__missing_values:
+            # If missing_values should be preserved without being cast
+            if preserve_missing_values:
+                return value
             value = None
 
         # Cast value
