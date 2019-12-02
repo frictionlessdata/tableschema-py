@@ -22,12 +22,13 @@ A library for working with [Table Schema](http://specs.frictionlessdata.io/table
 
 <!--TOC-->
 
-  - [Gettings Started](#gettings-started)
+  - [Getting Started](#getting-started)
     - [Installation](#installation)
     - [Examples](#examples)
   - [Documentation](#documentation)
     - [Table](#table)
     - [Schema](#schema)
+      - [FailedCast](#failedcast)
     - [Field](#field)
     - [validate](#validate)
     - [infer](#infer)
@@ -40,11 +41,11 @@ A library for working with [Table Schema](http://specs.frictionlessdata.io/table
 
 <!--TOC-->
 
-## Gettings Started
+## Getting Started
 
 ### Installation
 
-The package use semantic versioning. It means that major versions  could include breaking changes. It's highly recommended to specify `tableschema` version range in your `setup/requirements` file e.g. `tableschema>=1.0,<2.0`.
+The package uses semantic versioning. It means that major versions  could include breaking changes. It's highly recommended to specify `tableschema` version range in your `setup/requirements` file e.g. `tableschema>=1.0,<2.0`.
 
 ```bash
 $ pip install tableschema
@@ -180,7 +181,66 @@ table = Table('data.csv', schema='schema.json')
 # Continue the work
 ```
 
-This is a basic introduction to the `Table` class. To learn more let's take a look at the `Table` class API reference.
+As already mentioned a given schema can be used to *validate* data (see the [Schema](#schema) section for schema specification details). In default mode invalid data rows immediately trigger an [exception](#exceptions) in the `table.iter()`/`table.write()` methods.
+
+Suppose this schema-invalid local file `invalid_data.csv`:
+```csv
+key,value
+zero,0
+one,not_an_integer
+two,2
+```
+
+We're goint to validate the data against the following schema:
+```python
+table = Table(
+    'invalid_data.csv',
+    schema={'fields': [{'name': 'key'}, {'name': 'value', 'type': 'integer'}]})
+```
+
+Iterating over the data triggers an exception due to the failed cast of `'not_an_integer'` to `int`:
+```python
+for row in table.iter():
+    print(row)
+
+# Traceback (most recent call last):
+# ...
+# tableschema.exceptions.CastError: There are 1 cast errors (see exception.errors) for row "3"
+```
+
+Hint: The row number count starts with 1 and also includes header lines.
+
+(Note: You can optionally switch off `iter()`/`read()` value casting using the cast parameter, see reference below.)
+
+By providing a custom exception handler (a callable) to those methods you can treat occurring exceptions at your own discretion, i.e. to "fail late" and e.g. gather a validation report on the whole data:
+
+```python
+errors = []
+def exc_handler(exc, row_number=None, row_data=None, error_data=None):
+    errors.append((exc, row_number, row_data, error_data))
+
+for row in table.iter(exc_handler=exc_handler):
+    print(row)
+
+# ['zero', 0]
+# ['one', FailedCast('not_an_integer')]
+# ['two', 2]
+
+print(errors)
+
+# [(CastError('There are 1 cast errors (see exception.errors) for row "3"',),
+#   3,
+#   OrderedDict([('key', 'one'), ('value', 'not_an_integer')]),
+#   OrderedDict([('value', 'not_an_integer')]))]
+```
+
+Note that
+
+- Data rows are yielded even though the data is schema-invalid; this is due to our custom expression handler choosing not to raise exceptions (but rather collect them in the errors list).
+- Data field values that can't get casted properly (if `iter()`/`read()` cast parameter is set to True, which is the default) are wrapped into a `FailedCast` "value holder". This allows for distinguishing uncasted values from successfully casted values on the data consumer side. `FailedCast` instances can only get yielded when custom exception handling is in place.
+- The custom exception handler callable must support a function signature as specified in the `iter()`/`read()` sections of the `Table` class API reference.
+
+So far for a basic introduction to the `Table` class. To learn more let's take a look at the `Table` class API reference.
 
 #### `Table(source, schema=None, strict=False, post_cast=[], storage=None, **options)`
 
@@ -214,7 +274,7 @@ Constructor to instantiate `Table` class. If `references` argument is provided, 
 
 - `(str/None)` - returns the table's SHA256 hash if it's already read using e.g. `table.read`, otherwise returns `None`. In the middle of an iteration it returns hash of already read contents
 
-#### `table.iter(keyed=Fase, extended=False, cast=True, integrity=False, relations=False, foreign_keys_values=False)`
+#### `table.iter(keyed=Fase, extended=False, cast=True, integrity=False, relations=False, foreign_keys_values=False, exc_handler=None)`
 
 Iterates through the table data and emits rows cast based on table schema. Data casting can be disabled.
 
@@ -224,15 +284,46 @@ Iterates through the table data and emits rows cast based on table schema. Data 
 - `integrity` (dict) - dictionary in a form of `{'size': <bytes>, 'hash': '<sha256>'}` to check integrity of the table when it's read completely. Both keys are optional.
 - `relations (dict)` - dictionary of foreign key references in a form of `{resource1: [{field1: value1, field2: value2}, ...], ...}`. If provided, foreign key fields will checked and resolved to one of their references (/!\ one-to-many fk are not completely resolved).
 - `foreign_keys_values (dict)` - three-level dictionary of foreign key references optimized to speed up validation process in a form of `{resource1: { (foreign_key_field1, foreign_key_field2) : { (value1, value2) : {one_keyedrow}, ... }}}`. If not provided but relations is true, it will be created before the validation process by *index_foreign_keys_values* method
-- `(exceptions.TableSchemaException)` - raises any error that occurs during this process
+- `exc_handler ()` - optional custom exception handler callable. Can be used to defer raising errors (i.e. "fail late"), e.g. for data validation purposes. Must support the following call signature:
+
+    ```python
+    def exc_handler(exc, row_number=None, row_data=None, error_data=None):
+        """Custom exception handler (example).
+
+        Parameters
+        ----------
+        exc : Exception
+            Deferred exception instance
+        row_number : int
+            Data row number that triggers exception exc
+        row_data : OrderedDict
+            Invalid data row source data
+        error_data : OrderedDict
+            Data row source data field subset responsible for the error, if
+            applicable (e.g. invalid primary or foreign key fields). May be
+            identical to row_data.
+        """
+        # ...
+    ```
+
+Raises:
+
+- `(exceptions.TableSchemaException)` - base class of any error that occurs during this process. Specializations:
+  - `(exceptions.CastError)` - data cast error
+  - `(exceptions.IntegrityError)` - integrity checking error
+  - `(exceptions.UniqueKeyError)` - unique key constraint violation
+  - `(exceptions.UnresolvedFKError)` - unresolved foreign key reference error
+
+Yields:
+
 - `(any[]/any{})` - yields rows:
   - `[value1, value2]` - base
   - `{header1: value1, header2: value2}` - keyed
   - `[rowNumber, [header1, header2], [value1, value2]]` - extended
 
-#### `table.read(keyed=False, extended=False, cast=True, integrity=False, relations=False, limit=None, foreign_keys_values=False)`
+#### `table.read(keyed=False, extended=False, cast=True, integrity=False, relations=False, limit=None, foreign_keys_values=False, exc_handler=None)`
 
-Read the whole table and returns as array of rows. Count of rows could be limited.
+Read the whole table and return as array of rows. Count of rows could be limited.
 
 - `keyed (bool)` - flag to emit keyed rows
 - `extended (bool)` - flag to emit extended rows
@@ -241,7 +332,38 @@ Read the whole table and returns as array of rows. Count of rows could be limite
 - `relations (dict)` - dict of foreign key references in a form of `{resource1: [{field1: value1, field2: value2}, ...], ...}`. If provided foreign key fields will checked and resolved to its references
 - `limit (int)` - integer limit of rows to return
 - `foreign_keys_values (dict)` - three-level dictionary of foreign key references optimized to speed up validation process in a form of `{resource1: { (foreign_key_field1, foreign_key_field2) : { (value1, value2) : {one_keyedrow}, ... }}}`
-- `(exceptions.TableSchemaException)` - raises any error that occurs during this process
+- `exc_handler ()` - optional custom exception handler callable. Can be used to defer raising errors (i.e. "fail late"), e.g. for data validation purposes. Must support the following call signature:
+
+    ```python
+    def exc_handler(exc, row_number=None, row_data=None, error_data=None):
+        """Custom exception handler (example).
+
+        Parameters
+        ----------
+        exc : Exception
+            Deferred exception instance
+        row_number : int
+            Data row number that triggers exception exc
+        row_data : OrderedDict
+            Invalid data row source data
+        error_data : OrderedDict
+            Data row source data field subset responsible for the error, if
+            applicable (e.g. invalid primary or foreign key fields). May be
+            identical to row_data.
+        """
+        # ...
+    ```
+
+Raises:
+
+- `(exceptions.TableSchemaException)` - base class of any error that occurs during this process. Specializations:
+  - `(exceptions.CastError)` - data cast error
+  - `(exceptions.IntegrityError)` - integrity checking error
+  - `(exceptions.UniqueKeyError)` - unique key constraint violation
+  - `(exceptions.UnresolvedFKError)` - unresolved foreign key reference error
+
+Returns:
+
 - `(list[])` - returns array of rows (see `table.iter`)
 
 #### `table.infer(limit=100, confidence=0.75)`
@@ -470,6 +592,25 @@ Save schema descriptor to target destination.
 - `(exceptions.TableSchemaException)` - raises any error that occurs during the process
 - `(bool)` - returns true on success
 
+#### FailedCast
+`FailedCast` wraps an original data field value that failed to be properly casted to the target data type as denoted by the given schema. FailedCast allows for further processing/yielding values but still be able to distinguish uncasted values on the consuming side. 
+
+`FailedCast` objects can only get yielded if custom error handling is in place so that exceptions are deferred, see the `Table` class `iter()`/`read()`
+documentation.
+
+##### `FailedCast(value)`
+Constructor for the `FailedCast` class.
+
+- `value (any)` - data field value
+
+`FailedCast` delegates attribute access and the basic rich comparison methods
+to the underlying object. Supports default user-defined classes hashability i.e.  is hashable based on object identity (not based on the wrapped value).
+
+##### `failed_cast.value`
+
+- `(any)` - original data value
+
+
 ### Field
 
 ```python
@@ -648,6 +789,10 @@ All validation errors.
 
 All value cast errors.
 
+#### `exceptions.UniqueKeyError`
+
+Unique key constraint violation (CastError subclass).
+
 #### `exceptions.IntegrityError`
 
 All integrity errors.
@@ -655,6 +800,10 @@ All integrity errors.
 #### `exceptions.RelationError`
 
 All relations errors.
+
+#### `exceptions.UnresolvedFKError`
+
+Unresolved foreign key reference error (RelationError subclass).
 
 #### `exceptions.StorageError`
 
