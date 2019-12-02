@@ -191,7 +191,7 @@ one,not_an_integer
 two,2
 ```
 
-We're goint to validate the data against the following schema:
+We're going to validate the data against the following schema:
 ```python
 table = Table(
     'invalid_data.csv',
