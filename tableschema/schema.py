@@ -191,11 +191,18 @@ class Schema(object):
             message = (
                 'There are %s cast errors (see exception.errors)' +
                 row_number_info) % len(errors)
-            keyed_row = OrderedDict(zip(self.headers, row))
+            keyed_row = OrderedDict(zip(self.field_names, row))
+            # Add the cast failure-causing fields only to error data.
+            # Indexing results with the row field index should be ok at this
+            # point due to the previous processing.
+            error_data = OrderedDict(
+                (name, value)
+                for (i, (name, value)) in enumerate(keyed_row.items())
+                if isinstance(result[i], FailedCast))
             exc_handler(
                 exceptions.CastError(message, errors=errors),
                 row_number=row_number, row_data=keyed_row,
-                error_data=keyed_row)
+                error_data=error_data)
 
         return result
 

@@ -217,10 +217,11 @@ def test_cast_row_wrong_type_handled():
     expect_row_data = OrderedDict(
         [('id', 'string'), ('height', 'notdecimal'), ('age', '1'),
          ('name', 'string'), ('occupation', 'string')])
+    expect_error_data = OrderedDict([('height', 'notdecimal')])
     _check_error(
         errors[0], expect_exc_class=exceptions.CastError,
         expect_exc_str='There are 1 cast errors', expect_row_number=None,
-        expect_row_data=expect_row_data, expect_error_data=expect_row_data)
+        expect_row_data=expect_row_data, expect_error_data=expect_error_data)
     exc = errors[0][0]
     assert len(exc.errors) == 1
 
@@ -240,10 +241,12 @@ def test_cast_row_wrong_type_multiple_errors_handled():
     expect_row_data = OrderedDict(
         [('id', 'string'), ('height', 'notdecimal'), ('age', '10.6'),
          ('name', 'string'), ('occupation', 'string')])
+    expect_error_data = OrderedDict(
+        [('height', 'notdecimal'),('age', '10.6')])
     _check_error(
         errors[0], expect_exc_class=exceptions.CastError,
         expect_exc_str='There are 2 cast errors', expect_row_number=None,
-        expect_row_data=expect_row_data, expect_error_data=expect_row_data)
+        expect_row_data=expect_row_data, expect_error_data=expect_error_data)
     exc = errors[0][0]
     assert len(exc.errors) == 2
 

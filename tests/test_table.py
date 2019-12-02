@@ -9,7 +9,7 @@ import pytest
 from collections import OrderedDict
 from copy import deepcopy
 from mock import Mock, patch
-from tableschema import Schema, Table, Storage, exceptions
+from tableschema import Schema, FailedCast, Table, Storage, exceptions
 
 
 # General
@@ -149,6 +149,41 @@ def test_iter_with_headers_field_names_mismatch():
     assert 'match schema field names' in str(excinfo.value)
 
 
+def test_iter_invalid_col_value():
+    # Test a schema-invalid column value in one row
+    source = [
+        ['key', 'value'],
+        ['one', 'not_an_int'],
+        ['two', 2],
+    ]
+    table = Table(source, schema=SCHEMA_MIN)
+    with pytest.raises(exceptions.CastError) as excinfo:
+        for _ in table.iter():
+            pass
+    assert 'There are 1 cast errors' in str(excinfo.value)
+    error = excinfo.value.errors[0]
+    assert isinstance(error, exceptions.CastError)
+    assert ('Field "value" can\'t cast value "not_an_int" for type "integer"'
+            in str(error))
+
+
+def test_iter_invalid_col_value_no_cast():
+    # Test a schema-invalid column value in one row, without value-casting
+    source = [
+        ['key', 'value'],
+        ['one', 'not_an_int'],
+        ['two', 2],
+    ]
+    expect = [
+        ['one', 'not_an_int'],
+        ['two', 2],
+    ]
+    table = Table(source, schema=SCHEMA_MIN)
+    actual = list(table.iter(cast=False))
+    # no actual casting, no cast errors
+    assert actual == expect
+
+
 def test_read_keyed():
     table = Table(DATA_MIN, schema=SCHEMA_MIN)
     expect = [{'key': 'one', 'value': 1}, {'key': 'two', 'value': 2}]
@@ -247,6 +282,40 @@ def test_read_with_headers_field_names_mismatch():
     with pytest.raises(exceptions.CastError) as excinfo:
         table.read()
     assert 'match schema field names' in str(excinfo.value)
+
+
+def test_read_invalid_col_value():
+    # Test a schema-invalid column value in one row
+    source = [
+        ['key', 'value'],
+        ['one', 'not_an_int'],
+        ['two', 2],
+    ]
+    table = Table(source, schema=SCHEMA_MIN)
+    with pytest.raises(exceptions.CastError) as excinfo:
+        actual = table.read()
+    assert 'There are 1 cast errors' in str(excinfo.value)
+    error = excinfo.value.errors[0]
+    assert isinstance(error, exceptions.CastError)
+    assert ('Field "value" can\'t cast value "not_an_int" for type "integer"'
+            in str(error))
+
+
+def test_read_invalid_col_value_no_cast():
+    # Test a schema-invalid column value in one row, without value-casting
+    source = [
+        ['key', 'value'],
+        ['one', 'not_an_int'],
+        ['two', 2],
+    ]
+    expect = [
+        ['one', 'not_an_int'],
+        ['two', 2],
+    ]
+    table = Table(source, schema=SCHEMA_MIN)
+    actual = table.read(cast=False)
+    # no actual casting, no cast errors
+    assert actual == expect
 
 
 # Stats/integrity
@@ -690,6 +759,56 @@ def test_iter_single_field_foreign_key_invalid_handled():
     assert 'Foreign key' in str(exc)
 
 
+def test_iter_invalid_col_value_handled():
+    # Test a schema-invalid column value in one row, handled
+    source = [
+        ['key', 'value'],
+        ['one', 'not_an_int'],
+        ['two', 2],
+    ]
+    table = Table(source, schema=SCHEMA_MIN)
+    errors = []
+    def handler(exc, row_number, row_data, error_data):
+        errors.append((exc, row_number, row_data, error_data))
+    actual = list(table.iter(exc_handler=handler))
+    expect = [
+        ['one', 'not_an_int'],
+        ['two', 2],
+    ]
+    assert actual == expect
+    assert isinstance(actual[0][1], FailedCast)
+    assert len(errors) == 1
+    expect_row_data = OrderedDict(
+        [('key', 'one'), ('value', 'not_an_int')])
+    expect_error_data = OrderedDict(
+        [('value', 'not_an_int')])
+    _check_error(
+        errors[0], expect_exc_class=exceptions.CastError,
+        expect_exc_str='There are 1 cast errors', expect_row_number=2,
+        expect_row_data=expect_row_data, expect_error_data=expect_error_data)
+
+
+def test_iter_invalid_col_value_handled_no_cast():
+    # Test a schema-invalid column value in one row, without value-casting
+    source = [
+        ['key', 'value'],
+        ['one', 'not_an_int'],
+        ['two', 2],
+    ]
+    expect = [
+        ['one', 'not_an_int'],
+        ['two', 2],
+    ]
+    table = Table(source, schema=SCHEMA_MIN)
+    errors = []
+    def handler(exc, row_number, row_data, error_data):
+        errors.append((exc, row_number, row_data, error_data))
+    actual = list(table.iter(cast=False, exc_handler=handler))
+    # no actual casting, no cast errors
+    assert len(errors) == 0
+    assert actual == expect
+
+
 def test_read_invalid_extra_cols_handled():
     # Test a schema-invalid extra column in one row
     source = [
@@ -818,6 +937,56 @@ def test_read_single_field_foreign_key_invalid_handled():
     assert error_data == OrderedDict([('name', 'Walter')])
     assert isinstance(exc, exceptions.UnresolvedFKError)
     assert 'Foreign key' in str(exc)
+
+
+def test_read_invalid_col_value_handled():
+    # Test a schema-invalid column value in one row, handled
+    source = [
+        ['key', 'value'],
+        ['one', 'not_an_int'],
+        ['two', 2],
+    ]
+    table = Table(source, schema=SCHEMA_MIN)
+    errors = []
+    def handler(exc, row_number, row_data, error_data):
+        errors.append((exc, row_number, row_data, error_data))
+    actual = table.read(exc_handler=handler)
+    expect = [
+        ['one', 'not_an_int'],
+        ['two', 2],
+        ]
+    assert actual == expect
+    assert isinstance(actual[0][1], FailedCast)
+    assert len(errors) == 1
+    expect_row_data = OrderedDict(
+        [('key', 'one'), ('value', 'not_an_int')])
+    expect_error_data = OrderedDict(
+        [('value', 'not_an_int')])
+    _check_error(
+        errors[0], expect_exc_class=exceptions.CastError,
+        expect_exc_str='There are 1 cast errors', expect_row_number=2,
+        expect_row_data=expect_row_data, expect_error_data=expect_error_data)
+
+
+def test_read_invalid_col_value_handled_no_cast():
+    # Test a schema-invalid column value in one row, without value-casting
+    source = [
+        ['key', 'value'],
+        ['one', 'not_an_int'],
+        ['two', 2],
+    ]
+    expect = [
+        ['one', 'not_an_int'],
+        ['two', 2],
+    ]
+    table = Table(source, schema=SCHEMA_MIN)
+    errors = []
+    def handler(exc, row_number, row_data, error_data):
+        errors.append((exc, row_number, row_data, error_data))
+    actual = table.read(cast=False, exc_handler=handler)
+    # no actual casting, no cast errors
+    assert len(errors) == 0
+    assert actual == expect
 
 
 # Issues
