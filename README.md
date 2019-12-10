@@ -593,7 +593,7 @@ Save schema descriptor to target destination.
 - `(bool)` - returns true on success
 
 #### FailedCast
-`FailedCast` wraps an original data field value that failed to be properly casted to the target data type as denoted by the given schema. FailedCast allows for further processing/yielding values but still be able to distinguish uncasted values on the consuming side. 
+`FailedCast` wraps an original data field value that failed to be properly casted to the target data type as denoted by the given schema. FailedCast allows for further processing/yielding values but still be able to distinguish uncasted values on the consuming side.
 
 `FailedCast` objects can only get yielded if custom error handling is in place so that exceptions are deferred, see the `Table` class `iter()`/`read()`
 documentation.
@@ -988,6 +988,10 @@ and `mock` packages. These packages are available only in tox envionments.
 ## Changelog
 
 Here described only breaking and the most important changes. The full changelog and documentation for all released versions can be found in the nicely formatted [commit history](https://github.com/frictionlessdata/tableschema-py/commits/master).
+
+#### v1.12
+
+- Support optional custom exception handling for table.iter/read (#259)
 
 #### v1.11
 
