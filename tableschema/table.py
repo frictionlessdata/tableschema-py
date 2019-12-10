@@ -82,9 +82,18 @@ class Table(object):
 
     def iter(self, keyed=False, extended=False, cast=True,
              integrity=False, relations=False,
-             foreign_keys_values=False):
+             foreign_keys_values=False, exc_handler=None):
         """https://github.com/frictionlessdata/tableschema-py#table
         """
+        # TODO: Use helpers.default_exc_handler instead. Prerequisite: Use
+        # stream context manager to make sure the stream gets properly closed
+        # in all situations, see comment below.
+        if exc_handler is None:
+            stream = self.__stream
+
+            def exc_handler(exc, *args, **kwargs):
+                stream.close()
+                raise exc
 
         # Prepare unique checks
         if cast:
@@ -98,9 +107,13 @@ class Table(object):
             foreign_keys_values = self.index_foreign_keys_values(relations)
 
         # Open/iterate stream
+        # TODO: Use context manager instead to make sure stream gets closed in
+        # case of exceptions. Leaving that in for now for the sake of a smaller
+        # diff.
         self.__stream.open()
         iterator = self.__stream.iter(extended=True)
-        iterator = self.__apply_processors(iterator, cast=cast)
+        iterator = self.__apply_processors(
+            iterator, cast=cast, exc_handler=exc_handler)
         for row_number, headers, row in iterator:
 
             # Get headers
@@ -111,20 +124,36 @@ class Table(object):
             if cast:
                 if self.schema and self.headers:
                     if self.headers != self.schema.field_names:
-                        self.__stream.close()
-                        message = 'Table headers don\'t match schema field names'
-                        raise exceptions.CastError(message)
+                        message = (
+                            'Table headers (%r) don\'t match '
+                            'schema field names (%r) in row %s' % (
+                                self.headers, self.schema.field_names,
+                                row_number))
+                        keyed_row = OrderedDict(zip(headers, row))
+                        exc_handler(
+                            exceptions.CastError(message),
+                            row_number=row_number, row_data=keyed_row,
+                            error_data=keyed_row)
+                        continue
 
             # Check unique
             if cast:
                 for indexes, cache in unique_fields_cache.items():
-                    values = tuple(value for i, value in enumerate(row) if i in indexes)
+                    keyed_values = OrderedDict(
+                        (headers[i], value)
+                        for i, value in enumerate(row) if i in indexes)
+                    values = tuple(keyed_values.values())
                     if not all(map(lambda value: value is None, values)):
                         if values in cache['data']:
-                            self.__stream.close()
-                            message = 'Field(s) "%s" duplicates in row "%s"'
-                            message = message % (cache['name'], row_number)
-                            raise exceptions.CastError(message)
+                            message = (
+                                'Field(s) "%s" duplicates in row "%s" '
+                                'for values %r' % (
+                                    cache['name'], row_number, values))
+                            exc_handler(
+                                exceptions.UniqueKeyError(message),
+                                row_number=row_number,
+                                row_data=OrderedDict(zip(headers, row)),
+                                error_data=keyed_values)
                         cache['data'].add(values)
 
             # Resolve relations
@@ -135,17 +164,38 @@ class Table(object):
                         refValue = _resolve_relations(row, headers, foreign_keys_values,
                                                       foreign_key)
                         if refValue is None:
-                            self.__stream.close()
                             keyed_row = OrderedDict(zip(headers, row))
                             # local values of the FK
-                            local_values = tuple(keyed_row[f] for f in foreign_key['fields'])
-                            message = 'Foreign key "%s" violation in row "%s": %s not found in %s'
-                            message = message % (foreign_key['fields'],
-                                                row_number,
-                                                local_values,
-                                                foreign_key['reference']['resource'])
-                            raise exceptions.RelationError(message)
+                            local_keyed_values = {
+                                key: keyed_row[key]
+                                for key in foreign_key['fields']
+                                }
+                            local_values = tuple(local_keyed_values.values())
+                            message = (
+                                'Foreign key "%s" violation in row "%s": '
+                                '%s not found in %s' % (
+                                    foreign_key['fields'],
+                                    row_number,
+                                    local_values,
+                                    foreign_key['reference']['resource']))
+                            exc_handler(
+                                exceptions.UnresolvedFKError(message),
+                                row_number=row_number, row_data=keyed_row,
+                                error_data=local_keyed_values)
+                            # If we reach this point we don't fail-early
+                            # i.e. no exception has been raised. As the
+                            # reference can't be resolved, use empty dict
+                            # as the "unresolved result".
+                            for field in foreign_key['fields']:
+                                if not isinstance(
+                                        row_with_relations[field], dict):
+                                    row_with_relations[field] = {}
                         elif type(refValue) is dict:
+                            # Substitute resolved referenced object for
+                            # original referencing field value.
+                            # For a composite foreign key, this substitutes
+                            # each part of the composite key with the
+                            # referenced object.
                             for field in foreign_key['fields']:
                                 if type(row_with_relations[field]) is not dict:
                                     # no previous refValues injected on this field
@@ -187,14 +237,15 @@ class Table(object):
         self.__stream.close()
 
     def read(self, keyed=False, extended=False, cast=True, limit=None,
-             integrity=False, relations=False,
-             foreign_keys_values=False):
+             integrity=False, relations=False, foreign_keys_values=False,
+             exc_handler=None):
         """https://github.com/frictionlessdata/tableschema-py#table
         """
         result = []
-        rows = self.iter(keyed=keyed, extended=extended, cast=cast,
-            integrity=integrity, relations=relations,
-            foreign_keys_values=foreign_keys_values)
+        rows = self.iter(
+            keyed=keyed, extended=extended, cast=cast, integrity=integrity,
+            relations=relations, foreign_keys_values=foreign_keys_values,
+            exc_handler=exc_handler)
         for count, row in enumerate(rows, start=1):
             result.append(row)
             if count == limit:
@@ -273,13 +324,14 @@ class Table(object):
 
     # Private
 
-    def __apply_processors(self, iterator, cast=True):
+    def __apply_processors(self, iterator, cast=True, exc_handler=None):
 
         # Apply processors to iterator
         def builtin_processor(extended_rows):
             for row_number, headers, row in extended_rows:
                 if self.__schema and cast:
-                    row = self.__schema.cast_row(row)
+                    row = self.__schema.cast_row(
+                        row, row_number=row_number, exc_handler=exc_handler)
                 yield (row_number, headers, row)
         processors = [builtin_processor] + self.__post_cast
         for processor in processors:

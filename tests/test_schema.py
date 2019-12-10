@@ -9,8 +9,9 @@ import os
 import json
 import pytest
 import requests
+from collections import OrderedDict
 from decimal import Decimal
-from tableschema import Schema, exceptions
+from tableschema import Schema, FailedCast, exceptions
 
 
 # Constants
@@ -117,6 +118,137 @@ def test_cast_row_wrong_type_multiple_errors():
     with pytest.raises(exceptions.CastError) as excinfo:
         schema.cast_row(source)
     assert len(excinfo.value.errors) == 2
+
+
+
+# Test row casting with exception handler i.e. don't fail immediately
+
+def _check_error(
+        error, expect_exc_class, expect_exc_str, expect_row_number=None,
+        expect_row_data=None, expect_error_data=None):
+    # Helper function to check all given expectations on handled errors.
+    # error must be a (exc, row_number, row_data, error_data)-tuple
+
+    # Make this a namedtuple?
+    exc, row_number, row_data, error_data = error
+    assert isinstance(exc, expect_exc_class)
+    assert expect_exc_str in str(exc)
+    if expect_row_number is not None:
+        # actual row number including header line
+        assert row_number == expect_row_number
+    if expect_row_data is not None:
+        assert row_data == expect_row_data
+    if error_data is not None:
+        assert error_data == expect_error_data
+
+
+def test_cast_row_handled():
+    schema = Schema(DESCRIPTOR_MAX)
+    source = ['string', '10.0', '1', 'string', 'string']
+    target = ['string', Decimal(10.0), 1, 'string', 'string']
+    errors = []
+    def handler(exc, row_number, row_data, error_data):
+        errors.append((exc, row_number, row_data, error_data))
+    assert schema.cast_row(source, exc_handler=handler) == target
+    assert len(errors) == 0
+
+
+def test_cast_row_null_values_handled():
+    schema = Schema(DESCRIPTOR_MAX)
+    source = ['string', '', '-', 'string', 'null']
+    target = ['string', None, None, 'string', None]
+    errors = []
+    def handler(exc, row_number, row_data, error_data):
+        errors.append((exc, row_number, row_data, error_data))
+    assert schema.cast_row(source, exc_handler=handler) == target
+    assert len(errors) == 0
+
+
+def test_cast_row_too_short_handled():
+    schema = Schema(DESCRIPTOR_MAX)
+    source = ['string', '10.0', '1', 'string']
+    # Missing values get substituted by None
+    target = ['string', Decimal(10.0), 1, 'string', None]
+    errors = []
+    def handler(exc, row_number, row_data, error_data):
+        errors.append((exc, row_number, row_data, error_data))
+    assert schema.cast_row(source, exc_handler=handler) == target
+    assert len(errors) == 1
+    expect_row_data = OrderedDict(
+        [('id', 'string'), ('height', '10.0'), ('age', '1'),
+         ('name', 'string'), ('occupation', None)])
+    _check_error(
+        errors[0], expect_exc_class=exceptions.CastError,
+        expect_exc_str='Row length', expect_row_number=None,
+        expect_row_data=expect_row_data, expect_error_data=expect_row_data)
+
+def test_cast_row_too_long_handled():
+    schema = Schema(DESCRIPTOR_MAX)
+    source = ['string', '10.0', '1', 'string', 'string', 'string']
+    # superfluous values are left out
+    target = ['string', Decimal(10.0), 1, 'string', 'string']
+    errors = []
+    def handler(exc, row_number, row_data, error_data):
+        errors.append((exc, row_number, row_data, error_data))
+    assert schema.cast_row(source, exc_handler=handler) == target
+    assert len(errors) == 1
+    # superfluous values are keyed with col num for error reporting
+    expect_row_data = OrderedDict(
+        [('id', 'string'), ('height', '10.0'), ('age', '1'),
+         ('name', 'string'), ('occupation', 'string'),
+         ('tableschema-cast-error-extra-col-6', 'string')])
+    _check_error(
+        errors[0], expect_exc_class=exceptions.CastError,
+        expect_exc_str='Row length', expect_row_number=None,
+        expect_row_data=expect_row_data, expect_error_data=expect_row_data)
+
+
+def test_cast_row_wrong_type_handled():
+    schema = Schema(DESCRIPTOR_MAX)
+    source = ['string', 'notdecimal', '1', 'string', 'string']
+    target = ['string', 'notdecimal', 1, 'string', 'string']
+    errors = []
+    def handler(exc, row_number, row_data, error_data):
+        errors.append((exc, row_number, row_data, error_data))
+    actual = schema.cast_row(source, exc_handler=handler)
+    assert actual == target
+    assert isinstance(actual[1], FailedCast)
+    assert len(errors) == 1
+    expect_row_data = OrderedDict(
+        [('id', 'string'), ('height', 'notdecimal'), ('age', '1'),
+         ('name', 'string'), ('occupation', 'string')])
+    expect_error_data = OrderedDict([('height', 'notdecimal')])
+    _check_error(
+        errors[0], expect_exc_class=exceptions.CastError,
+        expect_exc_str='There are 1 cast errors', expect_row_number=None,
+        expect_row_data=expect_row_data, expect_error_data=expect_error_data)
+    exc = errors[0][0]
+    assert len(exc.errors) == 1
+
+
+def test_cast_row_wrong_type_multiple_errors_handled():
+    schema = Schema(DESCRIPTOR_MAX)
+    source = ['string', 'notdecimal', '10.6', 'string', 'string']
+    target = ['string', 'notdecimal', '10.6', 'string', 'string']
+    errors = []
+    def handler(exc, row_number, row_data, error_data):
+        errors.append((exc, row_number, row_data, error_data))
+    actual = schema.cast_row(source, exc_handler=handler)
+    assert actual == target
+    assert isinstance(actual[1], FailedCast)
+    assert isinstance(actual[2], FailedCast)
+    assert len(errors) == 1
+    expect_row_data = OrderedDict(
+        [('id', 'string'), ('height', 'notdecimal'), ('age', '10.6'),
+         ('name', 'string'), ('occupation', 'string')])
+    expect_error_data = OrderedDict(
+        [('height', 'notdecimal'),('age', '10.6')])
+    _check_error(
+        errors[0], expect_exc_class=exceptions.CastError,
+        expect_exc_str='There are 2 cast errors', expect_row_number=None,
+        expect_row_data=expect_row_data, expect_error_data=expect_error_data)
+    exc = errors[0][0]
+    assert len(exc.errors) == 2
 
 
 def test_fields():

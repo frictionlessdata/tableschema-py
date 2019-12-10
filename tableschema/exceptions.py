@@ -44,7 +44,15 @@ class IntegrityError(TableSchemaException):
     pass
 
 
+class UniqueKeyError(CastError):
+    pass
+
+
 class RelationError(TableSchemaException):
+    pass
+
+
+class UnresolvedFKError(RelationError):
     pass
 
 
