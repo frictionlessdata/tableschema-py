@@ -37,7 +37,7 @@ def generate_reference(package):
 def generate_readme(reference):
     readme = ''
     replace = False
-    with open('README2.md') as file:
+    with open('README.md') as file:
         for docline in file:
             if docline.startswith('## Contributing'):
                 replace = False
