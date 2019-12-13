@@ -8,7 +8,7 @@
 
 A Python implementation of the [Table Schema](http://specs.frictionlessdata.io/table-schema/) standard.
 
-> Read this README with navigation and search on [frictionlessdata.io](https://frictionlessdata.io)
+> Read this README on [frictionlessdata.io](https://frictionlessdata.io)
 
 ## Features
 
