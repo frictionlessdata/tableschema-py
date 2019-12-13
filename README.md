@@ -8,6 +8,8 @@
 
 A library for working with [Table Schema](http://specs.frictionlessdata.io/table-schema/) in Python.
 
+> Read this README with navigation and search on [frictionlessdata.io](https://frictionlessdata.io)
+
 ## Features
 
 - `Table` to work with data tables described by Table Schema
@@ -18,32 +20,7 @@ A library for working with [Table Schema](http://specs.frictionlessdata.io/table
 - built-in command-line interface to validate and infer schemas
 - storage/plugins system to connect tables to different storage backends like SQL Database
 
-## Contents
-
-<!--TOC-->
-
-  - [Getting Started](#getting-started)
-    - [Installation](#installation)
-    - [Examples](#examples)
-  - [Documentation](#documentation)
-    - [Table](#table)
-    - [Schema](#schema)
-      - [FailedCast](#failedcast)
-    - [Field](#field)
-    - [validate](#validate)
-    - [infer](#infer)
-    - [Exceptions](#exceptions)
-    - [Storage](#storage)
-    - [Plugins](#plugins)
-    - [CLI](#cli)
-  - [Contributing](#contributing)
-  - [Changelog](#changelog)
-
-<!--TOC-->
-
-## Getting Started
-
-### Installation
+## Installation
 
 The package uses semantic versioning. It means that major versions  could include breaking changes. It's highly recommended to specify `tableschema` version range in your `setup/requirements` file e.g. `tableschema>=1.0,<2.0`.
 
@@ -51,899 +28,495 @@ The package uses semantic versioning. It means that major versions  could includ
 $ pip install tableschema
 ```
 
-### Examples
-
-Code examples in this readme requires Python 3.4+ interpreter. You could see even more example in [examples](https://github.com/frictionlessdata/tableschema-py/tree/master/examples) directory.
-
-```python
-from tableschema import Table
-
-# Create table
-table = Table('path.csv', schema='schema.json')
-
-# Print schema descriptor
-print(table.schema.descriptor)
-
-# Print cast rows in a dict form
-for keyed_row in table.iter(keyed=True):
-    print(keyed_row)
-```
-
 ## Documentation
 
-### Table
-
-A table is a core concept in a tabular data world. It represents data with metadata (Table Schema). Let's see how we can use it in practice.
-
-Consider we have some local csv file. It could be inline data or from a remote link - all supported by the `Table` class (except local files for in-brower usage of course). But say it's `data.csv` for now:
-
-```csv
-city,location
-london,"51.50,-0.11"
-paris,"48.85,2.30"
-rome,N/A
-```
-
-Let's create and read a table instance. We use the static `Table.load` method and the `table.read` method with the `keyed` option to get an array of keyed rows:
-
-```python
-table = Table('data.csv')
-table.headers # ['city', 'location']
-table.read(keyed=True)
-# [
-#   {city: 'london', location: '51.50,-0.11'},
-#   {city: 'paris', location: '48.85,2.30'},
-#   {city: 'rome', location: 'N/A'},
-# ]
-```
-
-As we can see, our locations are just strings. But they should be geopoints. Also, Rome's location is not available, but it's just a string `N/A` instead of `None`. First we have to infer Table Schema:
-
-```python
-table.infer()
-table.schema.descriptor
-# { fields:
-#   [ { name: 'city', type: 'string', format: 'default' },
-#     { name: 'location', type: 'geopoint', format: 'default' } ],
-#  missingValues: [ '' ] }
-table.read(keyed=True)
-# Fails with a data validation error
-```
-
-Let's fix the "not available" location. There is a `missingValues` property in Table Schema specification. As a first try we set `missingValues` to `N/A` in `table.schema.descriptor`. The schema descriptor can be changed in-place, but all changes should also be committed using `table.schema.commit()`:
-
-```python
-table.schema.descriptor['missingValues'] = 'N/A'
-table.schema.commit()
-table.schema.valid # false
-table.schema.errors
-# [<ValidationError: "'N/A' is not of type 'array'">]
-```
-
-As a good citizens we've decided to check our schema descriptor's validity. And it's not valid! We should use an array for the `missingValues` property. Also, don't forget to include "empty string" as a valid missing value:
-
-```python
-table.schema.descriptor['missingValues'] = ['', 'N/A']
-table.schema.commit()
-table.schema.valid # true
-```
-
-All good. It looks like we're ready to read our data again:
-
-```python
-table.read(keyed=True)
-# [
-#   {city: 'london', location: [51.50,-0.11]},
-#   {city: 'paris', location: [48.85,2.30]},
-#   {city: 'rome', location: null},
-# ]
-```
-
-Now we see that:
-- locations are arrays with numeric latitude and longitude
-- Rome's location is a native Python `None`
-
-And because there are no errors after reading, we can be sure that our data is valid against our schema. Let's save it:
-
-```python
-table.schema.save('schema.json')
-table.save('data.csv')
-```
-
-Our `data.csv` looks the same because it has been stringified back to `csv` format. But now we have `schema.json`:
-
-```json
-{
-    "fields": [
-        {
-            "name": "city",
-            "type": "string",
-            "format": "default"
-        },
-        {
-            "name": "location",
-            "type": "geopoint",
-            "format": "default"
-        }
-    ],
-    "missingValues": [
-        "",
-        "N/A"
-    ]
-}
-
-```
+High-level documentation and tutorials:
+- [Tutorial 1](https://frictionlessdata.io)
+- [Tutorial 2](https://frictionlessdata.io)
 
-If we decide to improve it even more we could update the schema file and then open it again. But now providing a schema path:
+## Reference
 
-```python
-table = Table('data.csv', schema='schema.json')
-# Continue the work
-```
 
-As already mentioned a given schema can be used to *validate* data (see the [Schema](#schema) section for schema specification details). In default mode invalid data rows immediately trigger an [exception](#exceptions) in the `table.iter()`/`table.write()` methods.
+### Class `Table`
 
-Suppose this schema-invalid local file `invalid_data.csv`:
-```csv
-key,value
-zero,0
-one,not_an_integer
-two,2
-```
+> `class Table(source, schema=None, strict=False, post_cast=[], storage=None, **options)`
 
-We're going to validate the data against the following schema:
-```python
-table = Table(
-    'invalid_data.csv',
-    schema={'fields': [{'name': 'key'}, {'name': 'value', 'type': 'integer'}]})
-```
+Table representation
 
-Iterating over the data triggers an exception due to the failed cast of `'not_an_integer'` to `int`:
-```python
-for row in table.iter():
-    print(row)
+#### Arguments
 
-# Traceback (most recent call last):
-# ...
-# tableschema.exceptions.CastError: There are 1 cast errors (see exception.errors) for row "3"
-```
+**`source`** :&ensp;`Union`[`str`, `list`[]]
+:   data source one of:
+    - local file (path)
+    - remote file (url)
+    - array of arrays representing the rows
 
-Hint: The row number count starts with 1 and also includes header lines.
+**`schema`** :&ensp;`any`
+:   data schema in all forms supported by `Schema` class
 
-(Note: You can optionally switch off `iter()`/`read()` value casting using the cast parameter, see reference below.)
+**`strict`** :&ensp;`bool`
+:   strictness option to pass to `Schema` constructor
 
-By providing a custom exception handler (a callable) to those methods you can treat occurring exceptions at your own discretion, i.e. to "fail late" and e.g. gather a validation report on the whole data:
+**`post_cast`** :&ensp;`function`[]
+:   list of post cast processors
 
-```python
-errors = []
-def exc_handler(exc, row_number=None, row_data=None, error_data=None):
-    errors.append((exc, row_number, row_data, error_data))
+**`storage`** :&ensp;`None`
+:   storage name like `sql` or `bigquery`
 
-for row in table.iter(exc_handler=exc_handler):
-    print(row)
+**`options`** :&ensp;`dict`
+:   `tabulator` or storage's options
 
-# ['zero', 0]
-# ['one', FailedCast('not_an_integer')]
-# ['two', 2]
+#### Raises
 
-print(errors)
+`exceptions.TableSchemaException`: `raises` `any` `error` `that` `occurs` `in` `table` `creation` `process`
+:   &nbsp;
 
-# [(CastError('There are 1 cast errors (see exception.errors) for row "3"',),
-#   3,
-#   OrderedDict([('key', 'one'), ('value', 'not_an_integer')]),
-#   OrderedDict([('value', 'not_an_integer')]))]
-```
 
-Note that
+#### Instance variables
 
-- Data rows are yielded even though the data is schema-invalid; this is due to our custom expression handler choosing not to raise exceptions (but rather collect them in the errors list).
-- Data field values that can't get casted properly (if `iter()`/`read()` cast parameter is set to True, which is the default) are wrapped into a `FailedCast` "value holder". This allows for distinguishing uncasted values from successfully casted values on the data consumer side. `FailedCast` instances can only get yielded when custom exception handling is in place.
-- The custom exception handler callable must support a function signature as specified in the `iter()`/`read()` sections of the `Table` class API reference.
 
-So far for a basic introduction to the `Table` class. To learn more let's take a look at the `Table` class API reference.
+##### Variable `hash`
 
-#### `Table(source, schema=None, strict=False, post_cast=[], storage=None, **options)`
+<https://github.com/frictionlessdata/tableschema-py#table>
 
-Constructor to instantiate `Table` class. If `references` argument is provided, foreign keys will be checked on any reading operation.
 
-- `source (str/list[])` - data source (one of):
-  - local file (path)
-  - remote file (url)
-  - array of arrays representing the rows
-- `schema (any)` - data schema in all forms supported by `Schema` class
-- `strict (bool)` - strictness option to pass to `Schema` constructor
-- `post_cast (function[])` - list of post cast processors
-- `storage (None/str)` - storage name like `sql` or `bigquery`
-- `options (dict)` - `tabulator` or storage options
-- `(exceptions.TableSchemaException)` - raises any error that occurs in table creation process
-- `(Table)` - returns data table class instance
-
-#### `table.headers`
-
-- `(str[])` - returns data source headers
-
-#### `table.schema`
-
-- `(Schema)` - returns schema class instance
-
-#### `table.size`
+##### Variable `headers`
 
-- `(int/None)` - returns the table's size in BYTES if it's already read using e.g. `table.read`, otherwise returns `None`. In the middle of an iteration it returns size of already read contents
+<https://github.com/frictionlessdata/tableschema-py#table>
 
-#### `table.hash`
 
-- `(str/None)` - returns the table's SHA256 hash if it's already read using e.g. `table.read`, otherwise returns `None`. In the middle of an iteration it returns hash of already read contents
+##### Variable `schema`
 
-#### `table.iter(keyed=Fase, extended=False, cast=True, integrity=False, relations=False, foreign_keys_values=False, exc_handler=None)`
+<https://github.com/frictionlessdata/tableschema-py#table>
 
-Iterates through the table data and emits rows cast based on table schema. Data casting can be disabled.
 
-- `keyed (bool)` - iterate keyed rows
-- `extended (bool)` - iterate extended rows
-- `cast (bool)` - disable data casting if false
-- `integrity` (dict) - dictionary in a form of `{'size': <bytes>, 'hash': '<sha256>'}` to check integrity of the table when it's read completely. Both keys are optional.
-- `relations (dict)` - dictionary of foreign key references in a form of `{resource1: [{field1: value1, field2: value2}, ...], ...}`. If provided, foreign key fields will checked and resolved to one of their references (/!\ one-to-many fk are not completely resolved).
-- `foreign_keys_values (dict)` - three-level dictionary of foreign key references optimized to speed up validation process in a form of `{resource1: { (foreign_key_field1, foreign_key_field2) : { (value1, value2) : {one_keyedrow}, ... }}}`. If not provided but relations is true, it will be created before the validation process by *index_foreign_keys_values* method
-- `exc_handler ()` - optional custom exception handler callable. Can be used to defer raising errors (i.e. "fail late"), e.g. for data validation purposes. Must support the following call signature:
+##### Variable `size`
 
-    ```python
-    def exc_handler(exc, row_number=None, row_data=None, error_data=None):
-        """Custom exception handler (example).
+<https://github.com/frictionlessdata/tableschema-py#table>
 
-        Parameters
-        ----------
-        exc : Exception
-            Deferred exception instance
-        row_number : int
-            Data row number that triggers exception exc
-        row_data : OrderedDict
-            Invalid data row source data
-        error_data : OrderedDict
-            Data row source data field subset responsible for the error, if
-            applicable (e.g. invalid primary or foreign key fields). May be
-            identical to row_data.
-        """
-        # ...
-    ```
 
-Raises:
+#### Methods
 
-- `(exceptions.TableSchemaException)` - base class of any error that occurs during this process. Specializations:
-  - `(exceptions.CastError)` - data cast error
-  - `(exceptions.IntegrityError)` - integrity checking error
-  - `(exceptions.UniqueKeyError)` - unique key constraint violation
-  - `(exceptions.UnresolvedFKError)` - unresolved foreign key reference error
 
-Yields:
+##### Method `index_foreign_keys_values`
 
-- `(any[]/any{})` - yields rows:
-  - `[value1, value2]` - base
-  - `{header1: value1, header2: value2}` - keyed
-  - `[rowNumber, [header1, header2], [value1, value2]]` - extended
 
-#### `table.read(keyed=False, extended=False, cast=True, integrity=False, relations=False, limit=None, foreign_keys_values=False, exc_handler=None)`
+> `def index_foreign_keys_values(self, relations)`
 
-Read the whole table and return as array of rows. Count of rows could be limited.
 
-- `keyed (bool)` - flag to emit keyed rows
-- `extended (bool)` - flag to emit extended rows
-- `cast (bool)` - flag to disable data casting if false
-- `integrity` (dict) - dictionary in a form of `{'size': <bytes>, 'hash': '<sha256>'}` to check integrity of the table when it's read completely. Both keys are optional.
-- `relations (dict)` - dict of foreign key references in a form of `{resource1: [{field1: value1, field2: value2}, ...], ...}`. If provided foreign key fields will checked and resolved to its references
-- `limit (int)` - integer limit of rows to return
-- `foreign_keys_values (dict)` - three-level dictionary of foreign key references optimized to speed up validation process in a form of `{resource1: { (foreign_key_field1, foreign_key_field2) : { (value1, value2) : {one_keyedrow}, ... }}}`
-- `exc_handler ()` - optional custom exception handler callable. Can be used to defer raising errors (i.e. "fail late"), e.g. for data validation purposes. Must support the following call signature:
+##### Method `infer`
 
-    ```python
-    def exc_handler(exc, row_number=None, row_data=None, error_data=None):
-        """Custom exception handler (example).
 
-        Parameters
-        ----------
-        exc : Exception
-            Deferred exception instance
-        row_number : int
-            Data row number that triggers exception exc
-        row_data : OrderedDict
-            Invalid data row source data
-        error_data : OrderedDict
-            Data row source data field subset responsible for the error, if
-            applicable (e.g. invalid primary or foreign key fields). May be
-            identical to row_data.
-        """
-        # ...
-    ```
-
-Raises:
+> `def infer(self, limit=100, confidence=0.75)`
 
-- `(exceptions.TableSchemaException)` - base class of any error that occurs during this process. Specializations:
-  - `(exceptions.CastError)` - data cast error
-  - `(exceptions.IntegrityError)` - integrity checking error
-  - `(exceptions.UniqueKeyError)` - unique key constraint violation
-  - `(exceptions.UnresolvedFKError)` - unresolved foreign key reference error
+<https://github.com/frictionlessdata/tableschema-py#table>
 
-Returns:
 
-- `(list[])` - returns array of rows (see `table.iter`)
+##### Method `iter`
 
-#### `table.infer(limit=100, confidence=0.75)`
 
-Infer a schema for the table. It will infer and set Table Schema to `table.schema` based on table data.
-
-- `limit (int)` - limit rows sample size
-- `confidence (float)` - how many casting errors are allowed (as a ratio, between 0 and 1)
-- `(dict)` - returns Table Schema descriptor
+> `def iter(self, keyed=False, extended=False, cast=True, integrity=False, relations=False, foreign_keys_values=False, exc_handler=None)`
 
-#### `table.save(target, storage=None, **options)`
+<https://github.com/frictionlessdata/tableschema-py#table>
 
-> To save schema use `table.schema.save()`
 
-Save data source to file locally in CSV format with `,` (comma) delimiter
+##### Method `read`
 
-- `target (str)` - saving target (e.g. file path)
-- `storage (None/str)` - storage name like `sql` or `bigquery`
-- `options (dict)` - `tabulator` or storage options
-- `(exceptions.TableSchemaException)` - raises an error if there is saving problem
-- `(True/Storage)` - returns true or storage instance
 
-#### `table.index_foreign_keys_values(relations)`
+> `def read(self, keyed=False, extended=False, cast=True, limit=None, integrity=False, relations=False, foreign_keys_values=False, exc_handler=None)`
 
-Creates a three-level dictionary of foreign key references optimized to speed up validation process in a form of `{resource1: { (foreign_key_field1, foreign_key_field2) : { (value1, value2) : {one_keyedrow}, ... }}}`.
-For each foreign key of the schema it will iterate through the corresponding `relations['resource']` to create an index (i.e. a dict) of existing values for the foreign fields and store on keyed row for each value combination.
-The optimization relies on the indexation of possible values for one foreign key in a hashmap to later speed up resolution.
-This method is public to allow creating the index once to apply it on multiple tables charing the same schema (typically [grouped resources in datapackage](https://github.com/frictionlessdata/datapackage-py#group))
-Note 1: the second key of the output is a tuple of the foreign fields, a proxy identifier of the foreign key
-Note 2: the same relation resource can be indexed multiple times as a schema can contain more than one Foreign Keys pointing to the same resource
+<https://github.com/frictionlessdata/tableschema-py#table>
 
-- `relations (dict)` - dict of foreign key references in a form of `{resource1: [{field1: value1, field2: value2}, ...], ...}`. It must contain all resources pointed in the foreign keys schema definition.
-- `({resource1: { (foreign_key_field1, foreign_key_field2) : { (value1, value2) : {one_keyedrow}, ... }}})` - returns a three-level dictionary of foreign key references optimized to speed up validation process
 
-### Schema
+##### Method `save`
 
-A model of a schema with helpful methods for working with the schema and supported data. Schema instances can be initialized with a schema source as a url to a JSON file or a JSON object. The schema is initially validated (see [validate](#validate) below). By default validation errors will be stored in `schema.errors` but in a strict mode it will be instantly raised.
 
-Let's create a blank schema. It's not valid because `descriptor.fields` property is required by the [Table Schema](http://specs.frictionlessdata.io/table-schema/) specification:
+> `def save(self, target, storage=None, **options)`
 
-```python
-schema = Schema()
-schema.valid # false
-schema.errors
-# [<ValidationError: "'fields' is a required property">]
-```
+<https://github.com/frictionlessdata/tableschema-py#table>
 
-To avoid creating a schema descriptor by hand we will use a `schema.infer` method to infer the descriptor from given data:
 
-```python
-schema.infer([
-  ['id', 'age', 'name'],
-  ['1','39','Paul'],
-  ['2','23','Jimmy'],
-  ['3','36','Jane'],
-  ['4','28','Judy'],
-])
-schema.valid # true
-schema.descriptor
-#{ fields:
-#   [ { name: 'id', type: 'integer', format: 'default' },
-#     { name: 'age', type: 'integer', format: 'default' },
-#     { name: 'name', type: 'string', format: 'default' } ],
-#  missingValues: [ '' ] }
-```
 
-Now we have an inferred schema and it's valid. We can cast data rows against our schema. We provide a string input which will be cast correspondingly:
+### Class `Schema`
 
-```python
-schema.cast_row(['5', '66', 'Sam'])
-# [ 5, 66, 'Sam' ]
-```
+> `class Schema(descriptor=, strict=False)`
 
-But if we try provide some missing value to the `age` field, the cast will fail because the only valid "missing" value is an empty string. Let's update our schema:
+<https://github.com/frictionlessdata/tableschema-py#schema>
 
-```python
-schema.cast_row(['6', 'N/A', 'Walt'])
-# Cast error
-schema.descriptor['missingValues'] = ['', 'N/A']
-schema.commit()
-schema.cast_row(['6', 'N/A', 'Walt'])
-# [ 6, None, 'Walt' ]
-```
 
-We can save the schema to a local file, and resume work on it at any time by loading it from that file:
+#### Instance variables
 
-```python
-schema.save('schema.json')
-schema = Schema('schema.json')
-```
 
-This was a basic introduction to the `Schema` class. To learn more, let's take a look at the `Schema` API reference.
+##### Variable `descriptor`
 
-#### `Schema(descriptor, strict=False)`
+<https://github.com/frictionlessdata/tableschema-py#schema>
 
-Constructor to instantiate `Schema` class.
 
-- `descriptor (str/dict)` - schema descriptor:
-  -  local path
-  -  remote url
-  -  dictionary
-- `strict (bool)` - flag to specify validation behaviour:
-  - if false, errors will not be raised but instead collected in `schema.errors`
-  - if true, validation errors are raised immediately
-- `(exceptions.TableSchemaException)` - raise any error that occurs during the process
-- `(Schema)` - returns schema class instance
+##### Variable `errors`
 
-#### `schema.valid`
+<https://github.com/frictionlessdata/tableschema-py#schema>
 
-- `(bool)` - returns validation status. Always true in strict mode.
 
-#### `schema.errors`
+##### Variable `field_names`
 
-- `(Exception[])` - returns validation errors. Always empty in strict mode.
+<https://github.com/frictionlessdata/tableschema-py#schema>
 
-#### `schema.descriptor`
 
-- `(dict)` - returns schema descriptor
+##### Variable `fields`
 
-#### `schema.primary_key`
+<https://github.com/frictionlessdata/tableschema-py#schema>
 
-- `(str[])` - returns schema primary key
 
-#### `schema.foreign_keys`
+##### Variable `foreign_keys`
 
-- `(dict[])` - returns schema foreign keys
+<https://github.com/frictionlessdata/tableschema-py#schema>
 
-#### `schema.fields`
 
-- `(Field[])` - returns an array of `Field` instances
+##### Variable `headers`
 
-#### `schema.field_names`
+<https://github.com/frictionlessdata/tableschema-py#schema>
 
-- `(str[])` - returns an array of field names.
 
-#### `schema.get_field(name)`
+##### Variable `primary_key`
 
-Get schema field by name.
+<https://github.com/frictionlessdata/tableschema-py#schema>
 
-Note: use `update_field` if you want to modify the field descriptor
 
-- `name (str)` - schema field name
-- `(Field/None)` - returns `Field` instance or `None` if not found
+##### Variable `valid`
 
-#### `schema.add_field(descriptor)`
+<https://github.com/frictionlessdata/tableschema-py#schema>
 
-Add new field to schema. The schema descriptor will be validated with newly added field descriptor.
 
-- `descriptor (dict)` - field descriptor
-- `(exceptions.TableSchemaException)` - raises any error that occurs during the process
-- `(Field/None)` - returns added `Field` instance or `None` if not added
+#### Methods
 
-#### `schema.update_field(name, update)`
 
-Update existing descriptor field by name
+##### Method `add_field`
 
-- `name (str)` - schema field name
-- `update (dict)` - update to apply to field's descriptor
-- `(bool)` - returns true on success and false if no field is found to be modified
 
-cf [`schema.commit()`](#schemacommitstrictnone) example
+> `def add_field(self, descriptor)`
 
-#### `schema.remove_field(name)`
+<https://github.com/frictionlessdata/tableschema-py#schema>
 
-Remove field resource by name. The schema descriptor will be validated after field descriptor removal.
 
-- `name (str)` - schema field name
-- `(exceptions.TableSchemaException)` - raises any error that occurs during the process
-- `(Field/None)` - returns removed `Field` instances or `None` if not found
+##### Method `cast_row`
 
-#### `schema.cast_row(row)`
 
-Cast row based on field types and formats.
+> `def cast_row(self, row, fail_fast=False, row_number=None, exc_handler=None)`
 
-- `row (any[])` - data row as an array of values
-- `(any[])` - returns cast data row
+<https://github.com/frictionlessdata/tableschema-py#schema>
 
-#### `schema.infer(rows, headers=1, confidence=0.75, guesser_cls=None, resolver_cls=None)`
 
-Infer and set `schema.descriptor` based on data sample.
+##### Method `commit`
 
-- `rows (list[])` - array of arrays representing rows.
-- `headers (int/str[])` - data sample headers (one of):
-  - row number containing headers (`rows` should contain headers rows)
-  - array of headers (`rows` should NOT contain headers rows)
-- `confidence (float)` - how many casting errors are allowed (as a ratio, between 0 and 1)
-- `guesser_cls` & `resolver_cls` - you can implement inferring strategies by providing type-guessing and type-resolving classes [experimental]
-- `{dict}` - returns Table Schema descriptor
 
-#### `schema.commit(strict=None)`
+> `def commit(self, strict=None)`
 
-Update schema instance if there are in-place changes in the descriptor.
+<https://github.com/frictionlessdata/tableschema-py#schema>
 
-- `strict (bool)` - alter `strict` mode for further work
-- `(exceptions.TableSchemaException)` - raises any error that occurs during the process
-- `(bool)` - returns true on success and false if not modified
 
-```python
-from tableschema import Schema
-descriptor = {'fields': [{'name': 'my_field', 'title': 'My Field', 'type': 'string'}]}
-schema = Schema(descriptor)
-print(schema.get_field('my_field').descriptor['type']) # string
+##### Method `get_field`
 
-# Update descriptor by field position
-schema.descriptor['fields'][0]['type'] = 'number'
-# Update descriptor by field name
-schema.update_field('my_field', {'title': 'My Pretty Field'}) # True
 
-# Change are not committed
-print(schema.get_field('my_field').descriptor['type']) # string
-print(schema.get_field('my_field').descriptor['title']) # My Field
+> `def get_field(self, name)`
 
+<https://github.com/frictionlessdata/tableschema-py#schema>
 
-# Commit change
-schema.commit()
-print(schema.get_field('my_field').descriptor['type']) # number
-print(schema.get_field('my_field').descriptor['title']) # My Pretty Field
 
-```
+##### Method `has_field`
 
-#### `schema.save(target)`
 
-Save schema descriptor to target destination.
+> `def has_field(self, name)`
 
-- `target (str)` - path where to save a descriptor
-- `(exceptions.TableSchemaException)` - raises any error that occurs during the process
-- `(bool)` - returns true on success
+<https://github.com/frictionlessdata/tableschema-py#schema>
 
-#### FailedCast
-`FailedCast` wraps an original data field value that failed to be properly casted to the target data type as denoted by the given schema. FailedCast allows for further processing/yielding values but still be able to distinguish uncasted values on the consuming side.
 
-`FailedCast` objects can only get yielded if custom error handling is in place so that exceptions are deferred, see the `Table` class `iter()`/`read()`
-documentation.
+##### Method `infer`
 
-##### `FailedCast(value)`
-Constructor for the `FailedCast` class.
 
-- `value (any)` - data field value
+> `def infer(self, rows, headers=1, confidence=0.75, guesser_cls=None, resolver_cls=None)`
 
-`FailedCast` delegates attribute access and the basic rich comparison methods
-to the underlying object. Supports default user-defined classes hashability i.e.  is hashable based on object identity (not based on the wrapped value).
+<https://github.com/frictionlessdata/tableschema-py#schema>
 
-##### `failed_cast.value`
 
-- `(any)` - original data value
+##### Method `remove_field`
 
 
-### Field
+> `def remove_field(self, name)`
 
-```python
-from tableschema import Field
+<https://github.com/frictionlessdata/tableschema-py#schema>
 
-# Init field
-field = Field({'name': 'name', 'type': 'number'})
 
-# Cast a value
-field.cast_value('12345') # -> 12345
-```
+##### Method `save`
 
-Data values can be cast to native Python objects with a Field instance. Type instances can be initialized with [field descriptors](https://specs.frictionlessdata.io/table-schema/). This allows formats and constraints to be defined.
 
-Casting a value will check the value is of the expected type, is in the correct format, and complies with any constraints imposed by a schema. E.g. a date value (in ISO 8601 format) can be cast with a DateType instance. Values that can't be cast will raise an `InvalidCastError` exception.
+> `def save(self, target, ensure_ascii=True)`
 
-Casting a value that doesn't meet the constraints will raise a `ConstraintError` exception.
+<https://github.com/frictionlessdata/tableschema-py#schema>
 
-Here is an API reference for the `Field` class:
 
-#### `new Field(descriptor, missingValues=[''])`
+##### Method `update_field`
 
-Constructor to instantiate `Field` class.
 
-- `descriptor (dict)` - schema field descriptor
-- `missingValues (str[])` - an array with string representing missing values
-- `(exceptions.TableSchemaException)` - raises any error that occurs during the process
-- `(Field)` - returns field class instance
+> `def update_field(self, name, update)`
 
-#### `field.schema`
+<https://github.com/frictionlessdata/tableschema-py#schema>
 
-- `(Schema)` - returns a schema instance if the field belongs to some schema
 
-#### `field.name`
 
-- `(str)` - returns field name
+### Class `Field`
 
-#### `field.type`
+> `class Field(descriptor, missing_values=[''], schema=None)`
 
-- `(str)` - returns field type
+Table Schema field representation.
 
-#### `field.format`
 
-- `(str)` - returns field format
+<https://github.com/frictionlessdata/tableschema-py#field>
 
-#### `field.required`
 
-- `(bool)` - returns true if field is required
+#### Instance variables
 
-#### `field.constraints`
 
-- `(dict)` - returns an object with field constraints
+##### Variable `constraints`
 
-#### `field.descriptor`
+<https://github.com/frictionlessdata/tableschema-py#field>
 
-- `(dict)` - returns field descriptor
 
-#### `field.castValue(value, constraints=true)`
+##### Variable `descriptor`
 
-Cast given value according to the field type and format.
+<https://github.com/frictionlessdata/tableschema-py#field>
 
-- `value (any)` - value to cast against field
-- `constraints (boll/str[])` - gets constraints configuration
-  - it could be set to true to disable constraint checks
-  - it could be an Array of constraints to check e.g. ['minimum', 'maximum']
-- `(exceptions.TableSchemaException)` - raises any error that occurs during the process
-- `(any)` - returns cast value
 
-#### `field.testValue(value, constraints=true)`
+##### Variable `format`
 
-Test if value is compliant to the field.
+<https://github.com/frictionlessdata/tableschema-py#field>
 
-- `value (any)` - value to cast against field
-- `constraints (bool/str[])` - constraints configuration
-- `(bool)` - returns if value is compliant to the field
 
-### validate
+##### Variable `name`
 
-Given a schema as JSON file, url to JSON file, or a Python dict, `validate` returns true for a valid Table Schema, or raises an exception, `exceptions.ValidationError`. It validates only **schema**, not data against schema!
+<https://github.com/frictionlessdata/tableschema-py#field>
 
-```python
-from tableschema import validate, exceptions
 
-try:
-    valid = validate(descriptor)
-except exceptions.ValidationError as exception:
-   for error in exception.errors:
-       # handle individual error
-```
+##### Variable `required`
 
-#### `validate(descriptor)`
+<https://github.com/frictionlessdata/tableschema-py#field>
 
-Validate a Table Schema descriptor.
 
-- `descriptor (str/dict)` - schema descriptor (one of):
-  - local path
-  - remote url
-  - object
-- (exceptions.ValidationError) - raises on invalid
-- `(bool)` - returns true on valid
+##### Variable `schema`
 
-### infer
+<https://github.com/frictionlessdata/tableschema-py#field>
 
-Given headers and data, `infer` will return a Table Schema as a Python dict based on the data values. Given the data file, `data_to_infer.csv`:
 
-```
-id,age,name
-1,39,Paul
-2,23,Jimmy
-3,36,Jane
-4,28,Judy
-```
+##### Variable `type`
 
-Let's call `infer` for this file:
+<https://github.com/frictionlessdata/tableschema-py#field>
 
-```python
-from tableschema import infer
 
-descriptor = infer('data_to_infer.csv')
-#{'fields': [
-#    {
-#        'format': 'default',
-#        'name': 'id',
-#        'type': 'integer'
-#    },
-#    {
-#        'format': 'default',
-#        'name': 'age',
-#        'type': 'integer'
-#    },
-#    {
-#        'format': 'default',
-#        'name': 'name',
-#        'type': 'string'
-#    }]
-#}
-```
+#### Methods
 
-The number of rows used by `infer` can be limited with the `limit` argument.
 
-#### `infer(source, headers=1, limit=100, confidence=0.75, **options)`
+##### Method `cast_value`
 
-Infer source schema.
 
-- `source (any)` - source as path, url or inline data
-- `headers (int/str[])` - headers rows number or headers list
-- `confidence (float)` - how many casting errors are allowed (as a ratio, between 0 and 1)
-- `(exceptions.TableSchemaException)` - raises any error that occurs during the process
-- `(dict)` - returns schema descriptor
+> `def cast_value(self, value, constraints=True, preserve_missing_values=False)`
 
-### Exceptions
+<https://github.com/frictionlessdata/tableschema-py#field>
 
-#### `exceptions.TableSchemaException`
 
-Base class for all library exceptions. If there are multiple errors, they can be read from the exception object:
+##### Method `test_value`
 
-```python
 
-try:
-    # lib action
-except exceptions.TableSchemaException as exception:
-    if exception.multiple:
-        for error in exception.errors:
-            # handle error
-```
+> `def test_value(self, value, constraints=True)`
 
-#### `exceptions.LoadError`
+<https://github.com/frictionlessdata/tableschema-py#field>
 
-All loading errors.
 
-#### `exceptions.ValidationError`
 
-All validation errors.
+### Class `Storage`
 
-#### `exceptions.CastError`
+> `class Storage(**options)`
 
-All value cast errors.
+<https://github.com/frictionlessdata/tableschema-py#storage>
 
-#### `exceptions.UniqueKeyError`
 
-Unique key constraint violation (CastError subclass).
+#### Instance variables
 
-#### `exceptions.IntegrityError`
 
-All integrity errors.
+##### Variable `buckets`
 
-#### `exceptions.RelationError`
+<https://github.com/frictionlessdata/tableschema-py#storage>
 
-All relations errors.
 
-#### `exceptions.UnresolvedFKError`
+#### Static methods
 
-Unresolved foreign key reference error (RelationError subclass).
 
-#### `exceptions.StorageError`
+##### `Method connect`
 
-All storage errors.
 
-### Storage
+> `def connect(name, **options)`
 
-The library includes interface declaration to implement tabular `Storage`. This interface allow to use different data storage systems like SQL with `tableschema.Table` class (load/save) as well as on the data package level:
+<https://github.com/frictionlessdata/tableschema-py#storage>
 
-![Storage](https://raw.githubusercontent.com/frictionlessdata/tableschema-py/master/data/storage.png)
 
-For instantiation of concrete storage instances, `tableschema.Storage` provides a unified factory method `connect` (which uses the plugin system under the hood):
+#### Methods
 
-```python
-# pip install tableschema_sql
-from tableschema import Storage
 
-storage = Storage.connect('sql', **options)
-storage.create('bucket', descriptor)
-storage.write('bucket', rows)
-storage.read('bucket')
-```
+##### Method `create`
 
-#### `Storage.connect(name, **options)`
 
-Create tabular `storage` based on storage name.
+> `def create(self, bucket, descriptor, force=False)`
 
-- `name (str)` - storage name like `sql`
-- `options (dict)` - concrete storage options
-- `(exceptions.StorageError)` - raises on any error
-- `(Storage)` - returns `Storage` instance
+<https://github.com/frictionlessdata/tableschema-py#storage>
 
----
 
+##### Method `delete`
 
-An implementor should follow `tableschema.Storage` interface to write his own storage backend. Concrete storage backends could include additional functionality specific to conrete storage system. See `plugins` below to know how to integrate custom storage plugin into your workflow.
 
-#### `<<Interface>>Storage(**options)`
+> `def delete(self, bucket=None, ignore=False)`
 
-Create tabular `storage`. Implementations should fully implement this interface to be compatible with the `Storage` API.
+<https://github.com/frictionlessdata/tableschema-py#storage>
 
-- `options (dict)` - concrete storage options
-- `(exceptions.StorageError)` - raises on any error
-- `(Storage)` - returns `Storage` instance
 
-#### `storage.buckets`
+##### Method `describe`
 
-Return list of storage bucket names. A `bucket` is a special term which has almost the same meaning as `table`. You should consider `bucket` as a `table` stored in the `storage`.
 
-- `(exceptions.StorageError)` - raises on any error
-- `str[]` - return list of bucket names
+> `def describe(self, bucket, descriptor=None)`
 
-#### `create(bucket, descriptor, force=False)`
+<https://github.com/frictionlessdata/tableschema-py#storage>
 
-Create one/multiple buckets.
 
-- `bucket (str/list)` - bucket name or list of bucket names
-- `descriptor (dict/dict[])` - schema descriptor or list of descriptors
-- `force (bool)` - whether to delete and re-create already existing buckets
-- `(exceptions.StorageError)` - raises on any error
+##### Method `iter`
 
-#### `delete(bucket=None, ignore=False)`
 
-Delete one/multiple/all buckets.
+> `def iter(self, bucket)`
 
-- `bucket (str/list/None)` - bucket name or list of bucket names to delete. If `None`, all buckets will be deleted
-- `descriptor (dict/dict[])` - schema descriptor or list of descriptors
-- `ignore (bool)` - don't raise an error on non-existent bucket deletion from storage
-- `(exceptions.StorageError)` - raises on any error
+<https://github.com/frictionlessdata/tableschema-py#storage>
 
-#### `describe(bucket, descriptor=None)`
 
-Get/set bucket's Table Schema descriptor.
+##### Method `read`
 
-- `bucket (str)` - bucket name
-- `descriptor (dict/None)` - schema descriptor to set
-- `(exceptions.StorageError)` - raises on any error
-- `(dict)` - returns Table Schema descriptor
 
-#### `iter(bucket)`
+> `def read(self, bucket)`
 
-This method should return an iterator of typed values based on the schema of this bucket.
+<https://github.com/frictionlessdata/tableschema-py#storage>
 
-- `bucket (str)` - bucket name
-- `(exceptions.StorageError)` - raises on any error
-- `(list[])` - yields data rows
 
-#### `read(bucket)`
+##### Method `write`
 
-This method should read typed values based on the schema of this bucket.
 
-- `bucket (str)` - bucket name
-- `(exceptions.StorageError)` - raises on any error
-- `(list[])` - returns data rows
+> `def write(self, bucket, rows)`
 
-#### `write(bucket, rows)`
+<https://github.com/frictionlessdata/tableschema-py#storage>
 
-This method writes data rows into `storage`. It should store values of unsupported types as strings internally (like csv does).
 
-- `bucket (str)` - bucket name
-- `rows (list[])` - data rows to write
-- `(exceptions.StorageError)` - raises on any error
 
-### Plugins
+### Function `validate`
 
-Table Schema has a plugin system.  Any package with the name like `tableschema_<name>` can be imported as:
 
-```python
-from tableschema.plugins import <name>
-```
+> `def validate(descriptor)`
 
-If a plugin is not installed, an `ImportError` will be raised with a message describing how to install the plugin.
+<https://github.com/frictionlessdata/tableschema-py#schema>
 
-#### Official plugins
 
-- [BigQuery Storage](https://github.com/frictionlessdata/tableschema-bigquery-py)
-- [Elasticsearch Storage](https://github.com/frictionlessdata/tableschema-elasticsearch-py)
-- [Pandas Storage](https://github.com/frictionlessdata/tableschema-pandas-py)
-- [SQL Storage](https://github.com/frictionlessdata/tableschema-sql-py)
-- [SPSS Storage](https://github.com/frictionlessdata/tableschema-spss-py)
 
-### CLI
+### Function `infer`
 
-> It's a provisional API excluded from SemVer. If you use it as a part of another program please pin `tableschema`  to a concrete version in your requirements file.
 
-Table Schema features a CLI called `tableschema`. This CLI exposes the `infer` and `validate` functions for command line use.
+> `def infer(source, headers=1, limit=100, confidence=0.75, **options)`
 
-Example of `validate` usage:
+<https://github.com/frictionlessdata/tableschema-py#schema>
 
-```
-$ tableschema validate path/to-schema.json
-```
 
-Example of `infer` usage:
 
-```
-$ tableschema infer path/to/data.csv
-```
+### Class `FailedCast`
 
-The response is a schema as JSON. The optional argument `--encoding` allows a character encoding to be specified for the data file. The default is utf-8.
+> `class FailedCast(value)`
+
+Wrap an original data field value that failed to be properly casted.
+
+FailedCast allows for further processing/yielding values but still be able
+to distinguish uncasted values on the consuming side.
+
+Delegates attribute access and the basic rich comparison methods to the
+underlying object. Supports default user-defined classes hashability i.e.
+is hashable based on object identity (not based on the wrapped value).
+
+
+#### Instance variables
+
+
+##### Variable `value`
+
+
+
+### Class `TableSchemaException`
+
+> `class TableSchemaException(message, errors=[])`
+
+Common base class for all non-exit exceptions.
+
+
+
+### Class `LoadError`
+
+> `class LoadError(message, errors=[])`
+
+Common base class for all non-exit exceptions.
+
+
+
+### Class `ValidationError`
+
+> `class ValidationError(message, errors=[])`
+
+Common base class for all non-exit exceptions.
+
+
+
+### Class `CastError`
+
+> `class CastError(message, errors=[])`
+
+Common base class for all non-exit exceptions.
+
+
+
+### Class `IntegrityError`
+
+> `class IntegrityError(message, errors=[])`
+
+Common base class for all non-exit exceptions.
+
+
+
+### Class `UniqueKeyError`
+
+> `class UniqueKeyError(message, errors=[])`
+
+Common base class for all non-exit exceptions.
+
+
+
+### Class `RelationError`
+
+> `class RelationError(message, errors=[])`
+
+Common base class for all non-exit exceptions.
+
+
+
+### Class `UnresolvedFKError`
+
+> `class UnresolvedFKError(message, errors=[])`
+
+Common base class for all non-exit exceptions.
+
+
+
+### Class `StorageError`
+
+> `class StorageError(message, errors=[])`
+
+Common base class for all non-exit exceptions.
 
 ## Contributing
 
@@ -1040,3 +613,4 @@ Here described only breaking and the most important changes. The full changelog 
 #### v1.0
 
 - The library has been rebased on the Frictionless Data specs v1 - https://frictionlessdata.io/specs/table-schema/
+
