@@ -1,12 +1,12 @@
 # tableschema-py
 
-> Read this README with navigation and search on [frictionlessdata.io](https://frictionlessdata.io)
-
 [![Travis](https://travis-ci.org/frictionlessdata/tableschema-py.svg?branch=master)](https://travis-ci.org/frictionlessdata/tableschema-py)
 [![Coveralls](http://img.shields.io/coveralls/frictionlessdata/tableschema-py.svg?branch=master)](https://coveralls.io/r/frictionlessdata/tableschema-py?branch=master)
 [![PyPi](https://img.shields.io/pypi/v/tableschema.svg)](https://pypi.python.org/pypi/tableschema)
 [![Github](https://img.shields.io/badge/github-master-brightgreen)](https://github.com/frictionlessdata/tableschema-py)
 [![Gitter](https://img.shields.io/gitter/room/frictionlessdata/chat.svg)](https://gitter.im/frictionlessdata/chat)
+
+> Read this README with navigation and search on [frictionlessdata.io](https://frictionlessdata.io)
 
 A library for working with [Table Schema](http://specs.frictionlessdata.io/table-schema/) in Python.
 
@@ -45,7 +45,7 @@ Table representation
 
 #### Arguments
 
-**`source`** :&ensp;`Union`[`str`, `list`[]]:   
+**`source`** :&ensp;`Union`[`str`, `list`[]]:
 
 data source one of:
     - local file (path)
