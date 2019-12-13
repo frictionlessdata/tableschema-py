@@ -6,9 +6,9 @@
 [![Github](https://img.shields.io/badge/github-master-brightgreen)](https://github.com/frictionlessdata/tableschema-py)
 [![Gitter](https://img.shields.io/gitter/room/frictionlessdata/chat.svg)](https://gitter.im/frictionlessdata/chat)
 
-> Read this README with navigation and search on [frictionlessdata.io](https://frictionlessdata.io)
-
 A library for working with [Table Schema](http://specs.frictionlessdata.io/table-schema/) in Python.
+
+> Read this README with navigation and search on [frictionlessdata.io](https://frictionlessdata.io)
 
 ## Features
 
