@@ -22,6 +22,9 @@ readme:
 	md_toc -p README.md github --header-levels 3
 	sed -i '/(#$(PACKAGE)-py)/,+2d' README.md
 
+readme2:
+	python scripts/readme.py
+
 release:
 	git checkout master && git pull origin && git fetch -p && git diff
 	@echo "\nContinuing in 10 seconds. Press <CTRL+C> to abort\n" && sleep 10

@@ -22,7 +22,22 @@ class Table(object):
 
     def __init__(self, source, schema=None, strict=False,
                  post_cast=[], storage=None, **options):
-        """https://github.com/frictionlessdata/tableschema-py#table
+        """Table representation
+
+        Arguments:
+          source (Union[str, list[]]): data source one of:
+            - local file (path)
+            - remote file (url)
+            - array of arrays representing the rows
+          schema (any): data schema in all forms supported by `Schema` class
+          strict (bool): strictness option to pass to `Schema` constructor
+          post_cast (function[]): list of post cast processors
+          storage (None): storage name like `sql` or `bigquery`
+          options (dict): `tabulator` or storage's options
+
+        Raises:
+          exceptions.TableSchemaException: raises any error that occurs in table creation process
+
         """
 
         # Set attributes

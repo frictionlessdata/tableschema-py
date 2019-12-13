@@ -7,15 +7,26 @@ from __future__ import unicode_literals
 
 # Module API
 
-from .schema import Schema
-from .schema import FailedCast
-from .field import Field
 from .table import Table
+from .schema import Schema
+from .field import Field
 from .storage import Storage
 from .validate import validate
 from .infer import infer
-from . import exceptions
+from .schema import FailedCast
+from .exceptions import TableSchemaException
+from .exceptions import LoadError
+from .exceptions import ValidationError
+from .exceptions import CastError
+from .exceptions import IntegrityError
+from .exceptions import UniqueKeyError
+from .exceptions import RelationError
+from .exceptions import UnresolvedFKError
+from .exceptions import StorageError
 
+# Deprecated
+
+from . import exceptions
 
 # Version
 
