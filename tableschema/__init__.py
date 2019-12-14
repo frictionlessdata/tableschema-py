@@ -7,6 +7,8 @@ from __future__ import unicode_literals
 
 # Module API
 
+# TODO: uncomment
+#  from .cli import cli
 from .table import Table
 from .schema import Schema
 from .field import Field

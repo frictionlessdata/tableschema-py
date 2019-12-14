@@ -20,7 +20,8 @@ class Table(object):
     """Table representation
 
     # Arguments
-      source (Union[str, list[]]): data source one of:
+
+      source (str/list[]): data source one of:
         - local file (path)
         - remote file (url)
         - array of arrays representing the rows
@@ -31,6 +32,7 @@ class Table(object):
       options (dict): `tabulator` or storage's options
 
     # Raises
+
       exceptions.TableSchemaException:
         raises any error that occurs in table creation process
 
@@ -72,26 +74,32 @@ class Table(object):
 
     @property
     def headers(self):
-        """Some docstring
+        """str[]: data source headers
         """
         return self.__headers
 
     @property
     def schema(self):
-        """https://github.com/frictionlessdata/tableschema-py#table
+        """Schema: returns schema class instance
         """
         return self.__schema
 
     @property
     def size(self):
-        """https://github.com/frictionlessdata/tableschema-py#table
+        """int/None: returns the table's size in BYTES
+
+        If it's already read using e.g. `table.read`, otherwise returns `None`.
+        In the middle of an iteration it returns size of already read contents
         """
         if self.__stream:
             return self.__stream.size
 
     @property
     def hash(self):
-        """https://github.com/frictionlessdata/tableschema-py#table
+        """str/None: returns the table's SHA256 hash
+
+        If it's already read using e.g. `table.read`, otherwise returns `None`.
+        In the middle of an iteration it returns hash of already read contents
         """
         if self.__stream:
             return self.__stream.hash
@@ -99,32 +107,49 @@ class Table(object):
     def iter(self, keyed=False, extended=False, cast=True,
              integrity=False, relations=False,
              foreign_keys_values=False, exc_handler=None):
-        """ Iterates through the table data and emits rows cast based on table schema. Data casting can be disabled.
+        """Iterates through the table data and emits rows cast based on table schema.
 
         # Arguments
 
-        - `keyed (bool)` - iterate keyed rows
-        - `extended (bool)` - iterate extended rows
-        - `cast (bool)` - disable data casting if false
-        - `integrity` (dict) - dictionary in a form of `{'size': <bytes>, 'hash': '<sha256>'}` to check integrity of the table when it's read completely. Both keys are optional.
-        - `relations (dict)` - dictionary of foreign key references in a form of `{resource1: [{field1: value1, field2: value2}, ...], ...}`. If provided, foreign key fields will checked and resolved to one of their references (/!\ one-to-many fk are not completely resolved).
-        - `foreign_keys_values (dict)` - three-level dictionary of foreign key references optimized to speed up validation process in a form of `{resource1: { (foreign_key_field1, foreign_key_field2) : { (value1, value2) : {one_keyedrow}, ... }}}`. If not provided but relations is true, it will be created before the validation process by *index_foreign_keys_values* method
-        - `exc_handler ()` - optional custom exception handler callable. Can be used to defer raising errors (i.e. "fail late"), e.g. for data validation purposes. Must support the following call signature:
+          keyed (bool): iterate keyed rows
+          extended (bool): iterate extended rows
+          cast (bool): disable data casting if false
+
+          integrity` (dict) - dictionary in a form of
+            `{'size': <bytes>, 'hash': '<sha256>'}` to check integrity of the table
+            when it's read completely. Both keys are optional.
+
+          relations (dict): dictionary of foreign key references in a form of
+            `{resource1: [{field1: value1, field2: value2}, ...], ...}`.
+            If provided, foreign key fields will checked and resolved to one of
+            their references (/!\ one-to-many fk are not completely resolved).
+
+          foreign_keys_values (dict):
+            three-level dictionary of foreign key references optimized to speed up
+            validation process in a form of
+            `{resource1: { (foreign_key_field1, foreign_key_field2) : { (value1, value2) : {one_keyedrow}, ... }}}`.
+            If not provided but relations is true, it will be created before
+            the validation process by *index_foreign_keys_values* method
+
+          exc_handler ():
+            optional custom exception handler callable.
+            Can be used to defer raising errors (i.e. "fail late"), e.g.
+            for data validation purposes. Must support the following call signature:
 
         # Raises
 
-        - `(exceptions.TableSchemaException)` - base class of any error that occurs during this process. Specializations:
-          - `(exceptions.CastError)` - data cast error
-          - `(exceptions.IntegrityError)` - integrity checking error
-          - `(exceptions.UniqueKeyError)` - unique key constraint violation
-          - `(exceptions.UnresolvedFKError)` - unresolved foreign key reference error
+          exceptions.TableSchemaException: base class of any error
+          exceptions.CastError: data cast error
+          exceptions.IntegrityError: integrity checking error
+          exceptions.UniqueKeyError: unique key constraint violation
+          exceptions.UnresolvedFKError: unresolved foreign key reference error
 
-        # Yields
+        # Returns
 
-        - `(any[]/any{})` - yields rows:
-          - `[value1, value2]` - base
-          - `{header1: value1, header2: value2}` - keyed
-          - `[rowNumber, [header1, header2], [value1, value2]]` - extended
+         any[]/any{}: yields rows of of:
+           - `[value1, value2]` - base
+           - `{header1: value1, header2: value2}` - keyed
+           - `[rowNumber, [header1, header2], [value1, value2]]` - extended
         """
         # TODO: Use helpers.default_exc_handler instead. Prerequisite: Use
         # stream context manager to make sure the stream gets properly closed
