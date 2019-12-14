@@ -338,7 +338,19 @@ class Table(object):
         return result
 
     def infer(self, limit=100, confidence=0.75):
-        """https://github.com/frictionlessdata/tableschema-py#table
+        """Infer a schema for the table.
+
+        It will infer and set Table Schema to `table.schema` based on table data.
+
+        # Arguments
+          limit (int): limit rows sample size
+          confidence (float):
+            how many casting errors are allowed
+            (as a ratio, between 0 and 1)
+
+        # Returns
+          dict: Table Schema descriptor
+
         """
         if self.__schema is None or self.__headers is None:
 

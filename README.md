@@ -154,7 +154,20 @@ https://github.com/frictionlessdata/tableschema-py#table
 ```python
 table.infer(self, limit=100, confidence=0.75)
 ```
-https://github.com/frictionlessdata/tableschema-py#table
+Infer a schema for the table.
+
+It will infer and set Table Schema to `table.schema` based on table data.
+
+__Arguments__
+- __limit (int)__: limit rows sample size
+- __confidence (float)__:
+    how many casting errors are allowed
+    (as a ratio, between 0 and 1)
+
+__Returns__
+
+`dict`: Table Schema descriptor
+
 
 #### `table.save`
 ```python
