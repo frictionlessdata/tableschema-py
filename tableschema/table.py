@@ -17,28 +17,29 @@ from collections import defaultdict
 # Module API
 
 class Table(object):
+    """Table representation
+
+    # Arguments
+      source (Union[str, list[]]): data source one of:
+        - local file (path)
+        - remote file (url)
+        - array of arrays representing the rows
+      schema (any): data schema in all forms supported by `Schema` class
+      strict (bool): strictness option to pass to `Schema` constructor
+      post_cast (function[]): list of post cast processors
+      storage (None): storage name like `sql` or `bigquery`
+      options (dict): `tabulator` or storage's options
+
+    # Raises
+      exceptions.TableSchemaException:
+        raises any error that occurs in table creation process
+
+    """
 
     # Public
 
     def __init__(self, source, schema=None, strict=False,
                  post_cast=[], storage=None, **options):
-        """Table representation
-
-        Arguments:
-          source (Union[str, list[]]): data source one of:
-            - local file (path)
-            - remote file (url)
-            - array of arrays representing the rows
-          schema (any): data schema in all forms supported by `Schema` class
-          strict (bool): strictness option to pass to `Schema` constructor
-          post_cast (function[]): list of post cast processors
-          storage (None): storage name like `sql` or `bigquery`
-          options (dict): `tabulator` or storage's options
-
-        Raises:
-          exceptions.TableSchemaException: raises any error that occurs in table creation process
-
-        """
 
         # Set attributes
         self.__source = source
@@ -71,7 +72,7 @@ class Table(object):
 
     @property
     def headers(self):
-        """https://github.com/frictionlessdata/tableschema-py#table
+        """Some docstring
         """
         return self.__headers
 
@@ -98,7 +99,32 @@ class Table(object):
     def iter(self, keyed=False, extended=False, cast=True,
              integrity=False, relations=False,
              foreign_keys_values=False, exc_handler=None):
-        """https://github.com/frictionlessdata/tableschema-py#table
+        """ Iterates through the table data and emits rows cast based on table schema. Data casting can be disabled.
+
+        # Arguments
+
+        - `keyed (bool)` - iterate keyed rows
+        - `extended (bool)` - iterate extended rows
+        - `cast (bool)` - disable data casting if false
+        - `integrity` (dict) - dictionary in a form of `{'size': <bytes>, 'hash': '<sha256>'}` to check integrity of the table when it's read completely. Both keys are optional.
+        - `relations (dict)` - dictionary of foreign key references in a form of `{resource1: [{field1: value1, field2: value2}, ...], ...}`. If provided, foreign key fields will checked and resolved to one of their references (/!\ one-to-many fk are not completely resolved).
+        - `foreign_keys_values (dict)` - three-level dictionary of foreign key references optimized to speed up validation process in a form of `{resource1: { (foreign_key_field1, foreign_key_field2) : { (value1, value2) : {one_keyedrow}, ... }}}`. If not provided but relations is true, it will be created before the validation process by *index_foreign_keys_values* method
+        - `exc_handler ()` - optional custom exception handler callable. Can be used to defer raising errors (i.e. "fail late"), e.g. for data validation purposes. Must support the following call signature:
+
+        # Raises
+
+        - `(exceptions.TableSchemaException)` - base class of any error that occurs during this process. Specializations:
+          - `(exceptions.CastError)` - data cast error
+          - `(exceptions.IntegrityError)` - integrity checking error
+          - `(exceptions.UniqueKeyError)` - unique key constraint violation
+          - `(exceptions.UnresolvedFKError)` - unresolved foreign key reference error
+
+        # Yields
+
+        - `(any[]/any{})` - yields rows:
+          - `[value1, value2]` - base
+          - `{header1: value1, header2: value2}` - keyed
+          - `[rowNumber, [header1, header2], [value1, value2]]` - extended
         """
         # TODO: Use helpers.default_exc_handler instead. Prerequisite: Use
         # stream context manager to make sure the stream gets properly closed

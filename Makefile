@@ -18,7 +18,8 @@ profiles:
 	wget -O tableschema/profiles/table-schema.json https://specs.frictionlessdata.io/schemas/table-schema.json
 
 readme:
-	python scripts/readme.py
+	pip install referencer
+	referencer $(PACKAGE) README.md --in-place
 
 release:
 	git checkout master && git pull origin && git fetch -p && git diff

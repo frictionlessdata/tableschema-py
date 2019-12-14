@@ -36,402 +36,270 @@ High-level documentation and tutorials:
 
 ## Reference
 
-
-### Class `Table`
-
-> `class Table(source, schema=None, strict=False, post_cast=[], storage=None, **options)`
-
+### `Table`
+```python
+Table(self, source, schema=None, strict=False, post_cast=[], storage=None, **options)
+```
 Table representation
 
-#### Arguments
+__Arguments__
 
-**`source`** :&ensp;`Union`[`str`, `list`[]]:
-
-data source one of:
+- __source (Union[str, list[]])__: data source one of:
     - local file (path)
     - remote file (url)
     - array of arrays representing the rows
+- __schema (any)__: data schema in all forms supported by `Schema` class
+- __strict (bool)__: strictness option to pass to `Schema` constructor
+- __post_cast (function[])__: list of post cast processors
+- __storage (None)__: storage name like `sql` or `bigquery`
+- __options (dict)__: `tabulator` or storage's options
 
-**`schema`** :&ensp;`any`
-:   data schema in all forms supported by `Schema` class
+__Raises__
 
-**`strict`** :&ensp;`bool`
-:   strictness option to pass to `Schema` constructor
+- `exceptions.TableSchemaException`:
+    raises any error that occurs in table creation process
 
-**`post_cast`** :&ensp;`function`[]
-:   list of post cast processors
 
-**`storage`** :&ensp;`None`
-:   storage name like `sql` or `bigquery`
+#### `table.hash`
+https://github.com/frictionlessdata/tableschema-py#table
 
-**`options`** :&ensp;`dict`
-:   `tabulator` or storage's options
+#### `table.headers`
+Some docstring
 
-#### Raises
+#### `table.schema`
+https://github.com/frictionlessdata/tableschema-py#table
 
-`exceptions.TableSchemaException`: `raises` `any` `error` `that` `occurs` `in` `table` `creation` `process`
-:   &nbsp;
+#### `table.size`
+https://github.com/frictionlessdata/tableschema-py#table
 
+#### `table.iter`
+```python
+table.iter(self, keyed=False, extended=False, cast=True, integrity=False, relations=False, foreign_keys_values=False, exc_handler=None)
+```
+Iterates through the table data and emits rows cast based on table schema. Data casting can be disabled.
 
-#### Instance variables
+__Arguments__
 
 
-##### Variable `hash`
+- `keyed (bool)` - iterate keyed rows
+- `extended (bool)` - iterate extended rows
+- `cast (bool)` - disable data casting if false
+- __- `integrity` (dict) - dictionary in a form of `{'size'__: <bytes>, 'hash': '<sha256>'}` to check integrity of the table when it's read completely. Both keys are optional.
+- __- `relations (dict)` - dictionary of foreign key references in a form of `{resource1__: [{field1: value1, field2: value2}, ...], ...}`. If provided, foreign key fields will checked and resolved to one of their references (/!\ one-to-many fk are not completely resolved).
+- __- `foreign_keys_values (dict)` - three-level dictionary of foreign key references optimized to speed up validation process in a form of `{resource1__: { (foreign_key_field1, foreign_key_field2) : { (value1, value2) : {one_keyedrow}, ... }}}`. If not provided but relations is true, it will be created before the validation process by *index_foreign_keys_values* method
+- __- `exc_handler ()` - optional custom exception handler callable. Can be used to defer raising errors (i.e. "fail late"), e.g. for data validation purposes. Must support the following call signature__:
 
-<https://github.com/frictionlessdata/tableschema-py#table>
+__Raises__
 
 
-##### Variable `headers`
-
-<https://github.com/frictionlessdata/tableschema-py#table>
-
-
-##### Variable `schema`
-
-<https://github.com/frictionlessdata/tableschema-py#table>
-
-
-##### Variable `size`
-
-<https://github.com/frictionlessdata/tableschema-py#table>
-
-
-#### Methods
-
-
-##### Method `index_foreign_keys_values`
-
-
-> `def index_foreign_keys_values(self, relations)`
-
-
-##### Method `infer`
-
-
-> `def infer(self, limit=100, confidence=0.75)`
-
-<https://github.com/frictionlessdata/tableschema-py#table>
-
-
-##### Method `iter`
-
-
-> `def iter(self, keyed=False, extended=False, cast=True, integrity=False, relations=False, foreign_keys_values=False, exc_handler=None)`
-
-<https://github.com/frictionlessdata/tableschema-py#table>
-
-
-##### Method `read`
-
-
-> `def read(self, keyed=False, extended=False, cast=True, limit=None, integrity=False, relations=False, foreign_keys_values=False, exc_handler=None)`
-
-<https://github.com/frictionlessdata/tableschema-py#table>
-
-
-##### Method `save`
-
-
-> `def save(self, target, storage=None, **options)`
-
-<https://github.com/frictionlessdata/tableschema-py#table>
-
-
-
-### Class `Schema`
-
-> `class Schema(descriptor=, strict=False)`
-
-<https://github.com/frictionlessdata/tableschema-py#schema>
-
-
-#### Instance variables
-
-
-##### Variable `descriptor`
-
-<https://github.com/frictionlessdata/tableschema-py#schema>
-
-
-##### Variable `errors`
-
-<https://github.com/frictionlessdata/tableschema-py#schema>
-
-
-##### Variable `field_names`
-
-<https://github.com/frictionlessdata/tableschema-py#schema>
-
-
-##### Variable `fields`
-
-<https://github.com/frictionlessdata/tableschema-py#schema>
-
-
-##### Variable `foreign_keys`
-
-<https://github.com/frictionlessdata/tableschema-py#schema>
-
-
-##### Variable `headers`
-
-<https://github.com/frictionlessdata/tableschema-py#schema>
-
-
-##### Variable `primary_key`
-
-<https://github.com/frictionlessdata/tableschema-py#schema>
-
-
-##### Variable `valid`
-
-<https://github.com/frictionlessdata/tableschema-py#schema>
-
-
-#### Methods
-
-
-##### Method `add_field`
-
-
-> `def add_field(self, descriptor)`
-
-<https://github.com/frictionlessdata/tableschema-py#schema>
-
-
-##### Method `cast_row`
-
-
-> `def cast_row(self, row, fail_fast=False, row_number=None, exc_handler=None)`
-
-<https://github.com/frictionlessdata/tableschema-py#schema>
-
-
-##### Method `commit`
-
-
-> `def commit(self, strict=None)`
-
-<https://github.com/frictionlessdata/tableschema-py#schema>
-
-
-##### Method `get_field`
-
-
-> `def get_field(self, name)`
-
-<https://github.com/frictionlessdata/tableschema-py#schema>
-
-
-##### Method `has_field`
-
-
-> `def has_field(self, name)`
-
-<https://github.com/frictionlessdata/tableschema-py#schema>
-
-
-##### Method `infer`
-
-
-> `def infer(self, rows, headers=1, confidence=0.75, guesser_cls=None, resolver_cls=None)`
-
-<https://github.com/frictionlessdata/tableschema-py#schema>
-
-
-##### Method `remove_field`
-
-
-> `def remove_field(self, name)`
-
-<https://github.com/frictionlessdata/tableschema-py#schema>
-
-
-##### Method `save`
-
-
-> `def save(self, target, ensure_ascii=True)`
-
-<https://github.com/frictionlessdata/tableschema-py#schema>
-
-
-##### Method `update_field`
-
-
-> `def update_field(self, name, update)`
-
-<https://github.com/frictionlessdata/tableschema-py#schema>
-
-
-
-### Class `Field`
-
-> `class Field(descriptor, missing_values=[''], schema=None)`
-
+- `- `(exceptions.TableSchemaException)` - base class of any error that occurs during this process. Specializations`:
+  - `(exceptions.CastError)` - data cast error
+  - `(exceptions.IntegrityError)` - integrity checking error
+  - `(exceptions.UniqueKeyError)` - unique key constraint violation
+  - `(exceptions.UnresolvedFKError)` - unresolved foreign key reference error
+
+__Yields__
+
+
+- `(any[]/any{})` - yields rows:
+  - `[value1, value2]` - base
+  - `{header1: value1, header2: value2}` - keyed
+  - `[rowNumber, [header1, header2], [value1, value2]]` - extended
+
+#### `table.read`
+```python
+table.read(self, keyed=False, extended=False, cast=True, limit=None, integrity=False, relations=False, foreign_keys_values=False, exc_handler=None)
+```
+https://github.com/frictionlessdata/tableschema-py#table
+
+#### `table.infer`
+```python
+table.infer(self, limit=100, confidence=0.75)
+```
+https://github.com/frictionlessdata/tableschema-py#table
+
+#### `table.save`
+```python
+table.save(self, target, storage=None, **options)
+```
+https://github.com/frictionlessdata/tableschema-py#table
+
+### `Schema`
+```python
+Schema(self, descriptor={}, strict=False)
+```
+
+#### `schema.descriptor`
+https://github.com/frictionlessdata/tableschema-py#schema
+
+#### `schema.errors`
+https://github.com/frictionlessdata/tableschema-py#schema
+
+#### `schema.field_names`
+https://github.com/frictionlessdata/tableschema-py#schema
+
+#### `schema.fields`
+https://github.com/frictionlessdata/tableschema-py#schema
+
+#### `schema.foreign_keys`
+https://github.com/frictionlessdata/tableschema-py#schema
+
+#### `schema.headers`
+https://github.com/frictionlessdata/tableschema-py#schema
+
+#### `schema.primary_key`
+https://github.com/frictionlessdata/tableschema-py#schema
+
+#### `schema.valid`
+https://github.com/frictionlessdata/tableschema-py#schema
+
+#### `schema.get_field`
+```python
+schema.get_field(self, name)
+```
+https://github.com/frictionlessdata/tableschema-py#schema
+
+#### `schema.get_field`
+```python
+schema.get_field(self, name)
+```
+https://github.com/frictionlessdata/tableschema-py#schema
+
+#### `schema.add_field`
+```python
+schema.add_field(self, descriptor)
+```
+https://github.com/frictionlessdata/tableschema-py#schema
+
+#### `schema.update_field`
+```python
+schema.update_field(self, name, update)
+```
+https://github.com/frictionlessdata/tableschema-py#schema
+
+#### `schema.remove_field`
+```python
+schema.remove_field(self, name)
+```
+https://github.com/frictionlessdata/tableschema-py#schema
+
+#### `schema.cast_row`
+```python
+schema.cast_row(self, row, fail_fast=False, row_number=None, exc_handler=None)
+```
+https://github.com/frictionlessdata/tableschema-py#schema
+
+#### `schema.infer`
+```python
+schema.infer(self, rows, headers=1, confidence=0.75, guesser_cls=None, resolver_cls=None)
+```
+https://github.com/frictionlessdata/tableschema-py#schema
+
+#### `schema.commit`
+```python
+schema.commit(self, strict=None)
+```
+https://github.com/frictionlessdata/tableschema-py#schema
+
+#### `schema.save`
+```python
+schema.save(self, target, ensure_ascii=True)
+```
+https://github.com/frictionlessdata/tableschema-py#schema
+
+### `Field`
+```python
+Field(self, descriptor, missing_values=[''], schema=None)
+```
 Table Schema field representation.
 
-
-<https://github.com/frictionlessdata/tableschema-py#field>
-
-
-#### Instance variables
-
-
-##### Variable `constraints`
-
-<https://github.com/frictionlessdata/tableschema-py#field>
-
-
-##### Variable `descriptor`
-
-<https://github.com/frictionlessdata/tableschema-py#field>
-
-
-##### Variable `format`
-
-<https://github.com/frictionlessdata/tableschema-py#field>
-
-
-##### Variable `name`
-
-<https://github.com/frictionlessdata/tableschema-py#field>
-
-
-##### Variable `required`
-
-<https://github.com/frictionlessdata/tableschema-py#field>
-
-
-##### Variable `schema`
-
-<https://github.com/frictionlessdata/tableschema-py#field>
-
-
-##### Variable `type`
-
-<https://github.com/frictionlessdata/tableschema-py#field>
-
-
-#### Methods
-
-
-##### Method `cast_value`
-
-
-> `def cast_value(self, value, constraints=True, preserve_missing_values=False)`
-
-<https://github.com/frictionlessdata/tableschema-py#field>
-
-
-##### Method `test_value`
-
-
-> `def test_value(self, value, constraints=True)`
-
-<https://github.com/frictionlessdata/tableschema-py#field>
-
-
-
-### Class `Storage`
-
-> `class Storage(**options)`
-
-<https://github.com/frictionlessdata/tableschema-py#storage>
-
-
-#### Instance variables
-
-
-##### Variable `buckets`
-
-<https://github.com/frictionlessdata/tableschema-py#storage>
-
-
-#### Static methods
-
-
-##### `Method connect`
-
-
-> `def connect(name, **options)`
-
-<https://github.com/frictionlessdata/tableschema-py#storage>
-
-
-#### Methods
-
-
-##### Method `create`
-
-
-> `def create(self, bucket, descriptor, force=False)`
-
-<https://github.com/frictionlessdata/tableschema-py#storage>
-
-
-##### Method `delete`
-
-
-> `def delete(self, bucket=None, ignore=False)`
-
-<https://github.com/frictionlessdata/tableschema-py#storage>
-
-
-##### Method `describe`
-
-
-> `def describe(self, bucket, descriptor=None)`
-
-<https://github.com/frictionlessdata/tableschema-py#storage>
-
-
-##### Method `iter`
-
-
-> `def iter(self, bucket)`
-
-<https://github.com/frictionlessdata/tableschema-py#storage>
-
-
-##### Method `read`
-
-
-> `def read(self, bucket)`
-
-<https://github.com/frictionlessdata/tableschema-py#storage>
-
-
-##### Method `write`
-
-
-> `def write(self, bucket, rows)`
-
-<https://github.com/frictionlessdata/tableschema-py#storage>
-
-
-
-### Function `validate`
-
-
-> `def validate(descriptor)`
-
-<https://github.com/frictionlessdata/tableschema-py#schema>
-
-
-
-### Function `infer`
-
-
-> `def infer(source, headers=1, limit=100, confidence=0.75, **options)`
-
-<https://github.com/frictionlessdata/tableschema-py#schema>
-
-
-
-### Class `FailedCast`
-
-> `class FailedCast(value)`
-
+#### `field.constraints`
+https://github.com/frictionlessdata/tableschema-py#field
+
+#### `field.descriptor`
+https://github.com/frictionlessdata/tableschema-py#field
+
+#### `field.format`
+https://github.com/frictionlessdata/tableschema-py#field
+
+#### `field.name`
+https://github.com/frictionlessdata/tableschema-py#field
+
+#### `field.required`
+https://github.com/frictionlessdata/tableschema-py#field
+
+#### `field.schema`
+https://github.com/frictionlessdata/tableschema-py#field
+
+#### `field.type`
+https://github.com/frictionlessdata/tableschema-py#field
+
+#### `field.cast_value`
+```python
+field.cast_value(self, value, constraints=True, preserve_missing_values=False)
+```
+https://github.com/frictionlessdata/tableschema-py#field
+
+#### `field.test_value`
+```python
+field.test_value(self, value, constraints=True)
+```
+https://github.com/frictionlessdata/tableschema-py#field
+
+### `Storage`
+```python
+Storage(self, **options)
+```
+
+#### `storage.buckets`
+https://github.com/frictionlessdata/tableschema-py#storage
+
+#### `storage.connect`
+```python
+storage.connect(name, **options)
+```
+https://github.com/frictionlessdata/tableschema-py#storage
+
+#### `storage.create`
+```python
+storage.create(self, bucket, descriptor, force=False)
+```
+https://github.com/frictionlessdata/tableschema-py#storage
+
+#### `storage.delete`
+```python
+storage.delete(self, bucket=None, ignore=False)
+```
+https://github.com/frictionlessdata/tableschema-py#storage
+
+#### `storage.describe`
+```python
+storage.describe(self, bucket, descriptor=None)
+```
+https://github.com/frictionlessdata/tableschema-py#storage
+
+#### `storage.iter`
+```python
+storage.iter(self, bucket)
+```
+https://github.com/frictionlessdata/tableschema-py#storage
+
+#### `storage.read`
+```python
+storage.read(self, bucket)
+```
+https://github.com/frictionlessdata/tableschema-py#storage
+
+#### `storage.write`
+```python
+storage.write(self, bucket, rows)
+```
+https://github.com/frictionlessdata/tableschema-py#storage
+
+### `FailedCast`
+```python
+FailedCast(self, value)
+```
 Wrap an original data field value that failed to be properly casted.
 
 FailedCast allows for further processing/yielding values but still be able
@@ -440,84 +308,6 @@ to distinguish uncasted values on the consuming side.
 Delegates attribute access and the basic rich comparison methods to the
 underlying object. Supports default user-defined classes hashability i.e.
 is hashable based on object identity (not based on the wrapped value).
-
-
-#### Instance variables
-
-
-##### Variable `value`
-
-
-
-### Class `TableSchemaException`
-
-> `class TableSchemaException(message, errors=[])`
-
-Common base class for all non-exit exceptions.
-
-
-
-### Class `LoadError`
-
-> `class LoadError(message, errors=[])`
-
-Common base class for all non-exit exceptions.
-
-
-
-### Class `ValidationError`
-
-> `class ValidationError(message, errors=[])`
-
-Common base class for all non-exit exceptions.
-
-
-
-### Class `CastError`
-
-> `class CastError(message, errors=[])`
-
-Common base class for all non-exit exceptions.
-
-
-
-### Class `IntegrityError`
-
-> `class IntegrityError(message, errors=[])`
-
-Common base class for all non-exit exceptions.
-
-
-
-### Class `UniqueKeyError`
-
-> `class UniqueKeyError(message, errors=[])`
-
-Common base class for all non-exit exceptions.
-
-
-
-### Class `RelationError`
-
-> `class RelationError(message, errors=[])`
-
-Common base class for all non-exit exceptions.
-
-
-
-### Class `UnresolvedFKError`
-
-> `class UnresolvedFKError(message, errors=[])`
-
-Common base class for all non-exit exceptions.
-
-
-
-### Class `StorageError`
-
-> `class StorageError(message, errors=[])`
-
-Common base class for all non-exit exceptions.
 
 ## Contributing
 

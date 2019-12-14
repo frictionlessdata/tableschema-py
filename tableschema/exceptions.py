@@ -8,6 +8,8 @@ from __future__ import unicode_literals
 # Module API
 
 class DataPackageException(Exception):
+    """ Test
+    """
 
     # Public
 
