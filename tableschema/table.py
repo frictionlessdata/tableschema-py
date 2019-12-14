@@ -110,28 +110,33 @@ class Table(object):
         """Iterates through the table data and emits rows cast based on table schema.
 
         # Arguments
+
           keyed (bool): iterate keyed rows
           extended (bool): iterate extended rows
           cast (bool): disable data casting if false
+
           integrity (dict):
-            dictionary in a form of
-            `{'size': <bytes>, 'hash': '<sha256>'}` to check integrity of the table
-            when it's read completely. Both keys are optional.
+            dictionary in a form of `{'size'; <bytes>, 'hash'; '<sha256>'}`
+            to check integrity of the table when it's read completely.
+            Both keys are optional.
+
           relations (dict):
-            dictionary of foreign key references in a form of
-            `{resource1: [{field1: value1, field2: value2}, ...], ...}`.
-            If provided, foreign key fields will checked and resolved to one of
-            their references (/!\ one-to-many fk are not completely resolved).
+            dictionary of foreign key references in a form
+            of `{resource1; [{field1; value1, field2; value2}, ...], ...}`.
+            If provided, foreign key fields will checked and resolved
+            to one of their references (/!\ one-to-many fk are not completely resolved).
+
           foreign_keys_values (dict):
-            three-level dictionary of foreign key references optimized to speed up
-            validation process in a form of
-            `{resource1: { (foreign_key_field1, foreign_key_field2) : { (value1, value2) : {one_keyedrow}, ... }}}`.
-            If not provided but relations is true, it will be created before
-            the validation process by *index_foreign_keys_values* method
+            three-level dictionary of foreign key references optimized
+            to speed up validation process in a form
+            of `{resource1; { (foreign_key_field1, foreign_key_field2) ; { (value1, value2) ; {one_keyedrow}, ... }}}`.
+            If not provided but relations is true, it will be created
+            before the validation process by *index_foreign_keys_values* method
+
           exc_handler ():
             optional custom exception handler callable.
             Can be used to defer raising errors (i.e. "fail late"), e.g.
-            for data validation purposes. Must support the following call signature:
+            for data validation purposes. Must support the following call signature
 
         # Raises
 
@@ -145,7 +150,7 @@ class Table(object):
 
          any[]/any{}: yields rows of of:
            - `[value1, value2]` - base
-           - `{header1: value1, header2: value2}` - keyed
+           - `{header1; value1, header2; value2}` - keyed
            - `[rowNumber, [header1, header2], [value1, value2]]` - extended
         """
         # TODO: Use helpers.default_exc_handler instead. Prerequisite: Use
