@@ -33,8 +33,7 @@ class Table(object):
 
     # Raises
 
-      exceptions.TableSchemaException:
-        raises any error that occurs in table creation process
+      exceptions.TableSchemaException: raises on any error
 
     """
 
@@ -96,10 +95,15 @@ class Table(object):
 
     @property
     def hash(self):
-        """str/None: returns the table's SHA256 hash
+        """Table's hash
 
         If it's already read using e.g. `table.read`, otherwise returns `None`.
         In the middle of an iteration it returns hash of already read contents
+
+        # Returns
+
+          str/None: SHA256 hash
+
         """
         if self.__stream:
             return self.__stream.hash
@@ -111,9 +115,17 @@ class Table(object):
 
         # Arguments
 
-          keyed (bool): iterate keyed rows
-          extended (bool): iterate extended rows
-          cast (bool): disable data casting if false
+          keyed (bool):
+            yield keyed rows in a form of `{header1\\: value1, header2\\: value2}`
+            (default is false; the form of rows is `[value1, value2]`)
+
+          extended (bool):
+            yield extended rows in a for of `[rowNumber, [header1, header2], [value1, value2]]`
+            (default is false; the form of rows is `[value1, value2]`)
+
+          cast (bool):
+            disable data casting if false
+            (default is true)
 
           integrity (dict):
             dictionary in a form of `{'size'\\: <bytes>, 'hash'\\: '<sha256>'}`
@@ -148,10 +160,7 @@ class Table(object):
 
         # Returns
 
-          any[]/any{}: yields rows of of:
-            - `[value1, value2]` - base
-            - `{header1\\: value1, header2\\: value2}` - keyed
-            - `[rowNumber, [header1, header2], [value1, value2]]` - extended
+          Iterator[list]: yields rows
 
         """
         # TODO: Use helpers.default_exc_handler instead. Prerequisite: Use
