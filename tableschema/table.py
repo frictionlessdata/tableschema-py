@@ -20,7 +20,6 @@ class Table(object):
     """Table representation
 
     # Arguments
-
       source (str/list[]): data source one of:
         - local file (path)
         - remote file (url)
@@ -32,7 +31,6 @@ class Table(object):
       options (dict): `tabulator` or storage's options
 
     # Raises
-
       exceptions.TableSchemaException: raises on any error
 
     """
@@ -73,35 +71,46 @@ class Table(object):
 
     @property
     def headers(self):
-        """str[]: data source headers
+        """Table's headers is available
+
+        # Returns
+          str[]: headers
+
         """
         return self.__headers
 
     @property
     def schema(self):
-        """Schema: returns schema class instance
+        """Returns schema class instance if available
+
+        # Returns
+          Schema: schema
+
         """
         return self.__schema
 
     @property
     def size(self):
-        """int/None: returns the table's size in BYTES
+        """Table's size in BYTES if it's available
 
         If it's already read using e.g. `table.read`, otherwise returns `None`.
         In the middle of an iteration it returns size of already read contents
+
+        # Returns
+          int/None: size in BYTES
+
         """
         if self.__stream:
             return self.__stream.size
 
     @property
     def hash(self):
-        """Table's hash
+        """Table's SHA256 hash if it's available.
 
         If it's already read using e.g. `table.read`, otherwise returns `None`.
         In the middle of an iteration it returns hash of already read contents
 
         # Returns
-
           str/None: SHA256 hash
 
         """
@@ -151,7 +160,6 @@ class Table(object):
             for data validation purposes. Must support the following call signature
 
         # Raises
-
           exceptions.TableSchemaException: base class of any error
           exceptions.CastError: data cast error
           exceptions.IntegrityError: integrity checking error
@@ -159,7 +167,6 @@ class Table(object):
           exceptions.UnresolvedFKError: unresolved foreign key reference error
 
         # Returns
-
           Iterator[list]: yields rows
 
         """

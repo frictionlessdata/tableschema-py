@@ -43,7 +43,6 @@ Table(self, source, schema=None, strict=False, post_cast=[], storage=None, **opt
 Table representation
 
 __Arguments__
-
 - __source (str/list[])__: data source one of:
     - local file (path)
     - remote file (url)
@@ -55,33 +54,46 @@ __Arguments__
 - __options (dict)__: `tabulator` or storage's options
 
 __Raises__
-
 - `exceptions.TableSchemaException`: raises on any error
 
 
 #### `table.hash`
-Table's hash
+Table's SHA256 hash if it's available.
 
 If it's already read using e.g. `table.read`, otherwise returns `None`.
 In the middle of an iteration it returns hash of already read contents
 
 __Returns__
 
-
 `str/None`: SHA256 hash
 
 
 #### `table.headers`
-str[]: data source headers
+Table's headers is available
+
+__Returns__
+
+`str[]`: headers
+
 
 #### `table.schema`
-Schema: returns schema class instance
+Returns schema class instance if available
+
+__Returns__
+
+`Schema`: schema
+
 
 #### `table.size`
-int/None: returns the table's size in BYTES
+Table's size in BYTES if it's available
 
 If it's already read using e.g. `table.read`, otherwise returns `None`.
 In the middle of an iteration it returns size of already read contents
+
+__Returns__
+
+`int/None`: size in BYTES
+
 
 #### `table.iter`
 ```python
@@ -121,7 +133,6 @@ __Arguments__
     for data validation purposes. Must support the following call signature
 
 __Raises__
-
 - `exceptions.TableSchemaException`: base class of any error
 - `exceptions.CastError`: data cast error
 - `exceptions.IntegrityError`: integrity checking error
@@ -129,7 +140,6 @@ __Raises__
 - `exceptions.UnresolvedFKError`: unresolved foreign key reference error
 
 __Returns__
-
 
 `Iterator[list]`: yields rows
 
