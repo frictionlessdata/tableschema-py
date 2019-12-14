@@ -115,7 +115,7 @@ class Table(object):
           extended (bool): iterate extended rows
           cast (bool): disable data casting if false
 
-          integrity` (dict) - dictionary in a form of
+          integrity (dict) - dictionary in a form of
             `{'size': <bytes>, 'hash': '<sha256>'}` to check integrity of the table
             when it's read completely. Both keys are optional.
 
