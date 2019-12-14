@@ -117,7 +117,7 @@ class Table(object):
 
           integrity (dict):
             dictionary in a form of
-            `{'size': <bytes>, 'hash': '<sha256>'}` to check integrity of the table
+            "{'size': <bytes>, 'hash': '<sha256>'}" to check integrity of the table
             when it's read completely. Both keys are optional.
 
           relations (dict):

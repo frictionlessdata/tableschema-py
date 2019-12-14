@@ -95,7 +95,7 @@ __Arguments__
 
 - __integrity (dict)__:
     dictionary in a form of
-- __`{'size'__: <bytes>, 'hash': '<sha256>'}` to check integrity of the table
+- __"{'size'__: <bytes>, 'hash': '<sha256>'}" to check integrity of the table
     when it's read completely. Both keys are optional.
 
 - __relations (dict)__:
