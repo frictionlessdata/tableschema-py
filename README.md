@@ -93,11 +93,13 @@ __Arguments__
 - __extended (bool)__: iterate extended rows
 - __cast (bool)__: disable data casting if false
 
-  integrity (dict) - dictionary in a form of
+- __integrity (dict)__:
+    dictionary in a form of
 - __`{'size'__: <bytes>, 'hash': '<sha256>'}` to check integrity of the table
     when it's read completely. Both keys are optional.
 
-- __relations (dict)__: dictionary of foreign key references in a form of
+- __relations (dict)__:
+    dictionary of foreign key references in a form of
 - __`{resource1__: [{field1: value1, field2: value2}, ...], ...}`.
     If provided, foreign key fields will checked and resolved to one of
     their references (/!\ one-to-many fk are not completely resolved).
