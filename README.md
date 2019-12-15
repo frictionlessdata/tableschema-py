@@ -56,7 +56,7 @@ __Arguments__
 - __options (dict)__: `tabulator` or storage's options
 
 __Raises__
-- `exceptions.TableSchemaException`: raises on any error
+- `TableSchemaException`: raises on any error
 
 
 #### `table.hash`
@@ -106,49 +106,54 @@ Iterates through the table data and emits rows cast based on table schema.
 __Arguments__
 
 - __keyed (bool)__:
-    yield keyed rows in a form of `{header1: value1, header2: value2}`
-    (default is false; the form of rows is `[value1, value2]`)
+        yield keyed rows in a form of `{header1: value1, header2: value2}`
+        (default is false; the form of rows is `[value1, value2]`)
 - __extended (bool)__:
-    yield extended rows in a for of `[rowNumber, [header1, header2], [value1, value2]]`
-    (default is false; the form of rows is `[value1, value2]`)
+        yield extended rows in a for of `[rowNumber, [header1, header2], [value1, value2]]`
+        (default is false; the form of rows is `[value1, value2]`)
 - __cast (bool)__:
-    disable data casting if false
-    (default is true)
+        disable data casting if false
+        (default is true)
 - __integrity (dict)__:
-    dictionary in a form of `{'size': <bytes>, 'hash': '<sha256>'}`
-    to check integrity of the table when it's read completely.
-    Both keys are optional.
+        dictionary in a form of `{'size': <bytes>, 'hash': '<sha256>'}`
+        to check integrity of the table when it's read completely.
+        Both keys are optional.
 - __relations (dict)__:
-    dictionary of foreign key references in a form
-    of `{resource1: [{field1: value1, field2: value2}, ...], ...}`.
-    If provided, foreign key fields will checked and resolved
-    to one of their references (/!\ one-to-many fk are not completely resolved).
+        dictionary of foreign key references in a form
+        of `{resource1: [{field1: value1, field2: value2}, ...], ...}`.
+        If provided, foreign key fields will checked and resolved
+        to one of their references (/!\ one-to-many fk are not completely resolved).
 - __foreign_keys_values (dict)__:
-    three-level dictionary of foreign key references optimized
-    to speed up validation process in a form of
-    `{resource1: {(foreign_key_field1, foreign_key_field2): {(value1, value2): {one_keyedrow}, ... }}}`.
-    If not provided but relations is true, it will be created
-    before the validation process by *index_foreign_keys_values* method
+        three-level dictionary of foreign key references optimized
+        to speed up validation process in a form of
+        `{resource1: {(foreign_key_field1, foreign_key_field2): {(value1, value2): {one_keyedrow}, ... }}}`.
+        If not provided but relations is true, it will be created
+        before the validation process by *index_foreign_keys_values* method
 - __exc_handler (func)__:
-    optional custom exception handler callable.
-    Can be used to defer raising errors (i.e. "fail late"), e.g.
-    for data validation purposes. Must support the signature mentioned below
+        optional custom exception handler callable.
+        Can be used to defer raising errors (i.e. "fail late"), e.g.
+        for data validation purposes. Must support the signature below
 
 __Custom exception handler__
 
 
 ```python
 def exc_handler(exc, row_number=None, row_data=None, error_data=None):
-    exc(Exception):
-        Deferred exception instance
-    row_number(int):
-        Data row number that triggers exception exc
-    row_data(OrderedDict):
-        Invalid data row source data
-    error_data(OrderedDict):
-        Data row source data field subset responsible for the error, if
-        applicable (e.g. invalid primary or foreign key fields). May be
-        identical to row_data.
+    '''Custom exception handler (example)
+
+    # Arguments:
+        exc(Exception):
+            Deferred exception instance
+        row_number(int):
+            Data row number that triggers exception exc
+        row_data(OrderedDict):
+            Invalid data row source data
+        error_data(OrderedDict):
+            Data row source data field subset responsible for the error, if
+            applicable (e.g. invalid primary or foreign key fields). May be
+            identical to row_data.
+    '''
+    # ...
 ```
 
 __Raises__
@@ -169,7 +174,7 @@ table.read(self, keyed=False, extended=False, cast=True, limit=None, integrity=F
 ```
 Read the whole table and return as array of rows
 
-**It has the same API as `table.iter` except for:***
+> It has the same API as `table.iter` except for
 
 __Arguments__
 - __limit (int)__: limit count of rows to read and return
@@ -190,8 +195,8 @@ It will infer and set Table Schema to `table.schema` based on table data.
 __Arguments__
 - __limit (int)__: limit rows sample size
 - __confidence (float)__:
-    how many casting errors are allowed
-    (as a ratio, between 0 and 1)
+        how many casting errors are allowed
+        (as a ratio, between 0 and 1)
 
 __Returns__
 
@@ -202,7 +207,22 @@ __Returns__
 ```python
 table.save(self, target, storage=None, **options)
 ```
-https://github.com/frictionlessdata/tableschema-py#table
+Save data source to file locally in CSV format with `,` (comma) delimiter
+
+> To save schema use `table.schema.save()`
+
+__Arguments__
+- __target (str)__: saving target (e.g. file path)
+- __storage (None/str)__: storage name like `sql` or `bigquery`
+- __options (dict)__: `tabulator` or storage options
+
+__Raises__
+- `TableSchemaException`: raises an error if there is saving problem
+
+__Returns__
+
+`True/Storage`: returns true or storage instance
+
 
 #### `table.index_foreign_keys_values`
 ```python

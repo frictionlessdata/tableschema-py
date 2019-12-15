@@ -31,7 +31,7 @@ class Table(object):
       options (dict): `tabulator` or storage's options
 
     # Raises
-      exceptions.TableSchemaException: raises on any error
+      TableSchemaException: raises on any error
 
     """
 
@@ -74,7 +74,7 @@ class Table(object):
         """Table's headers is available
 
         # Returns
-          str[]: headers
+            str[]: headers
 
         """
         return self.__headers
@@ -84,7 +84,7 @@ class Table(object):
         """Returns schema class instance if available
 
         # Returns
-          Schema: schema
+            Schema: schema
 
         """
         return self.__schema
@@ -97,7 +97,7 @@ class Table(object):
         In the middle of an iteration it returns size of already read contents
 
         # Returns
-          int/None: size in BYTES
+            int/None: size in BYTES
 
         """
         if self.__stream:
@@ -111,7 +111,7 @@ class Table(object):
         In the middle of an iteration it returns hash of already read contents
 
         # Returns
-          str/None: SHA256 hash
+            str/None: SHA256 hash
 
         """
         if self.__stream:
@@ -124,66 +124,71 @@ class Table(object):
 
         # Arguments
 
-          keyed (bool):
-            yield keyed rows in a form of `{header1\\: value1, header2\\: value2}`
-            (default is false; the form of rows is `[value1, value2]`)
+            keyed (bool):
+                yield keyed rows in a form of `{header1\\: value1, header2\\: value2}`
+                (default is false; the form of rows is `[value1, value2]`)
 
-          extended (bool):
-            yield extended rows in a for of `[rowNumber, [header1, header2], [value1, value2]]`
-            (default is false; the form of rows is `[value1, value2]`)
+            extended (bool):
+                yield extended rows in a for of `[rowNumber, [header1, header2], [value1, value2]]`
+                (default is false; the form of rows is `[value1, value2]`)
 
-          cast (bool):
-            disable data casting if false
-            (default is true)
+            cast (bool):
+                disable data casting if false
+                (default is true)
 
-          integrity (dict):
-            dictionary in a form of `{'size'\\: <bytes>, 'hash'\\: '<sha256>'}`
-            to check integrity of the table when it's read completely.
-            Both keys are optional.
+            integrity (dict):
+                dictionary in a form of `{'size'\\: <bytes>, 'hash'\\: '<sha256>'}`
+                to check integrity of the table when it's read completely.
+                Both keys are optional.
 
-          relations (dict):
-            dictionary of foreign key references in a form
-            of `{resource1\\: [{field1\\: value1, field2\\: value2}, ...], ...}`.
-            If provided, foreign key fields will checked and resolved
-            to one of their references (/!\\ one-to-many fk are not completely resolved).
+            relations (dict):
+                dictionary of foreign key references in a form
+                of `{resource1\\: [{field1\\: value1, field2\\: value2}, ...], ...}`.
+                If provided, foreign key fields will checked and resolved
+                to one of their references (/!\\ one-to-many fk are not completely resolved).
 
-          foreign_keys_values (dict):
-            three-level dictionary of foreign key references optimized
-            to speed up validation process in a form of
-            `{resource1\\: {(foreign_key_field1, foreign_key_field2)\\: {(value1, value2)\\: {one_keyedrow}, ... }}}`.
-            If not provided but relations is true, it will be created
-            before the validation process by *index_foreign_keys_values* method
+            foreign_keys_values (dict):
+                three-level dictionary of foreign key references optimized
+                to speed up validation process in a form of
+                `{resource1\\: {(foreign_key_field1, foreign_key_field2)\\: {(value1, value2)\\: {one_keyedrow}, ... }}}`.
+                If not provided but relations is true, it will be created
+                before the validation process by *index_foreign_keys_values* method
 
-          exc_handler (func):
-            optional custom exception handler callable.
-            Can be used to defer raising errors (i.e. "fail late"), e.g.
-            for data validation purposes. Must support the signature mentioned below
+            exc_handler (func):
+                optional custom exception handler callable.
+                Can be used to defer raising errors (i.e. "fail late"), e.g.
+                for data validation purposes. Must support the signature below
 
         # Custom exception handler
 
         ```python
         def exc_handler(exc, row_number=None, row_data=None, error_data=None):
-            exc(Exception):
-                Deferred exception instance
-            row_number(int):
-                Data row number that triggers exception exc
-            row_data(OrderedDict):
-                Invalid data row source data
-            error_data(OrderedDict):
-                Data row source data field subset responsible for the error, if
-                applicable (e.g. invalid primary or foreign key fields). May be
-                identical to row_data.
+            '''Custom exception handler (example)
+
+            # Arguments:
+                exc(Exception):
+                    Deferred exception instance
+                row_number(int):
+                    Data row number that triggers exception exc
+                row_data(OrderedDict):
+                    Invalid data row source data
+                error_data(OrderedDict):
+                    Data row source data field subset responsible for the error, if
+                    applicable (e.g. invalid primary or foreign key fields). May be
+                    identical to row_data.
+            '''
+            # ...
         ```
 
         # Raises
-          exceptions.TableSchemaException: base class of any error
-          exceptions.CastError: data cast error
-          exceptions.IntegrityError: integrity checking error
-          exceptions.UniqueKeyError: unique key constraint violation
-          exceptions.UnresolvedFKError: unresolved foreign key reference error
+            exceptions.TableSchemaException: base class of any error
+            exceptions.CastError: data cast error
+            exceptions.IntegrityError: integrity checking error
+            exceptions.UniqueKeyError: unique key constraint violation
+            exceptions.UnresolvedFKError: unresolved foreign key reference error
 
         # Returns
-          Iterator[list]: yields rows
+            Iterator[list]: yields rows
 
         """
         # TODO: Use helpers.default_exc_handler instead. Prerequisite: Use
@@ -342,13 +347,13 @@ class Table(object):
              exc_handler=None):
         """Read the whole table and return as array of rows
 
-        **It has the same API as `table.iter` except for:***
+        > It has the same API as `table.iter` except for
 
         # Arguments
-          limit (int): limit count of rows to read and return
+            limit (int): limit count of rows to read and return
 
         # Returns
-          list[]: returns rows
+            list[]: returns rows
 
         """
         result = []
@@ -368,13 +373,13 @@ class Table(object):
         It will infer and set Table Schema to `table.schema` based on table data.
 
         # Arguments
-          limit (int): limit rows sample size
-          confidence (float):
-            how many casting errors are allowed
-            (as a ratio, between 0 and 1)
+            limit (int): limit rows sample size
+            confidence (float):
+                how many casting errors are allowed
+                (as a ratio, between 0 and 1)
 
         # Returns
-          dict: Table Schema descriptor
+            dict: Table Schema descriptor
 
         """
         if self.__schema is None or self.__headers is None:
@@ -401,7 +406,21 @@ class Table(object):
         return self.__schema.descriptor
 
     def save(self, target, storage=None, **options):
-        """https://github.com/frictionlessdata/tableschema-py#table
+        """Save data source to file locally in CSV format with `,` (comma) delimiter
+
+        > To save schema use `table.schema.save()`
+
+        # Arguments
+            target (str): saving target (e.g. file path)
+            storage (None/str): storage name like `sql` or `bigquery`
+            options (dict): `tabulator` or storage options
+
+        # Raises
+            TableSchemaException: raises an error if there is saving problem
+
+        # Returns
+            True/Storage: returns true or storage instance
+
         """
 
         # Save (tabulator)
