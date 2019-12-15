@@ -18,6 +18,58 @@ A Python implementation of the [Table Schema](http://specs.frictionlessdata.io/t
 - built-in command-line interface to validate and infer schemas
 - storage/plugins system to connect tables to different storage backends like SQL Database
 
+## Contents
+
+<!--TOC-->
+
+  - [Getting started](#getting-started)
+    - [Installation](#installation)
+    - [Running on CLI](#running-on-cli)
+    - [Running on Python](#running-on-python)
+  - [Documentation](#documentation)
+    - [Stream](#stream)
+      - [Headers](#headers)
+      - [Encoding](#encoding)
+      - [Compression (Python3-only)](#compression-python3-only)
+      - [Allow html](#allow-html)
+      - [Sample size](#sample-size)
+      - [Bytes sample size](#bytes-sample-size)
+      - [Ignore blank headers](#ignore-blank-headers)
+      - [Force strings](#force-strings)
+      - [Force parse](#force-parse)
+      - [Skip rows](#skip-rows)
+      - [Post parse](#post-parse)
+      - [Keyed and extended rows](#keyed-and-extended-rows)
+    - [Supported schemes](#supported-schemes)
+      - [s3](#s3)
+      - [file](#file)
+      - [http/https/ftp/ftps](#httphttpsftpftps)
+      - [stream](#stream-1)
+      - [text](#text)
+    - [Supported file formats](#supported-file-formats)
+      - [csv (read & write)](#csv-read--write)
+      - [xls/xlsx (read & write)](#xlsxlsx-read-only)
+      - [ods (read only)](#ods-read-only)
+      - [gsheet (read only)](#gsheet-read-only)
+      - [sql (read & write)](#sql-read--write)
+      - [Data Package (read only)](#data-package-read-only)
+      - [inline (read only)](#inline-read-only)
+      - [json (read only)](#json-read-only)
+      - [ndjson (read only)](#ndjson-read-only)
+      - [tsv (read only)](#tsv-read-only)
+      - [html (read only)](#html-read-only)
+    - [Adding support for new file sources, formats, and writers](#adding-support-for-new-file-sources-formats-and-writers)
+      - [Custom loaders](#custom-loaders)
+      - [Custom parsers](#custom-parsers)
+      - [Custom writers](#custom-writers)
+    - [Validate](#validate)
+    - [Exceptions](#exceptions)
+  - [API Reference](#api-reference)
+  - [Contributing](#contributing)
+  - [Changelog](#changelog)
+
+<!--TOC-->
+
 ## Getting Started
 
 ### Installation
@@ -30,9 +82,267 @@ $ pip install tableschema
 
 ## Documentation
 
-High-level documentation and tutorials:
-- [Tutorial 1](https://frictionlessdata.io)
-- [Tutorial 2](https://frictionlessdata.io)
+### Introduction
+
+Let's start with a simple example:
+
+```python
+from tableschema import Table
+
+# Create table
+table = Table('path.csv', schema='schema.json')
+
+# Print schema descriptor
+print(table.schema.descriptor)
+
+# Print cast rows in a dict form
+for keyed_row in table.iter(keyed=True):
+    print(keyed_row)
+```
+
+### Working with Table
+
+A table is a core concept in a tabular data world. It represents data with metadata (Table Schema). Let's see how we can use it in practice.
+
+Consider we have some local csv file. It could be inline data or from a remote link - all supported by the `Table` class (except local files for in-brower usage of course). But say it's `data.csv` for now:
+
+```csv
+city,location
+london,"51.50,-0.11"
+paris,"48.85,2.30"
+rome,N/A
+```
+
+Let's create and read a table instance. We use the static `Table.load` method and the `table.read` method with the `keyed` option to get an array of keyed rows:
+
+```python
+table = Table('data.csv')
+table.headers # ['city', 'location']
+table.read(keyed=True)
+# [
+#   {city: 'london', location: '51.50,-0.11'},
+#   {city: 'paris', location: '48.85,2.30'},
+#   {city: 'rome', location: 'N/A'},
+# ]
+```
+
+As we can see, our locations are just strings. But they should be geopoints. Also, Rome's location is not available, but it's just a string `N/A` instead of `None`. First we have to infer Table Schema:
+
+```python
+table.infer()
+table.schema.descriptor
+# { fields:
+#   [ { name: 'city', type: 'string', format: 'default' },
+#     { name: 'location', type: 'geopoint', format: 'default' } ],
+#  missingValues: [ '' ] }
+table.read(keyed=True)
+# Fails with a data validation error
+```
+
+Let's fix the "not available" location. There is a `missingValues` property in Table Schema specification. As a first try we set `missingValues` to `N/A` in `table.schema.descriptor`. The schema descriptor can be changed in-place, but all changes should also be committed using `table.schema.commit()`:
+
+```python
+table.schema.descriptor['missingValues'] = 'N/A'
+table.schema.commit()
+table.schema.valid # false
+table.schema.errors
+# [<ValidationError: "'N/A' is not of type 'array'">]
+```
+
+As a good citizens we've decided to check our schema descriptor's validity. And it's not valid! We should use an array for the `missingValues` property. Also, don't forget to include "empty string" as a valid missing value:
+
+```python
+table.schema.descriptor['missingValues'] = ['', 'N/A']
+table.schema.commit()
+table.schema.valid # true
+```
+
+All good. It looks like we're ready to read our data again:
+
+```python
+table.read(keyed=True)
+# [
+#   {city: 'london', location: [51.50,-0.11]},
+#   {city: 'paris', location: [48.85,2.30]},
+#   {city: 'rome', location: null},
+# ]
+```
+
+Now we see that:
+- locations are arrays with numeric latitude and longitude
+- Rome's location is a native Python `None`
+
+And because there are no errors after reading, we can be sure that our data is valid against our schema. Let's save it:
+
+```python
+table.schema.save('schema.json')
+table.save('data.csv')
+```
+
+Our `data.csv` looks the same because it has been stringified back to `csv` format. But now we have `schema.json`:
+
+```json
+{
+    "fields": [
+        {
+            "name": "city",
+            "type": "string",
+            "format": "default"
+        },
+        {
+            "name": "location",
+            "type": "geopoint",
+            "format": "default"
+        }
+    ],
+    "missingValues": [
+        "",
+        "N/A"
+    ]
+}
+
+```
+
+If we decide to improve it even more we could update the schema file and then open it again. But now providing a schema path:
+
+```python
+table = Table('data.csv', schema='schema.json')
+# Continue the work
+```
+
+As already mentioned a given schema can be used to *validate* data (see the [Schema](#schema) section for schema specification details). In default mode invalid data rows immediately trigger an [exception](#exceptions) in the `table.iter()`/`table.write()` methods.
+
+Suppose this schema-invalid local file `invalid_data.csv`:
+```csv
+key,value
+zero,0
+one,not_an_integer
+two,2
+```
+
+We're going to validate the data against the following schema:
+```python
+table = Table(
+    'invalid_data.csv',
+    schema={'fields': [{'name': 'key'}, {'name': 'value', 'type': 'integer'}]})
+```
+
+Iterating over the data triggers an exception due to the failed cast of `'not_an_integer'` to `int`:
+```python
+for row in table.iter():
+    print(row)
+
+# Traceback (most recent call last):
+# ...
+# tableschema.exceptions.CastError: There are 1 cast errors (see exception.errors) for row "3"
+```
+
+Hint: The row number count starts with 1 and also includes header lines.
+
+(Note: You can optionally switch off `iter()`/`read()` value casting using the cast parameter, see reference below.)
+
+By providing a custom exception handler (a callable) to those methods you can treat occurring exceptions at your own discretion, i.e. to "fail late" and e.g. gather a validation report on the whole data:
+
+```python
+errors = []
+def exc_handler(exc, row_number=None, row_data=None, error_data=None):
+    errors.append((exc, row_number, row_data, error_data))
+
+for row in table.iter(exc_handler=exc_handler):
+    print(row)
+
+# ['zero', 0]
+# ['one', FailedCast('not_an_integer')]
+# ['two', 2]
+
+print(errors)
+
+# [(CastError('There are 1 cast errors (see exception.errors) for row "3"',),
+#   3,
+#   OrderedDict([('key', 'one'), ('value', 'not_an_integer')]),
+#   OrderedDict([('value', 'not_an_integer')]))]
+```
+
+Note that
+
+- Data rows are yielded even though the data is schema-invalid; this is due to our custom expression handler choosing not to raise exceptions (but rather collect them in the errors list).
+- Data field values that can't get casted properly (if `iter()`/`read()` cast parameter is set to True, which is the default) are wrapped into a `FailedCast` "value holder". This allows for distinguishing uncasted values from successfully casted values on the data consumer side. `FailedCast` instances can only get yielded when custom exception handling is in place.
+- The custom exception handler callable must support a function signature as specified in the `iter()`/`read()` sections of the `Table` class API reference.
+
+### Working with Schema
+
+A model of a schema with helpful methods for working with the schema and supported data. Schema instances can be initialized with a schema source as a url to a JSON file or a JSON object. The schema is initially validated (see [validate](#validate) below). By default validation errors will be stored in `schema.errors` but in a strict mode it will be instantly raised.
+
+Let's create a blank schema. It's not valid because `descriptor.fields` property is required by the [Table Schema](http://specs.frictionlessdata.io/table-schema/) specification:
+
+```python
+schema = Schema()
+schema.valid # false
+schema.errors
+# [<ValidationError: "'fields' is a required property">]
+```
+
+To avoid creating a schema descriptor by hand we will use a `schema.infer` method to infer the descriptor from given data:
+
+```python
+schema.infer([
+  ['id', 'age', 'name'],
+  ['1','39','Paul'],
+  ['2','23','Jimmy'],
+  ['3','36','Jane'],
+  ['4','28','Judy'],
+])
+schema.valid # true
+schema.descriptor
+#{ fields:
+#   [ { name: 'id', type: 'integer', format: 'default' },
+#     { name: 'age', type: 'integer', format: 'default' },
+#     { name: 'name', type: 'string', format: 'default' } ],
+#  missingValues: [ '' ] }
+```
+
+Now we have an inferred schema and it's valid. We can cast data rows against our schema. We provide a string input which will be cast correspondingly:
+
+```python
+schema.cast_row(['5', '66', 'Sam'])
+# [ 5, 66, 'Sam' ]
+```
+
+But if we try provide some missing value to the `age` field, the cast will fail because the only valid "missing" value is an empty string. Let's update our schema:
+
+```python
+schema.cast_row(['6', 'N/A', 'Walt'])
+# Cast error
+schema.descriptor['missingValues'] = ['', 'N/A']
+schema.commit()
+schema.cast_row(['6', 'N/A', 'Walt'])
+# [ 6, None, 'Walt' ]
+```
+
+We can save the schema to a local file, and resume work on it at any time by loading it from that file:
+
+```python
+schema.save('schema.json')
+schema = Schema('schema.json')
+```
+
+### Working with Field
+
+```python
+from tableschema import Field
+
+# Init field
+field = Field({'name': 'name', 'type': 'number'})
+
+# Cast a value
+field.cast_value('12345') # -> 12345
+```
+
+Data values can be cast to native Python objects with a Field instance. Type instances can be initialized with [field descriptors](https://specs.frictionlessdata.io/table-schema/). This allows formats and constraints to be defined.
+
+Casting a value will check the value is of the expected type, is in the correct format, and complies with any constraints imposed by a schema. E.g. a date value (in ISO 8601 format) can be cast with a DateType instance. Values that can't be cast will raise an `InvalidCastError` exception.
+
+Casting a value that doesn't meet the constraints will raise a `ConstraintError` exception.
 
 ## API Reference
 

@@ -15,7 +15,7 @@ class DataPackageException(Exception):
     ```python
     try:
         # lib action
-    except exceptions.TableSchemaException as exception:
+    except DataPackageException as exception:
         if exception.multiple:
             for error in exception.errors:
                 # handle error
