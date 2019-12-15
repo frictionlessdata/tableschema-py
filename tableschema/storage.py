@@ -14,20 +14,11 @@ from . import exceptions
 
 @add_metaclass(ABCMeta)
 class Storage(object):
-    """Storage interface and factory
+    """Storage factory/interface
+
+    # For users
 
     > Use `Storage.connect` to instantiate a storage
-
-    The library includes interface declaration to implement tabular `Storage`.
-    This interface allow to use different data storage systems like SQL
-    with `tableschema.Table` class (load/save) as well as on the data package level:
-
-    ![Storage](https://raw.githubusercontent.com/frictionlessdata/tableschema-py/master/data/storage.png)
-
-    An implementor must follow `tableschema.Storage` interface
-    to write his own storage backend. Concrete storage backends
-    could include additional functionality specific to conrete storage system.
-    See `plugins` below to know how to integrate custom storage plugin into your workflow.
 
     For instantiation of concrete storage instances,
     `tableschema.Storage` provides a unified factory method `connect`
@@ -42,6 +33,20 @@ class Storage(object):
     storage.write('bucket', rows)
     storage.read('bucket')
     ```
+
+    # For integrators
+
+    The library includes interface declaration to implement tabular `Storage`.
+    This interface allow to use different data storage systems like SQL
+    with `tableschema.Table` class (load/save) as well as on the data package level:
+
+    ![Storage](https://raw.githubusercontent.com/frictionlessdata/tableschema-py/master/data/storage.png)
+
+    An implementor must follow `tableschema.Storage` interface
+    to write his own storage backend. Concrete storage backends
+    could include additional functionality specific to conrete storage system.
+    See `plugins` below to know how to integrate custom storage plugin into your workflow.
+
     """
 
     # Public
