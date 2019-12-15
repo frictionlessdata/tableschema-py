@@ -16,6 +16,7 @@ from .storage import Storage
 from .validate import validate
 from .infer import infer
 from .schema import FailedCast
+from .exceptions import DataPackageException
 from .exceptions import TableSchemaException
 from .exceptions import LoadError
 from .exceptions import ValidationError

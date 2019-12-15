@@ -839,6 +839,130 @@ Delegates attribute access and the basic rich comparison methods to the
 underlying object. Supports default user-defined classes hashability i.e.
 is hashable based on object identity (not based on the wrapped value).
 
+### `DataPackageException`
+```python
+DataPackageException(self, message, errors=[])
+```
+Base class for all DataPackage/TableSchema exceptions.
+
+If there are multiple errors, they can be read from the exception object:
+
+```
+try:
+    # lib action
+except exceptions.TableSchemaException as exception:
+    if exception.multiple:
+        for error in exception.errors:
+            # handle error
+```
+
+
+#### `datapackageexception.errors`
+List of nested errors
+
+__Returns:__
+
+    DataPackageException[]: list of nested errors
+
+
+#### `datapackageexception.multiple`
+Whether it's a nested exception
+
+__Returns:__
+
+    bool: whether it's a nested exception
+
+
+### `TableSchemaException`
+```python
+TableSchemaException(self, message, errors=[])
+```
+Base class for all TableSchema exceptions.
+
+### `TableSchemaException`
+```python
+TableSchemaException(self, message, errors=[])
+```
+Base class for all TableSchema exceptions.
+
+### `LoadError`
+```python
+LoadError(self, message, errors=[])
+```
+All loading errors.
+
+### `LoadError`
+```python
+LoadError(self, message, errors=[])
+```
+All loading errors.
+
+### `ValidationError`
+```python
+ValidationError(self, message, errors=[])
+```
+All validation errors.
+
+### `ValidationError`
+```python
+ValidationError(self, message, errors=[])
+```
+All validation errors.
+
+### `ValidationError`
+```python
+ValidationError(self, message, errors=[])
+```
+All validation errors.
+
+### `CastError`
+```python
+CastError(self, message, errors=[])
+```
+All value cast errors.
+
+### `CastError`
+```python
+CastError(self, message, errors=[])
+```
+All value cast errors.
+
+### `CastError`
+```python
+CastError(self, message, errors=[])
+```
+All value cast errors.
+
+### `IntegrityError`
+```python
+IntegrityError(self, message, errors=[])
+```
+All integrity errors.
+
+### `UniqueKeyError`
+```python
+UniqueKeyError(self, message, errors=[])
+```
+Unique key constraint violation (CastError subclass)
+
+### `RelationError`
+```python
+RelationError(self, message, errors=[])
+```
+All relations errors.
+
+### `UnresolvedFKError`
+```python
+UnresolvedFKError(self, message, errors=[])
+```
+Unresolved foreign key reference error (RelationError subclass).
+
+### `StorageError`
+```python
+StorageError(self, message, errors=[])
+```
+All storage errors.
+
 ## Contributing
 
 The project follows the [Open Knowledge International coding standards](https://github.com/okfn/coding-standards).
