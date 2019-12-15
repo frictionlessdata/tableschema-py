@@ -8,8 +8,6 @@
 
 A Python implementation of the [Table Schema](http://specs.frictionlessdata.io/table-schema/) standard.
 
-> Read this README on [frictionlessdata.io](https://frictionlessdata.io)
-
 ## Features
 
 - `Table` to work with data tables described by Table Schema
@@ -659,51 +657,163 @@ __Returns__
 ```python
 Storage(self, **options)
 ```
+Storage interface and factory
+
+> Use `Storage.connect` to instantiate a storage
+
+The library includes interface declaration to implement tabular `Storage`.
+This interface allow to use different data storage systems like SQL
+with `tableschema.Table` class (load/save) as well as on the data package level:
+
+![Storage](https://raw.githubusercontent.com/frictionlessdata/tableschema-py/master/data/storage.png)
+
+An implementor must follow `tableschema.Storage` interface
+to write his own storage backend. Concrete storage backends
+could include additional functionality specific to conrete storage system.
+See `plugins` below to know how to integrate custom storage plugin into your workflow.
+
+For instantiation of concrete storage instances,
+`tableschema.Storage` provides a unified factory method `connect`
+(which uses the plugin system under the hood):
+
+```python
+# pip install tableschema_sql
+from tableschema import Storage
+
+storage = Storage.connect('sql', **options)
+storage.create('bucket', descriptor)
+storage.write('bucket', rows)
+storage.read('bucket')
+```
 
 #### `storage.buckets`
-https://github.com/frictionlessdata/tableschema-py#storage
+Return list of storage bucket names.
+
+A `bucket` is a special term which has almost the same meaning as `table`.
+You should consider `bucket` as a `table` stored in the `storage`.
+
+__Raises__
+- `exceptions.StorageError`: raises on any error
+
+__Returns__
+
+`str[]`: return list of bucket names
+
 
 #### `storage.connect`
 ```python
 storage.connect(name, **options)
 ```
-https://github.com/frictionlessdata/tableschema-py#storage
+Create tabular `storage` based on storage name.
+
+__Arguments__
+- __name (str)__: storage name like `sql`
+- __options (dict)__: concrete storage options
+
+__Raises__
+- `StorageError`: raises on any error
+
+__Returns__
+
+`Storage`: returns `Storage` instance
+
 
 #### `storage.create`
 ```python
 storage.create(self, bucket, descriptor, force=False)
 ```
-https://github.com/frictionlessdata/tableschema-py#storage
+Create one/multiple buckets.
+
+__Arguments__
+- __bucket (str/list)__: bucket name or list of bucket names
+- __descriptor (dict/dict[])__: schema descriptor or list of descriptors
+- __force (bool)__: whether to delete and re-create already existing buckets
+
+__Raises__
+- `exceptions.StorageError`: raises on any error
+
 
 #### `storage.delete`
 ```python
 storage.delete(self, bucket=None, ignore=False)
 ```
-https://github.com/frictionlessdata/tableschema-py#storage
+Delete one/multiple/all buckets.
+
+__Arguments__
+- __bucket (str/list/None)__: bucket name or list of bucket names to delete.
+        If `None`, all buckets will be deleted
+- __descriptor (dict/dict[])__: schema descriptor or list of descriptors
+- __ignore (bool)__: don't raise an error on non-existent bucket deletion
+
+__Raises__
+- `exceptions.StorageError`: raises on any error
+
 
 #### `storage.describe`
 ```python
 storage.describe(self, bucket, descriptor=None)
 ```
-https://github.com/frictionlessdata/tableschema-py#storage
+Get/set bucket's Table Schema descriptor
+
+__Arguments__
+- __bucket (str)__: bucket name
+- __descriptor (dict/None)__: schema descriptor to set
+
+__Raises__
+- `exceptions.StorageError`: raises on any error
+
+__Returns__
+
+`dict`: returns Table Schema descriptor
+
 
 #### `storage.iter`
 ```python
 storage.iter(self, bucket)
 ```
-https://github.com/frictionlessdata/tableschema-py#storage
+Return an iterator of typed values based on the schema of this bucket.
+
+__Arguments__
+- __bucket (str)__: bucket name
+
+__Raises__
+- `exceptions.StorageError`: raises on any error
+
+__Returns__
+
+`list[]`: yields data rows
+
 
 #### `storage.read`
 ```python
 storage.read(self, bucket)
 ```
-https://github.com/frictionlessdata/tableschema-py#storage
+Read typed values based on the schema of this bucket.
+
+__Arguments__
+- __bucket (str)__: bucket name
+__Raises__
+- `exceptions.StorageError`: raises on any error
+__Returns__
+
+`list[]`: returns data rows
+
 
 #### `storage.write`
 ```python
 storage.write(self, bucket, rows)
 ```
-https://github.com/frictionlessdata/tableschema-py#storage
+This method writes data rows into `storage`.
+
+It should store values of unsupported types as strings internally (like csv does).
+
+__Arguments__
+- __bucket (str)__: bucket name
+- __rows (list[])__: data rows to write
+
+__Raises__
+- `exceptions.StorageError`: raises on any error
+
 
 ### `FailedCast`
 ```python
