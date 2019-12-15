@@ -38,15 +38,9 @@ A Python implementation of the [Table Schema](http://specs.frictionlessdata.io/t
     - [`FailedCast`](#failedcast)
     - [`DataPackageException`](#datapackageexception)
     - [`TableSchemaException`](#tableschemaexception)
-    - [`TableSchemaException`](#tableschemaexception-1)
     - [`LoadError`](#loaderror)
-    - [`LoadError`](#loaderror-1)
     - [`ValidationError`](#validationerror)
-    - [`ValidationError`](#validationerror-1)
-    - [`ValidationError`](#validationerror-2)
     - [`CastError`](#casterror)
-    - [`CastError`](#casterror-1)
-    - [`CastError`](#casterror-2)
     - [`IntegrityError`](#integrityerror)
     - [`UniqueKeyError`](#uniquekeyerror)
     - [`RelationError`](#relationerror)
@@ -1180,18 +1174,6 @@ TableSchemaException(self, message, errors=[])
 ```
 Base class for all TableSchema exceptions.
 
-### `TableSchemaException`
-```python
-TableSchemaException(self, message, errors=[])
-```
-Base class for all TableSchema exceptions.
-
-### `LoadError`
-```python
-LoadError(self, message, errors=[])
-```
-All loading errors.
-
 ### `LoadError`
 ```python
 LoadError(self, message, errors=[])
@@ -1203,30 +1185,6 @@ All loading errors.
 ValidationError(self, message, errors=[])
 ```
 All validation errors.
-
-### `ValidationError`
-```python
-ValidationError(self, message, errors=[])
-```
-All validation errors.
-
-### `ValidationError`
-```python
-ValidationError(self, message, errors=[])
-```
-All validation errors.
-
-### `CastError`
-```python
-CastError(self, message, errors=[])
-```
-All value cast errors.
-
-### `CastError`
-```python
-CastError(self, message, errors=[])
-```
-All value cast errors.
 
 ### `CastError`
 ```python
