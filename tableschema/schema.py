@@ -62,7 +62,7 @@ class Schema(object):
         Always true in strict mode.
 
         # Returns:
-            - bool: validation status
+            bool: validation status
 
         """
         return not bool(self.__errors)
@@ -146,7 +146,7 @@ class Schema(object):
     def get_field(self, name):
         """Get schema's field by name.
 
-        > `table.update_field` if you want to modify the field descriptor
+        > Use `table.update_field` if you want to modify the field descriptor
 
         # Arguments
             name (str): schema field name

@@ -16,7 +16,15 @@ from . import types
 # Module API
 
 class Field(object):
-    """Table Schema field representation.
+    """Field representaion
+
+    # Arguments
+        descriptor (dict): schema field descriptor
+        missingValues (str[]): an array with string representing missing values
+
+    # Raises
+        TableSchemaException: raises any error that occurs during the process
+
     """
 
     # Public
@@ -24,8 +32,6 @@ class Field(object):
     def __init__(self, descriptor, missing_values=config.DEFAULT_MISSING_VALUES,
                  # Internal
                  schema=None):
-        """https://github.com/frictionlessdata/tableschema-py#field
-        """
 
         # Process descriptor
         descriptor = helpers.expand_field_descriptor(descriptor)
@@ -39,48 +45,89 @@ class Field(object):
 
     @property
     def schema(self):
-        """https://github.com/frictionlessdata/tableschema-py#field
+        """Returns a schema instance if the field belongs to some schema
+
+        # Returns
+            Schema: field's schema
+
         """
         return self.__schema
 
     @property
     def name(self):
-        """https://github.com/frictionlessdata/tableschema-py#field
+        """Field name
+
+        # Returns
+            str: field name
+
         """
         return self.__descriptor.get('name')
 
     @property
     def type(self):
-        """https://github.com/frictionlessdata/tableschema-py#field
+        """Field type
+
+        # Returns
+            str: field type
+
         """
         return self.__descriptor.get('type')
 
     @property
     def format(self):
-        """https://github.com/frictionlessdata/tableschema-py#field
+        """Field format
+
+        # Returns
+            str: field format
+
         """
         return self.__descriptor.get('format')
 
     @property
     def required(self):
-        """https://github.com/frictionlessdata/tableschema-py#field
+        """Whether field is required
+
+        # Returns
+            bool: true if required
+
         """
         return self.constraints.get('required', False)
 
     @property
     def constraints(self):
-        """https://github.com/frictionlessdata/tableschema-py#field
+        """Field constraints
+
+        # Returns
+            dict: dict of field constraints
+
         """
         return self.__descriptor.get('constraints', {})
 
     @property
     def descriptor(self):
-        """https://github.com/frictionlessdata/tableschema-py#field
+        """Fields's descriptor
+
+        # Returns
+            dict: descriptor
+
         """
         return self.__descriptor
 
     def cast_value(self, value, constraints=True, preserve_missing_values=False):
-        """https://github.com/frictionlessdata/tableschema-py#field
+        """Cast given value according to the field type and format.
+
+        # Arguments
+            value (any): value to cast against field
+            constraints (boll/str[]): gets constraints configuration
+                - it could be set to true to disable constraint checks
+                - it could be an Array of constraints to check e.g. ['minimum', 'maximum']
+
+        # Raises
+            TableSchemaException: raises any error that occurs during the process
+
+        # Returns
+            any: returns cast value
+
         """
 
         # Null value
@@ -116,7 +163,15 @@ class Field(object):
         return cast_value
 
     def test_value(self, value, constraints=True):
-        """https://github.com/frictionlessdata/tableschema-py#field
+        """Test whether value is compliant to the field.
+
+        # Arguments
+            value (any): value to cast against field
+            constraints (bool/str[]): constraints configuration
+
+        # Returns
+            bool: returns if value is compliant to the field
+
         """
         try:
             self.cast_value(value, constraints=constraints)

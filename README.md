@@ -348,7 +348,7 @@ Always true in strict mode.
 
 __Returns:__
 
-    - bool: validation status
+    bool: validation status
 
 
 #### `schema.get_field`
@@ -357,7 +357,7 @@ schema.get_field(self, name)
 ```
 Get schema's field by name.
 
-> `table.update_field` if you want to modify the field descriptor
+> Use `table.update_field` if you want to modify the field descriptor
 
 __Arguments__
 - __name (str)__: schema field name
@@ -373,7 +373,7 @@ schema.get_field(self, name)
 ```
 Get schema's field by name.
 
-> `table.update_field` if you want to modify the field descriptor
+> Use `table.update_field` if you want to modify the field descriptor
 
 __Arguments__
 - __name (str)__: schema field name
@@ -535,40 +535,106 @@ __Returns__
 ```python
 Field(self, descriptor, missing_values=[''], schema=None)
 ```
-Table Schema field representation.
+Field representaion
+
+__Arguments__
+- __descriptor (dict)__: schema field descriptor
+- __missingValues (str[])__: an array with string representing missing values
+
+__Raises__
+- `TableSchemaException`: raises any error that occurs during the process
+
 
 #### `field.constraints`
-https://github.com/frictionlessdata/tableschema-py#field
+Field constraints
+
+__Returns__
+
+`dict`: dict of field constraints
+
 
 #### `field.descriptor`
-https://github.com/frictionlessdata/tableschema-py#field
+Fields's descriptor
+
+__Returns__
+
+`dict`: descriptor
+
 
 #### `field.format`
-https://github.com/frictionlessdata/tableschema-py#field
+Field format
+
+__Returns__
+
+`str`: field format
+
 
 #### `field.name`
-https://github.com/frictionlessdata/tableschema-py#field
+Field name
+
+__Returns__
+
+`str`: field name
+
 
 #### `field.required`
-https://github.com/frictionlessdata/tableschema-py#field
+Whether field is required
+
+__Returns__
+
+`bool`: true if required
+
 
 #### `field.schema`
-https://github.com/frictionlessdata/tableschema-py#field
+Returns a schema instance if the field belongs to some schema
+
+__Returns__
+
+`Schema`: field's schema
+
 
 #### `field.type`
-https://github.com/frictionlessdata/tableschema-py#field
+Field type
+
+__Returns__
+
+`str`: field type
+
 
 #### `field.cast_value`
 ```python
 field.cast_value(self, value, constraints=True, preserve_missing_values=False)
 ```
-https://github.com/frictionlessdata/tableschema-py#field
+Cast given value according to the field type and format.
+
+__Arguments__
+- __value (any)__: value to cast against field
+- __constraints (boll/str[])__: gets constraints configuration
+        - it could be set to true to disable constraint checks
+        - it could be an Array of constraints to check e.g. ['minimum', 'maximum']
+
+__Raises__
+- `TableSchemaException`: raises any error that occurs during the process
+
+__Returns__
+
+`any`: returns cast value
+
 
 #### `field.test_value`
 ```python
 field.test_value(self, value, constraints=True)
 ```
-https://github.com/frictionlessdata/tableschema-py#field
+Test whether value is compliant to the field.
+
+__Arguments__
+- __value (any)__: value to cast against field
+- __constraints (bool/str[])__: constraints configuration
+
+__Returns__
+
+`bool`: returns if value is compliant to the field
+
 
 ### `Storage`
 ```python
