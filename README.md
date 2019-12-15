@@ -22,6 +22,8 @@ A Python implementation of the [Table Schema](http://specs.frictionlessdata.io/t
 
 ## Getting Started
 
+### Installation
+
 The package uses semantic versioning. It means that major versions  could include breaking changes. It's highly recommended to specify `tableschema` version range in your `setup/requirements` file e.g. `tableschema>=1.0,<2.0`.
 
 ```bash
@@ -127,10 +129,27 @@ __Arguments__
     `{resource1: {(foreign_key_field1, foreign_key_field2): {(value1, value2): {one_keyedrow}, ... }}}`.
     If not provided but relations is true, it will be created
     before the validation process by *index_foreign_keys_values* method
-- __exc_handler ()__:
+- __exc_handler (func)__:
     optional custom exception handler callable.
     Can be used to defer raising errors (i.e. "fail late"), e.g.
-    for data validation purposes. Must support the following call signature
+    for data validation purposes. Must support the signature mentioned below
+
+__Custom exception handler__
+
+
+```python
+def exc_handler(exc, row_number=None, row_data=None, error_data=None):
+    exc(Exception):
+        Deferred exception instance
+    row_number(int):
+        Data row number that triggers exception exc
+    row_data(OrderedDict):
+        Invalid data row source data
+    error_data(OrderedDict):
+        Data row source data field subset responsible for the error, if
+        applicable (e.g. invalid primary or foreign key fields). May be
+        identical to row_data.
+```
 
 __Raises__
 - `exceptions.TableSchemaException`: base class of any error
@@ -148,7 +167,17 @@ __Returns__
 ```python
 table.read(self, keyed=False, extended=False, cast=True, limit=None, integrity=False, relations=False, foreign_keys_values=False, exc_handler=None)
 ```
-https://github.com/frictionlessdata/tableschema-py#table
+Read the whole table and return as array of rows
+
+**It has the same API as `table.iter` except for:***
+
+__Arguments__
+- __limit (int)__: limit count of rows to read and return
+
+__Returns__
+
+`list[]`: returns rows
+
 
 #### `table.infer`
 ```python

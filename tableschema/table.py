@@ -154,10 +154,26 @@ class Table(object):
             If not provided but relations is true, it will be created
             before the validation process by *index_foreign_keys_values* method
 
-          exc_handler ():
+          exc_handler (func):
             optional custom exception handler callable.
             Can be used to defer raising errors (i.e. "fail late"), e.g.
-            for data validation purposes. Must support the following call signature
+            for data validation purposes. Must support the signature mentioned below
+
+        # Custom exception handler
+
+        ```python
+        def exc_handler(exc, row_number=None, row_data=None, error_data=None):
+            exc(Exception):
+                Deferred exception instance
+            row_number(int):
+                Data row number that triggers exception exc
+            row_data(OrderedDict):
+                Invalid data row source data
+            error_data(OrderedDict):
+                Data row source data field subset responsible for the error, if
+                applicable (e.g. invalid primary or foreign key fields). May be
+                identical to row_data.
+        ```
 
         # Raises
           exceptions.TableSchemaException: base class of any error
@@ -324,7 +340,16 @@ class Table(object):
     def read(self, keyed=False, extended=False, cast=True, limit=None,
              integrity=False, relations=False, foreign_keys_values=False,
              exc_handler=None):
-        """https://github.com/frictionlessdata/tableschema-py#table
+        """Read the whole table and return as array of rows
+
+        **It has the same API as `table.iter` except for:***
+
+        # Arguments
+          limit (int): limit count of rows to read and return
+
+        # Returns
+          list[]: returns rows
+
         """
         result = []
         rows = self.iter(
