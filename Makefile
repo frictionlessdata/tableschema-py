@@ -20,6 +20,9 @@ profiles:
 readme:
 	pip install referencer
 	referencer $(PACKAGE) README.md --in-place
+	pip install md-toc
+	md_toc -p README.md github --header-levels 3
+	sed -i '/(#$(PACKAGE)-py)/,+2d' README.md
 
 release:
 	git checkout master && git pull origin && git fetch -p && git diff

@@ -22,54 +22,6 @@ A Python implementation of the [Table Schema](http://specs.frictionlessdata.io/t
 
 <!--TOC-->
 
-  - [Getting started](#getting-started)
-    - [Installation](#installation)
-    - [Running on CLI](#running-on-cli)
-    - [Running on Python](#running-on-python)
-  - [Documentation](#documentation)
-    - [Stream](#stream)
-      - [Headers](#headers)
-      - [Encoding](#encoding)
-      - [Compression (Python3-only)](#compression-python3-only)
-      - [Allow html](#allow-html)
-      - [Sample size](#sample-size)
-      - [Bytes sample size](#bytes-sample-size)
-      - [Ignore blank headers](#ignore-blank-headers)
-      - [Force strings](#force-strings)
-      - [Force parse](#force-parse)
-      - [Skip rows](#skip-rows)
-      - [Post parse](#post-parse)
-      - [Keyed and extended rows](#keyed-and-extended-rows)
-    - [Supported schemes](#supported-schemes)
-      - [s3](#s3)
-      - [file](#file)
-      - [http/https/ftp/ftps](#httphttpsftpftps)
-      - [stream](#stream-1)
-      - [text](#text)
-    - [Supported file formats](#supported-file-formats)
-      - [csv (read & write)](#csv-read--write)
-      - [xls/xlsx (read & write)](#xlsxlsx-read-only)
-      - [ods (read only)](#ods-read-only)
-      - [gsheet (read only)](#gsheet-read-only)
-      - [sql (read & write)](#sql-read--write)
-      - [Data Package (read only)](#data-package-read-only)
-      - [inline (read only)](#inline-read-only)
-      - [json (read only)](#json-read-only)
-      - [ndjson (read only)](#ndjson-read-only)
-      - [tsv (read only)](#tsv-read-only)
-      - [html (read only)](#html-read-only)
-    - [Adding support for new file sources, formats, and writers](#adding-support-for-new-file-sources-formats-and-writers)
-      - [Custom loaders](#custom-loaders)
-      - [Custom parsers](#custom-parsers)
-      - [Custom writers](#custom-writers)
-    - [Validate](#validate)
-    - [Exceptions](#exceptions)
-  - [API Reference](#api-reference)
-  - [Contributing](#contributing)
-  - [Changelog](#changelog)
-
-<!--TOC-->
-
 ## Getting Started
 
 ### Installation
@@ -1160,7 +1112,7 @@ If there are multiple errors, they can be read from the exception object:
 ```python
 try:
     # lib action
-except exceptions.TableSchemaException as exception:
+except DataPackageException as exception:
     if exception.multiple:
         for error in exception.errors:
             # handle error
@@ -1189,18 +1141,6 @@ TableSchemaException(self, message, errors=[])
 ```
 Base class for all TableSchema exceptions.
 
-### `TableSchemaException`
-```python
-TableSchemaException(self, message, errors=[])
-```
-Base class for all TableSchema exceptions.
-
-### `LoadError`
-```python
-LoadError(self, message, errors=[])
-```
-All loading errors.
-
 ### `LoadError`
 ```python
 LoadError(self, message, errors=[])
@@ -1212,30 +1152,6 @@ All loading errors.
 ValidationError(self, message, errors=[])
 ```
 All validation errors.
-
-### `ValidationError`
-```python
-ValidationError(self, message, errors=[])
-```
-All validation errors.
-
-### `ValidationError`
-```python
-ValidationError(self, message, errors=[])
-```
-All validation errors.
-
-### `CastError`
-```python
-CastError(self, message, errors=[])
-```
-All value cast errors.
-
-### `CastError`
-```python
-CastError(self, message, errors=[])
-```
-All value cast errors.
 
 ### `CastError`
 ```python
