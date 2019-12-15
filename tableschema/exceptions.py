@@ -12,7 +12,7 @@ class DataPackageException(Exception):
 
     If there are multiple errors, they can be read from the exception object:
 
-    ```
+    ```python
     try:
         # lib action
     except exceptions.TableSchemaException as exception:
@@ -33,7 +33,7 @@ class DataPackageException(Exception):
     def multiple(self):
         """Whether it's a nested exception
 
-        # Returns:
+        # Returns
             bool: whether it's a nested exception
 
         """
@@ -43,7 +43,7 @@ class DataPackageException(Exception):
     def errors(self):
         """List of nested errors
 
-        # Returns:
+        # Returns
             DataPackageException[]: list of nested errors
 
         """

@@ -847,7 +847,7 @@ Base class for all DataPackage/TableSchema exceptions.
 
 If there are multiple errors, they can be read from the exception object:
 
-```
+```python
 try:
     # lib action
 except exceptions.TableSchemaException as exception:
@@ -860,17 +860,17 @@ except exceptions.TableSchemaException as exception:
 #### `datapackageexception.errors`
 List of nested errors
 
-__Returns:__
+__Returns__
 
-    DataPackageException[]: list of nested errors
+`DataPackageException[]`: list of nested errors
 
 
 #### `datapackageexception.multiple`
 Whether it's a nested exception
 
-__Returns:__
+__Returns__
 
-    bool: whether it's a nested exception
+`bool`: whether it's a nested exception
 
 
 ### `TableSchemaException`
