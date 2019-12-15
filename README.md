@@ -656,9 +656,9 @@ Validation status
 
 Always true in strict mode.
 
-__Returns:__
+__Returns__
 
-    bool: validation status
+`bool`: validation status
 
 
 #### `schema.get_field`

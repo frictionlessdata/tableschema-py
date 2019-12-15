@@ -61,7 +61,7 @@ class Schema(object):
 
         Always true in strict mode.
 
-        # Returns:
+        # Returns
             bool: validation status
 
         """
