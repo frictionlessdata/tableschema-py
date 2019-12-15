@@ -6,7 +6,7 @@
 [![Github](https://img.shields.io/badge/github-master-brightgreen)](https://github.com/frictionlessdata/tableschema-py)
 [![Gitter](https://img.shields.io/gitter/room/frictionlessdata/chat.svg)](https://gitter.im/frictionlessdata/chat)
 
-A library for working with [Table Schema](http://specs.frictionlessdata.io/table-schema/) in Python.
+A Python implementation of the [Table Schema](http://specs.frictionlessdata.io/table-schema/) standard.
 
 ## Features
 
@@ -24,18 +24,28 @@ A library for working with [Table Schema](http://specs.frictionlessdata.io/table
 
   - [Getting Started](#getting-started)
     - [Installation](#installation)
-    - [Examples](#examples)
   - [Documentation](#documentation)
-    - [Table](#table)
-    - [Schema](#schema)
-      - [FailedCast](#failedcast)
-    - [Field](#field)
-    - [validate](#validate)
-    - [infer](#infer)
-    - [Exceptions](#exceptions)
-    - [Storage](#storage)
-    - [Plugins](#plugins)
-    - [CLI](#cli)
+    - [Introduction](#introduction)
+    - [Working with Table](#working-with-table)
+    - [Working with Schema](#working-with-schema)
+    - [Working with Field](#working-with-field)
+  - [API Reference](#api-reference)
+    - [`cli`](#cli)
+    - [`Table`](#table)
+    - [`Schema`](#schema)
+    - [`Field`](#field)
+    - [`Storage`](#storage)
+    - [`FailedCast`](#failedcast)
+    - [`DataPackageException`](#datapackageexception)
+    - [`TableSchemaException`](#tableschemaexception)
+    - [`LoadError`](#loaderror)
+    - [`ValidationError`](#validationerror)
+    - [`CastError`](#casterror)
+    - [`IntegrityError`](#integrityerror)
+    - [`UniqueKeyError`](#uniquekeyerror)
+    - [`RelationError`](#relationerror)
+    - [`UnresolvedFKError`](#unresolvedfkerror)
+    - [`StorageError`](#storageerror)
   - [Contributing](#contributing)
   - [Changelog](#changelog)
 
@@ -51,9 +61,11 @@ The package uses semantic versioning. It means that major versions  could includ
 $ pip install tableschema
 ```
 
-### Examples
+## Documentation
 
-Code examples in this readme requires Python 3.4+ interpreter. You could see even more example in [examples](https://github.com/frictionlessdata/tableschema-py/tree/master/examples) directory.
+### Introduction
+
+Let's start with a simple example:
 
 ```python
 from tableschema import Table
@@ -69,9 +81,7 @@ for keyed_row in table.iter(keyed=True):
     print(keyed_row)
 ```
 
-## Documentation
-
-### Table
+### Working with Table
 
 A table is a core concept in a tabular data world. It represents data with metadata (Table Schema). Let's see how we can use it in practice.
 
@@ -240,165 +250,7 @@ Note that
 - Data field values that can't get casted properly (if `iter()`/`read()` cast parameter is set to True, which is the default) are wrapped into a `FailedCast` "value holder". This allows for distinguishing uncasted values from successfully casted values on the data consumer side. `FailedCast` instances can only get yielded when custom exception handling is in place.
 - The custom exception handler callable must support a function signature as specified in the `iter()`/`read()` sections of the `Table` class API reference.
 
-So far for a basic introduction to the `Table` class. To learn more let's take a look at the `Table` class API reference.
-
-#### `Table(source, schema=None, strict=False, post_cast=[], storage=None, **options)`
-
-Constructor to instantiate `Table` class. If `references` argument is provided, foreign keys will be checked on any reading operation.
-
-- `source (str/list[])` - data source (one of):
-  - local file (path)
-  - remote file (url)
-  - array of arrays representing the rows
-- `schema (any)` - data schema in all forms supported by `Schema` class
-- `strict (bool)` - strictness option to pass to `Schema` constructor
-- `post_cast (function[])` - list of post cast processors
-- `storage (None/str)` - storage name like `sql` or `bigquery`
-- `options (dict)` - `tabulator` or storage options
-- `(exceptions.TableSchemaException)` - raises any error that occurs in table creation process
-- `(Table)` - returns data table class instance
-
-#### `table.headers`
-
-- `(str[])` - returns data source headers
-
-#### `table.schema`
-
-- `(Schema)` - returns schema class instance
-
-#### `table.size`
-
-- `(int/None)` - returns the table's size in BYTES if it's already read using e.g. `table.read`, otherwise returns `None`. In the middle of an iteration it returns size of already read contents
-
-#### `table.hash`
-
-- `(str/None)` - returns the table's SHA256 hash if it's already read using e.g. `table.read`, otherwise returns `None`. In the middle of an iteration it returns hash of already read contents
-
-#### `table.iter(keyed=Fase, extended=False, cast=True, integrity=False, relations=False, foreign_keys_values=False, exc_handler=None)`
-
-Iterates through the table data and emits rows cast based on table schema. Data casting can be disabled.
-
-- `keyed (bool)` - iterate keyed rows
-- `extended (bool)` - iterate extended rows
-- `cast (bool)` - disable data casting if false
-- `integrity` (dict) - dictionary in a form of `{'size': <bytes>, 'hash': '<sha256>'}` to check integrity of the table when it's read completely. Both keys are optional.
-- `relations (dict)` - dictionary of foreign key references in a form of `{resource1: [{field1: value1, field2: value2}, ...], ...}`. If provided, foreign key fields will checked and resolved to one of their references (/!\ one-to-many fk are not completely resolved).
-- `foreign_keys_values (dict)` - three-level dictionary of foreign key references optimized to speed up validation process in a form of `{resource1: { (foreign_key_field1, foreign_key_field2) : { (value1, value2) : {one_keyedrow}, ... }}}`. If not provided but relations is true, it will be created before the validation process by *index_foreign_keys_values* method
-- `exc_handler ()` - optional custom exception handler callable. Can be used to defer raising errors (i.e. "fail late"), e.g. for data validation purposes. Must support the following call signature:
-
-    ```python
-    def exc_handler(exc, row_number=None, row_data=None, error_data=None):
-        """Custom exception handler (example).
-
-        Parameters
-        ----------
-        exc : Exception
-            Deferred exception instance
-        row_number : int
-            Data row number that triggers exception exc
-        row_data : OrderedDict
-            Invalid data row source data
-        error_data : OrderedDict
-            Data row source data field subset responsible for the error, if
-            applicable (e.g. invalid primary or foreign key fields). May be
-            identical to row_data.
-        """
-        # ...
-    ```
-
-Raises:
-
-- `(exceptions.TableSchemaException)` - base class of any error that occurs during this process. Specializations:
-  - `(exceptions.CastError)` - data cast error
-  - `(exceptions.IntegrityError)` - integrity checking error
-  - `(exceptions.UniqueKeyError)` - unique key constraint violation
-  - `(exceptions.UnresolvedFKError)` - unresolved foreign key reference error
-
-Yields:
-
-- `(any[]/any{})` - yields rows:
-  - `[value1, value2]` - base
-  - `{header1: value1, header2: value2}` - keyed
-  - `[rowNumber, [header1, header2], [value1, value2]]` - extended
-
-#### `table.read(keyed=False, extended=False, cast=True, integrity=False, relations=False, limit=None, foreign_keys_values=False, exc_handler=None)`
-
-Read the whole table and return as array of rows. Count of rows could be limited.
-
-- `keyed (bool)` - flag to emit keyed rows
-- `extended (bool)` - flag to emit extended rows
-- `cast (bool)` - flag to disable data casting if false
-- `integrity` (dict) - dictionary in a form of `{'size': <bytes>, 'hash': '<sha256>'}` to check integrity of the table when it's read completely. Both keys are optional.
-- `relations (dict)` - dict of foreign key references in a form of `{resource1: [{field1: value1, field2: value2}, ...], ...}`. If provided foreign key fields will checked and resolved to its references
-- `limit (int)` - integer limit of rows to return
-- `foreign_keys_values (dict)` - three-level dictionary of foreign key references optimized to speed up validation process in a form of `{resource1: { (foreign_key_field1, foreign_key_field2) : { (value1, value2) : {one_keyedrow}, ... }}}`
-- `exc_handler ()` - optional custom exception handler callable. Can be used to defer raising errors (i.e. "fail late"), e.g. for data validation purposes. Must support the following call signature:
-
-    ```python
-    def exc_handler(exc, row_number=None, row_data=None, error_data=None):
-        """Custom exception handler (example).
-
-        Parameters
-        ----------
-        exc : Exception
-            Deferred exception instance
-        row_number : int
-            Data row number that triggers exception exc
-        row_data : OrderedDict
-            Invalid data row source data
-        error_data : OrderedDict
-            Data row source data field subset responsible for the error, if
-            applicable (e.g. invalid primary or foreign key fields). May be
-            identical to row_data.
-        """
-        # ...
-    ```
-
-Raises:
-
-- `(exceptions.TableSchemaException)` - base class of any error that occurs during this process. Specializations:
-  - `(exceptions.CastError)` - data cast error
-  - `(exceptions.IntegrityError)` - integrity checking error
-  - `(exceptions.UniqueKeyError)` - unique key constraint violation
-  - `(exceptions.UnresolvedFKError)` - unresolved foreign key reference error
-
-Returns:
-
-- `(list[])` - returns array of rows (see `table.iter`)
-
-#### `table.infer(limit=100, confidence=0.75)`
-
-Infer a schema for the table. It will infer and set Table Schema to `table.schema` based on table data.
-
-- `limit (int)` - limit rows sample size
-- `confidence (float)` - how many casting errors are allowed (as a ratio, between 0 and 1)
-- `(dict)` - returns Table Schema descriptor
-
-#### `table.save(target, storage=None, **options)`
-
-> To save schema use `table.schema.save()`
-
-Save data source to file locally in CSV format with `,` (comma) delimiter
-
-- `target (str)` - saving target (e.g. file path)
-- `storage (None/str)` - storage name like `sql` or `bigquery`
-- `options (dict)` - `tabulator` or storage options
-- `(exceptions.TableSchemaException)` - raises an error if there is saving problem
-- `(True/Storage)` - returns true or storage instance
-
-#### `table.index_foreign_keys_values(relations)`
-
-Creates a three-level dictionary of foreign key references optimized to speed up validation process in a form of `{resource1: { (foreign_key_field1, foreign_key_field2) : { (value1, value2) : {one_keyedrow}, ... }}}`.
-For each foreign key of the schema it will iterate through the corresponding `relations['resource']` to create an index (i.e. a dict) of existing values for the foreign fields and store on keyed row for each value combination.
-The optimization relies on the indexation of possible values for one foreign key in a hashmap to later speed up resolution.
-This method is public to allow creating the index once to apply it on multiple tables charing the same schema (typically [grouped resources in datapackage](https://github.com/frictionlessdata/datapackage-py#group))
-Note 1: the second key of the output is a tuple of the foreign fields, a proxy identifier of the foreign key
-Note 2: the same relation resource can be indexed multiple times as a schema can contain more than one Foreign Keys pointing to the same resource
-
-- `relations (dict)` - dict of foreign key references in a form of `{resource1: [{field1: value1, field2: value2}, ...], ...}`. It must contain all resources pointed in the foreign keys schema definition.
-- `({resource1: { (foreign_key_field1, foreign_key_field2) : { (value1, value2) : {one_keyedrow}, ... }}})` - returns a three-level dictionary of foreign key references optimized to speed up validation process
-
-### Schema
+### Working with Schema
 
 A model of a schema with helpful methods for working with the schema and supported data. Schema instances can be initialized with a schema source as a url to a JSON file or a JSON object. The schema is initially validated (see [validate](#validate) below). By default validation errors will be stored in `schema.errors` but in a strict mode it will be instantly raised.
 
@@ -455,163 +307,7 @@ schema.save('schema.json')
 schema = Schema('schema.json')
 ```
 
-This was a basic introduction to the `Schema` class. To learn more, let's take a look at the `Schema` API reference.
-
-#### `Schema(descriptor, strict=False)`
-
-Constructor to instantiate `Schema` class.
-
-- `descriptor (str/dict)` - schema descriptor:
-  -  local path
-  -  remote url
-  -  dictionary
-- `strict (bool)` - flag to specify validation behaviour:
-  - if false, errors will not be raised but instead collected in `schema.errors`
-  - if true, validation errors are raised immediately
-- `(exceptions.TableSchemaException)` - raise any error that occurs during the process
-- `(Schema)` - returns schema class instance
-
-#### `schema.valid`
-
-- `(bool)` - returns validation status. Always true in strict mode.
-
-#### `schema.errors`
-
-- `(Exception[])` - returns validation errors. Always empty in strict mode.
-
-#### `schema.descriptor`
-
-- `(dict)` - returns schema descriptor
-
-#### `schema.primary_key`
-
-- `(str[])` - returns schema primary key
-
-#### `schema.foreign_keys`
-
-- `(dict[])` - returns schema foreign keys
-
-#### `schema.fields`
-
-- `(Field[])` - returns an array of `Field` instances
-
-#### `schema.field_names`
-
-- `(str[])` - returns an array of field names.
-
-#### `schema.get_field(name)`
-
-Get schema field by name.
-
-Note: use `update_field` if you want to modify the field descriptor
-
-- `name (str)` - schema field name
-- `(Field/None)` - returns `Field` instance or `None` if not found
-
-#### `schema.add_field(descriptor)`
-
-Add new field to schema. The schema descriptor will be validated with newly added field descriptor.
-
-- `descriptor (dict)` - field descriptor
-- `(exceptions.TableSchemaException)` - raises any error that occurs during the process
-- `(Field/None)` - returns added `Field` instance or `None` if not added
-
-#### `schema.update_field(name, update)`
-
-Update existing descriptor field by name
-
-- `name (str)` - schema field name
-- `update (dict)` - update to apply to field's descriptor
-- `(bool)` - returns true on success and false if no field is found to be modified
-
-cf [`schema.commit()`](#schemacommitstrictnone) example
-
-#### `schema.remove_field(name)`
-
-Remove field resource by name. The schema descriptor will be validated after field descriptor removal.
-
-- `name (str)` - schema field name
-- `(exceptions.TableSchemaException)` - raises any error that occurs during the process
-- `(Field/None)` - returns removed `Field` instances or `None` if not found
-
-#### `schema.cast_row(row)`
-
-Cast row based on field types and formats.
-
-- `row (any[])` - data row as an array of values
-- `(any[])` - returns cast data row
-
-#### `schema.infer(rows, headers=1, confidence=0.75, guesser_cls=None, resolver_cls=None)`
-
-Infer and set `schema.descriptor` based on data sample.
-
-- `rows (list[])` - array of arrays representing rows.
-- `headers (int/str[])` - data sample headers (one of):
-  - row number containing headers (`rows` should contain headers rows)
-  - array of headers (`rows` should NOT contain headers rows)
-- `confidence (float)` - how many casting errors are allowed (as a ratio, between 0 and 1)
-- `guesser_cls` & `resolver_cls` - you can implement inferring strategies by providing type-guessing and type-resolving classes [experimental]
-- `{dict}` - returns Table Schema descriptor
-
-#### `schema.commit(strict=None)`
-
-Update schema instance if there are in-place changes in the descriptor.
-
-- `strict (bool)` - alter `strict` mode for further work
-- `(exceptions.TableSchemaException)` - raises any error that occurs during the process
-- `(bool)` - returns true on success and false if not modified
-
-```python
-from tableschema import Schema
-descriptor = {'fields': [{'name': 'my_field', 'title': 'My Field', 'type': 'string'}]}
-schema = Schema(descriptor)
-print(schema.get_field('my_field').descriptor['type']) # string
-
-# Update descriptor by field position
-schema.descriptor['fields'][0]['type'] = 'number'
-# Update descriptor by field name
-schema.update_field('my_field', {'title': 'My Pretty Field'}) # True
-
-# Change are not committed
-print(schema.get_field('my_field').descriptor['type']) # string
-print(schema.get_field('my_field').descriptor['title']) # My Field
-
-
-# Commit change
-schema.commit()
-print(schema.get_field('my_field').descriptor['type']) # number
-print(schema.get_field('my_field').descriptor['title']) # My Pretty Field
-
-```
-
-#### `schema.save(target)`
-
-Save schema descriptor to target destination.
-
-- `target (str)` - path where to save a descriptor
-- `(exceptions.TableSchemaException)` - raises any error that occurs during the process
-- `(bool)` - returns true on success
-
-#### FailedCast
-`FailedCast` wraps an original data field value that failed to be properly casted to the target data type as denoted by the given schema. FailedCast allows for further processing/yielding values but still be able to distinguish uncasted values on the consuming side.
-
-`FailedCast` objects can only get yielded if custom error handling is in place so that exceptions are deferred, see the `Table` class `iter()`/`read()`
-documentation.
-
-##### `FailedCast(value)`
-Constructor for the `FailedCast` class.
-
-- `value (any)` - data field value
-
-`FailedCast` delegates attribute access and the basic rich comparison methods
-to the underlying object. Supports default user-defined classes hashability i.e.  is hashable based on object identity (not based on the wrapped value).
-
-##### `failed_cast.value`
-
-- `(any)` - original data value
-
-
-### Field
+### Working with Field
 
 ```python
 from tableschema import Field
@@ -629,193 +325,641 @@ Casting a value will check the value is of the expected type, is in the correct 
 
 Casting a value that doesn't meet the constraints will raise a `ConstraintError` exception.
 
-Here is an API reference for the `Field` class:
+## API Reference
 
-#### `new Field(descriptor, missingValues=[''])`
+### `cli`
+```python
+cli()
+```
+Command-line interface
 
-Constructor to instantiate `Field` class.
+```
+Usage: tableschema [OPTIONS] COMMAND [ARGS]...
 
-- `descriptor (dict)` - schema field descriptor
-- `missingValues (str[])` - an array with string representing missing values
-- `(exceptions.TableSchemaException)` - raises any error that occurs during the process
-- `(Field)` - returns field class instance
+Options:
+  --help  Show this message and exit.
 
-#### `field.schema`
+Commands:
+  infer     Infer a schema from data.
+  info      Return info on this version of Table Schema
+  validate  Validate that a supposed schema is in fact a Table Schema.
+```
 
-- `(Schema)` - returns a schema instance if the field belongs to some schema
 
-#### `field.name`
+### `Table`
+```python
+Table(self, source, schema=None, strict=False, post_cast=[], storage=None, **options)
+```
+Table representation
 
-- `(str)` - returns field name
+__Arguments__
+- __source (str/list[])__: data source one of:
+    - local file (path)
+    - remote file (url)
+    - array of arrays representing the rows
+- __schema (any)__: data schema in all forms supported by `Schema` class
+- __strict (bool)__: strictness option to pass to `Schema` constructor
+- __post_cast (function[])__: list of post cast processors
+- __storage (None)__: storage name like `sql` or `bigquery`
+- __options (dict)__: `tabulator` or storage's options
 
-#### `field.type`
+__Raises__
+- `TableSchemaException`: raises on any error
 
-- `(str)` - returns field type
 
-#### `field.format`
+#### `table.hash`
+Table's SHA256 hash if it's available.
 
-- `(str)` - returns field format
+If it's already read using e.g. `table.read`, otherwise returns `None`.
+In the middle of an iteration it returns hash of already read contents
 
-#### `field.required`
+__Returns__
 
-- `(bool)` - returns true if field is required
+`str/None`: SHA256 hash
+
+
+#### `table.headers`
+Table's headers is available
+
+__Returns__
+
+`str[]`: headers
+
+
+#### `table.schema`
+Returns schema class instance if available
+
+__Returns__
+
+`Schema`: schema
+
+
+#### `table.size`
+Table's size in BYTES if it's available
+
+If it's already read using e.g. `table.read`, otherwise returns `None`.
+In the middle of an iteration it returns size of already read contents
+
+__Returns__
+
+`int/None`: size in BYTES
+
+
+#### `table.iter`
+```python
+table.iter(self, keyed=False, extended=False, cast=True, integrity=False, relations=False, foreign_keys_values=False, exc_handler=None)
+```
+Iterates through the table data and emits rows cast based on table schema.
+
+__Arguments__
+
+- __keyed (bool)__:
+        yield keyed rows in a form of `{header1: value1, header2: value2}`
+        (default is false; the form of rows is `[value1, value2]`)
+- __extended (bool)__:
+        yield extended rows in a for of `[rowNumber, [header1, header2], [value1, value2]]`
+        (default is false; the form of rows is `[value1, value2]`)
+- __cast (bool)__:
+        disable data casting if false
+        (default is true)
+- __integrity (dict)__:
+        dictionary in a form of `{'size': <bytes>, 'hash': '<sha256>'}`
+        to check integrity of the table when it's read completely.
+        Both keys are optional.
+- __relations (dict)__:
+        dictionary of foreign key references in a form
+        of `{resource1: [{field1: value1, field2: value2}, ...], ...}`.
+        If provided, foreign key fields will checked and resolved
+        to one of their references (/!\ one-to-many fk are not completely resolved).
+- __foreign_keys_values (dict)__:
+        three-level dictionary of foreign key references optimized
+        to speed up validation process in a form of
+        `{resource1: {(fk_field1, fk_field2): {(value1, value2): {one_keyedrow}, ... }}}`.
+        If not provided but relations is true, it will be created
+        before the validation process by *index_foreign_keys_values* method
+- __exc_handler (func)__:
+        optional custom exception handler callable.
+        Can be used to defer raising errors (i.e. "fail late"), e.g.
+        for data validation purposes. Must support the signature below
+
+__Custom exception handler__
+
+
+```python
+def exc_handler(exc, row_number=None, row_data=None, error_data=None):
+    '''Custom exception handler (example)
+
+    # Arguments:
+        exc(Exception):
+            Deferred exception instance
+        row_number(int):
+            Data row number that triggers exception exc
+        row_data(OrderedDict):
+            Invalid data row source data
+        error_data(OrderedDict):
+            Data row source data field subset responsible for the error, if
+            applicable (e.g. invalid primary or foreign key fields). May be
+            identical to row_data.
+    '''
+    # ...
+```
+
+__Raises__
+- `exceptions.TableSchemaException`: base class of any error
+- `exceptions.CastError`: data cast error
+- `exceptions.IntegrityError`: integrity checking error
+- `exceptions.UniqueKeyError`: unique key constraint violation
+- `exceptions.UnresolvedFKError`: unresolved foreign key reference error
+
+__Returns__
+
+`Iterator[list]`: yields rows
+
+
+#### `table.read`
+```python
+table.read(self, keyed=False, extended=False, cast=True, limit=None, integrity=False, relations=False, foreign_keys_values=False, exc_handler=None)
+```
+Read the whole table and return as array of rows
+
+> It has the same API as `table.iter` except for
+
+__Arguments__
+- __limit (int)__: limit count of rows to read and return
+
+__Returns__
+
+`list[]`: returns rows
+
+
+#### `table.infer`
+```python
+table.infer(self, limit=100, confidence=0.75)
+```
+Infer a schema for the table.
+
+It will infer and set Table Schema to `table.schema` based on table data.
+
+__Arguments__
+- __limit (int)__: limit rows sample size
+- __confidence (float)__:
+        how many casting errors are allowed
+        (as a ratio, between 0 and 1)
+
+__Returns__
+
+`dict`: Table Schema descriptor
+
+
+#### `table.save`
+```python
+table.save(self, target, storage=None, **options)
+```
+Save data source to file locally in CSV format with `,` (comma) delimiter
+
+> To save schema use `table.schema.save()`
+
+__Arguments__
+- __target (str)__: saving target (e.g. file path)
+- __storage (None/str)__: storage name like `sql` or `bigquery`
+- __options (dict)__: `tabulator` or storage options
+
+__Raises__
+- `TableSchemaException`: raises an error if there is saving problem
+
+__Returns__
+
+`True/Storage`: returns true or storage instance
+
+
+#### `table.index_foreign_keys_values`
+```python
+table.index_foreign_keys_values(self, relations)
+```
+Creates a three-level dictionary of foreign key references
+
+We create them optimized to speed up validation process in a form of
+`{resource1: {(fk_field1, fk_field2): {(value1, value2): {one_keyedrow}, ... }}}`.
+
+For each foreign key of the schema it will iterate through the corresponding
+`relations['resource']` to create an index (i.e. a dict) of existing values
+for the foreign fields and store on keyed row for each value combination.
+
+The optimization relies on the indexation of possible values for one foreign key
+in a hashmap to later speed up resolution.
+
+This method is public to allow creating the index once to apply it
+on multiple tables charing the same schema
+(typically [grouped resources in datapackage](https://github.com/frictionlessdata/datapackage-py#group))
+
+__Notes__
+
+- the second key of the output is a tuple of the foreign fields,
+    a proxy identifier of the foreign key
+- the same relation resource can be indexed multiple times
+    as a schema can contain more than one Foreign Keys
+    pointing to the same resource
+
+__Arguments__
+- __relations (dict)__:
+        dict of foreign key references in a form of
+        `{resource1: [{field1: value1, field2: value2}, ...], ...}`.
+        It must contain all resources pointed in the foreign keys schema definition.
+
+__Returns__
+
+`dict`:
+        returns a three-level dictionary of foreign key references
+        optimized to speed up validation process in a form of
+        `{resource1: {(fk_field1, fk_field2): {(value1, value2): {one_keyedrow}, ... }}})`
+
+
+### `Schema`
+```python
+Schema(self, descriptor={}, strict=False)
+```
+Schema representation
+
+__Arguments__
+- __descriptor (str/dict)__: schema descriptor one of:
+        - local path
+        - remote url
+        - dictionary
+- __strict (bool)__: flag to specify validation behaviour:
+        - if false, errors will not be raised but instead collected in `schema.errors`
+        - if true, validation errors are raised immediately
+
+__Raises__
+- `exceptions.TableSchemaException`: raise any error that occurs during the process
+
+
+#### `schema.descriptor`
+Schema's descriptor
+
+__Returns__
+
+`dict`: descriptor
+
+
+#### `schema.errors`
+Validation errors
+
+Always empty in strict mode.
+
+__Returns__
+
+`Exception[]`: validation errors
+
+
+#### `schema.field_names`
+Schema's field names
+
+__Returns__
+
+`str[]`: an array of field names
+
+
+#### `schema.fields`
+Schema's fields
+
+__Returns__
+
+`Field[]`: an array of field instances
+
+
+#### `schema.foreign_keys`
+Schema's foreign keys
+
+__Returns__
+
+`dict[]`: foreign keys
+
+
+#### `schema.headers`
+Schema's field names
+
+__Returns__
+
+`str[]`: an array of field names
+
+
+#### `schema.primary_key`
+Schema's primary keys
+
+__Returns__
+
+`str[]`: primary keys
+
+
+#### `schema.valid`
+Validation status
+
+Always true in strict mode.
+
+__Returns:__
+
+    bool: validation status
+
+
+#### `schema.get_field`
+```python
+schema.get_field(self, name)
+```
+Get schema's field by name.
+
+> Use `table.update_field` if you want to modify the field descriptor
+
+__Arguments__
+- __name (str)__: schema field name
+
+__Returns__
+
+`Field/None`: `Field` instance or `None` if not found
+
+
+#### `schema.get_field`
+```python
+schema.get_field(self, name)
+```
+Get schema's field by name.
+
+> Use `table.update_field` if you want to modify the field descriptor
+
+__Arguments__
+- __name (str)__: schema field name
+
+__Returns__
+
+`Field/None`: `Field` instance or `None` if not found
+
+
+#### `schema.add_field`
+```python
+schema.add_field(self, descriptor)
+```
+Add new field to schema.
+
+The schema descriptor will be validated with newly added field descriptor.
+
+__Arguments__
+- __descriptor (dict)__: field descriptor
+
+__Raises__
+- `TableSchemaException`: raises any error that occurs during the process
+
+__Returns__
+
+`Field/None`: added `Field` instance or `None` if not added
+
+
+#### `schema.update_field`
+```python
+schema.update_field(self, name, update)
+```
+Update existing descriptor field by name
+
+__Arguments__
+- __name (str)__: schema field name
+- __update (dict)__: update to apply to field's descriptor
+
+__Returns__
+
+`bool`: true on success and false if no field is found to be modified
+
+
+#### `schema.remove_field`
+```python
+schema.remove_field(self, name)
+```
+Remove field resource by name.
+
+The schema descriptor will be validated after field descriptor removal.
+
+__Arguments__
+- __name (str)__: schema field name
+
+__Raises__
+- `exceptions.TableSchemaException`: raises any error that occurs during the process
+
+__Returns__
+
+`Field/None`: removed `Field` instances or `None` if not found
+
+
+#### `schema.cast_row`
+```python
+schema.cast_row(self, row, fail_fast=False, row_number=None, exc_handler=None)
+```
+Cast row based on field types and formats.
+
+__Arguments__
+- __row (any[]__: data row as an array of values
+
+__Returns__
+
+`any[]`: returns cast data row
+
+
+#### `schema.infer`
+```python
+schema.infer(self, rows, headers=1, confidence=0.75, guesser_cls=None, resolver_cls=None)
+```
+Infer and set `schema.descriptor` based on data sample.
+
+__Arguments__
+- __rows (list[])__: array of arrays representing rows.
+- __headers (int/str[])__: data sample headers (one of):
+      - row number containing headers (`rows` should contain headers rows)
+      - array of headers (`rows` should NOT contain headers rows)
+- __confidence (float)__: how many casting errors are allowed (as a ratio, between 0 and 1)
+- __guesser_cls (class)__: you can implement inferring strategies by
+         providing type-guessing and type-resolving classes [experimental]
+- __resolver_cls (class)__: you can implement inferring strategies by
+         providing type-guessing and type-resolving classes [experimental]
+
+__Returns__
+
+`dict`: Table Schema descriptor
+
+
+#### `schema.commit`
+```python
+schema.commit(self, strict=None)
+```
+Update schema instance if there are in-place changes in the descriptor.
+
+__Example__
+
+
+```python
+from tableschema import Schema
+descriptor = {'fields': [{'name': 'my_field', 'title': 'My Field', 'type': 'string'}]}
+schema = Schema(descriptor)
+print(schema.get_field('my_field').descriptor['type']) # string
+
+# Update descriptor by field position
+schema.descriptor['fields'][0]['type'] = 'number'
+# Update descriptor by field name
+schema.update_field('my_field', {'title': 'My Pretty Field'}) # True
+
+# Change are not committed
+print(schema.get_field('my_field').descriptor['type']) # string
+print(schema.get_field('my_field').descriptor['title']) # My Field
+
+# Commit change
+schema.commit()
+print(schema.get_field('my_field').descriptor['type']) # number
+print(schema.get_field('my_field').descriptor['title']) # My Pretty Field
+
+```
+
+__Arguments__
+- __strict (bool)__: alter `strict` mode for further work
+
+__Raises__
+- `exceptions.TableSchemaException`: raises any error that occurs during the process
+
+__Returns__
+
+`bool`: true on success and false if not modified
+
+
+#### `schema.save`
+```python
+schema.save(self, target, ensure_ascii=True)
+```
+Save schema descriptor to target destination.
+
+__Arguments__
+- __target (str)__: path where to save a descriptor
+
+__Raises__
+- `TableSchemaException`: raises any error that occurs during the process
+
+__Returns__
+
+`bool`: true on success
+
+
+### `Field`
+```python
+Field(self, descriptor, missing_values=[''], schema=None)
+```
+Field representaion
+
+__Arguments__
+- __descriptor (dict)__: schema field descriptor
+- __missingValues (str[])__: an array with string representing missing values
+
+__Raises__
+- `TableSchemaException`: raises any error that occurs during the process
+
 
 #### `field.constraints`
+Field constraints
 
-- `(dict)` - returns an object with field constraints
+__Returns__
+
+`dict`: dict of field constraints
+
 
 #### `field.descriptor`
+Fields's descriptor
 
-- `(dict)` - returns field descriptor
+__Returns__
 
-#### `field.castValue(value, constraints=true)`
+`dict`: descriptor
 
+
+#### `field.format`
+Field format
+
+__Returns__
+
+`str`: field format
+
+
+#### `field.name`
+Field name
+
+__Returns__
+
+`str`: field name
+
+
+#### `field.required`
+Whether field is required
+
+__Returns__
+
+`bool`: true if required
+
+
+#### `field.schema`
+Returns a schema instance if the field belongs to some schema
+
+__Returns__
+
+`Schema`: field's schema
+
+
+#### `field.type`
+Field type
+
+__Returns__
+
+`str`: field type
+
+
+#### `field.cast_value`
+```python
+field.cast_value(self, value, constraints=True, preserve_missing_values=False)
+```
 Cast given value according to the field type and format.
 
-- `value (any)` - value to cast against field
-- `constraints (boll/str[])` - gets constraints configuration
-  - it could be set to true to disable constraint checks
-  - it could be an Array of constraints to check e.g. ['minimum', 'maximum']
-- `(exceptions.TableSchemaException)` - raises any error that occurs during the process
-- `(any)` - returns cast value
+__Arguments__
+- __value (any)__: value to cast against field
+- __constraints (boll/str[])__: gets constraints configuration
+        - it could be set to true to disable constraint checks
+        - it could be an Array of constraints to check e.g. ['minimum', 'maximum']
 
-#### `field.testValue(value, constraints=true)`
+__Raises__
+- `TableSchemaException`: raises any error that occurs during the process
 
-Test if value is compliant to the field.
+__Returns__
 
-- `value (any)` - value to cast against field
-- `constraints (bool/str[])` - constraints configuration
-- `(bool)` - returns if value is compliant to the field
+`any`: returns cast value
 
-### validate
 
-Given a schema as JSON file, url to JSON file, or a Python dict, `validate` returns true for a valid Table Schema, or raises an exception, `exceptions.ValidationError`. It validates only **schema**, not data against schema!
-
+#### `field.test_value`
 ```python
-from tableschema import validate, exceptions
-
-try:
-    valid = validate(descriptor)
-except exceptions.ValidationError as exception:
-   for error in exception.errors:
-       # handle individual error
+field.test_value(self, value, constraints=True)
 ```
+Test whether value is compliant to the field.
 
-#### `validate(descriptor)`
+__Arguments__
+- __value (any)__: value to cast against field
+- __constraints (bool/str[])__: constraints configuration
 
-Validate a Table Schema descriptor.
+__Returns__
 
-- `descriptor (str/dict)` - schema descriptor (one of):
-  - local path
-  - remote url
-  - object
-- (exceptions.ValidationError) - raises on invalid
-- `(bool)` - returns true on valid
+`bool`: returns if value is compliant to the field
 
-### infer
 
-Given headers and data, `infer` will return a Table Schema as a Python dict based on the data values. Given the data file, `data_to_infer.csv`:
-
-```
-id,age,name
-1,39,Paul
-2,23,Jimmy
-3,36,Jane
-4,28,Judy
-```
-
-Let's call `infer` for this file:
-
+### `Storage`
 ```python
-from tableschema import infer
-
-descriptor = infer('data_to_infer.csv')
-#{'fields': [
-#    {
-#        'format': 'default',
-#        'name': 'id',
-#        'type': 'integer'
-#    },
-#    {
-#        'format': 'default',
-#        'name': 'age',
-#        'type': 'integer'
-#    },
-#    {
-#        'format': 'default',
-#        'name': 'name',
-#        'type': 'string'
-#    }]
-#}
+Storage(self, **options)
 ```
+Storage factory/interface
 
-The number of rows used by `infer` can be limited with the `limit` argument.
+__For users__
 
-#### `infer(source, headers=1, limit=100, confidence=0.75, **options)`
 
-Infer source schema.
+> Use `Storage.connect` to instantiate a storage
 
-- `source (any)` - source as path, url or inline data
-- `headers (int/str[])` - headers rows number or headers list
-- `confidence (float)` - how many casting errors are allowed (as a ratio, between 0 and 1)
-- `(exceptions.TableSchemaException)` - raises any error that occurs during the process
-- `(dict)` - returns schema descriptor
-
-### Exceptions
-
-#### `exceptions.TableSchemaException`
-
-Base class for all library exceptions. If there are multiple errors, they can be read from the exception object:
-
-```python
-
-try:
-    # lib action
-except exceptions.TableSchemaException as exception:
-    if exception.multiple:
-        for error in exception.errors:
-            # handle error
-```
-
-#### `exceptions.LoadError`
-
-All loading errors.
-
-#### `exceptions.ValidationError`
-
-All validation errors.
-
-#### `exceptions.CastError`
-
-All value cast errors.
-
-#### `exceptions.UniqueKeyError`
-
-Unique key constraint violation (CastError subclass).
-
-#### `exceptions.IntegrityError`
-
-All integrity errors.
-
-#### `exceptions.RelationError`
-
-All relations errors.
-
-#### `exceptions.UnresolvedFKError`
-
-Unresolved foreign key reference error (RelationError subclass).
-
-#### `exceptions.StorageError`
-
-All storage errors.
-
-### Storage
-
-The library includes interface declaration to implement tabular `Storage`. This interface allow to use different data storage systems like SQL with `tableschema.Table` class (load/save) as well as on the data package level:
-
-![Storage](https://raw.githubusercontent.com/frictionlessdata/tableschema-py/master/data/storage.png)
-
-For instantiation of concrete storage instances, `tableschema.Storage` provides a unified factory method `connect` (which uses the plugin system under the hood):
+For instantiation of concrete storage instances,
+`tableschema.Storage` provides a unified factory method `connect`
+(which uses the plugin system under the hood):
 
 ```python
 # pip install tableschema_sql
@@ -827,123 +971,256 @@ storage.write('bucket', rows)
 storage.read('bucket')
 ```
 
-#### `Storage.connect(name, **options)`
-
-Create tabular `storage` based on storage name.
-
-- `name (str)` - storage name like `sql`
-- `options (dict)` - concrete storage options
-- `(exceptions.StorageError)` - raises on any error
-- `(Storage)` - returns `Storage` instance
-
----
+__For integrators__
 
 
-An implementor should follow `tableschema.Storage` interface to write his own storage backend. Concrete storage backends could include additional functionality specific to conrete storage system. See `plugins` below to know how to integrate custom storage plugin into your workflow.
+The library includes interface declaration to implement tabular `Storage`.
+This interface allow to use different data storage systems like SQL
+with `tableschema.Table` class (load/save) as well as on the data package level:
 
-#### `<<Interface>>Storage(**options)`
+![Storage](https://raw.githubusercontent.com/frictionlessdata/tableschema-py/master/data/storage.png)
 
-Create tabular `storage`. Implementations should fully implement this interface to be compatible with the `Storage` API.
+An implementor must follow `tableschema.Storage` interface
+to write his own storage backend. Concrete storage backends
+could include additional functionality specific to conrete storage system.
+See `plugins` below to know how to integrate custom storage plugin into your workflow.
 
-- `options (dict)` - concrete storage options
-- `(exceptions.StorageError)` - raises on any error
-- `(Storage)` - returns `Storage` instance
 
 #### `storage.buckets`
+Return list of storage bucket names.
 
-Return list of storage bucket names. A `bucket` is a special term which has almost the same meaning as `table`. You should consider `bucket` as a `table` stored in the `storage`.
+A `bucket` is a special term which has almost the same meaning as `table`.
+You should consider `bucket` as a `table` stored in the `storage`.
 
-- `(exceptions.StorageError)` - raises on any error
-- `str[]` - return list of bucket names
+__Raises__
+- `exceptions.StorageError`: raises on any error
 
-#### `create(bucket, descriptor, force=False)`
+__Returns__
 
+`str[]`: return list of bucket names
+
+
+#### `storage.connect`
+```python
+storage.connect(name, **options)
+```
+Create tabular `storage` based on storage name.
+
+> This method is statis: `Storage.connect()`
+
+__Arguments__
+- __name (str)__: storage name like `sql`
+- __options (dict)__: concrete storage options
+
+__Raises__
+- `StorageError`: raises on any error
+
+__Returns__
+
+`Storage`: returns `Storage` instance
+
+
+#### `storage.create`
+```python
+storage.create(self, bucket, descriptor, force=False)
+```
 Create one/multiple buckets.
 
-- `bucket (str/list)` - bucket name or list of bucket names
-- `descriptor (dict/dict[])` - schema descriptor or list of descriptors
-- `force (bool)` - whether to delete and re-create already existing buckets
-- `(exceptions.StorageError)` - raises on any error
+__Arguments__
+- __bucket (str/list)__: bucket name or list of bucket names
+- __descriptor (dict/dict[])__: schema descriptor or list of descriptors
+- __force (bool)__: whether to delete and re-create already existing buckets
 
-#### `delete(bucket=None, ignore=False)`
+__Raises__
+- `exceptions.StorageError`: raises on any error
 
+
+#### `storage.delete`
+```python
+storage.delete(self, bucket=None, ignore=False)
+```
 Delete one/multiple/all buckets.
 
-- `bucket (str/list/None)` - bucket name or list of bucket names to delete. If `None`, all buckets will be deleted
-- `descriptor (dict/dict[])` - schema descriptor or list of descriptors
-- `ignore (bool)` - don't raise an error on non-existent bucket deletion from storage
-- `(exceptions.StorageError)` - raises on any error
+__Arguments__
+- __bucket (str/list/None)__: bucket name or list of bucket names to delete.
+        If `None`, all buckets will be deleted
+- __descriptor (dict/dict[])__: schema descriptor or list of descriptors
+- __ignore (bool)__: don't raise an error on non-existent bucket deletion
 
-#### `describe(bucket, descriptor=None)`
+__Raises__
+- `exceptions.StorageError`: raises on any error
 
-Get/set bucket's Table Schema descriptor.
 
-- `bucket (str)` - bucket name
-- `descriptor (dict/None)` - schema descriptor to set
-- `(exceptions.StorageError)` - raises on any error
-- `(dict)` - returns Table Schema descriptor
+#### `storage.describe`
+```python
+storage.describe(self, bucket, descriptor=None)
+```
+Get/set bucket's Table Schema descriptor
 
-#### `iter(bucket)`
+__Arguments__
+- __bucket (str)__: bucket name
+- __descriptor (dict/None)__: schema descriptor to set
 
-This method should return an iterator of typed values based on the schema of this bucket.
+__Raises__
+- `exceptions.StorageError`: raises on any error
 
-- `bucket (str)` - bucket name
-- `(exceptions.StorageError)` - raises on any error
-- `(list[])` - yields data rows
+__Returns__
 
-#### `read(bucket)`
+`dict`: returns Table Schema descriptor
 
-This method should read typed values based on the schema of this bucket.
 
-- `bucket (str)` - bucket name
-- `(exceptions.StorageError)` - raises on any error
-- `(list[])` - returns data rows
+#### `storage.iter`
+```python
+storage.iter(self, bucket)
+```
+Return an iterator of typed values based on the schema of this bucket.
 
-#### `write(bucket, rows)`
+__Arguments__
+- __bucket (str)__: bucket name
 
-This method writes data rows into `storage`. It should store values of unsupported types as strings internally (like csv does).
+__Raises__
+- `exceptions.StorageError`: raises on any error
 
-- `bucket (str)` - bucket name
-- `rows (list[])` - data rows to write
-- `(exceptions.StorageError)` - raises on any error
+__Returns__
 
-### Plugins
+`list[]`: yields data rows
 
-Table Schema has a plugin system.  Any package with the name like `tableschema_<name>` can be imported as:
+
+#### `storage.read`
+```python
+storage.read(self, bucket)
+```
+Read typed values based on the schema of this bucket.
+
+__Arguments__
+- __bucket (str)__: bucket name
+__Raises__
+- `exceptions.StorageError`: raises on any error
+__Returns__
+
+`list[]`: returns data rows
+
+
+#### `storage.write`
+```python
+storage.write(self, bucket, rows)
+```
+This method writes data rows into `storage`.
+
+It should store values of unsupported types as strings internally (like csv does).
+
+__Arguments__
+- __bucket (str)__: bucket name
+- __rows (list[])__: data rows to write
+
+__Raises__
+- `exceptions.StorageError`: raises on any error
+
+
+### `FailedCast`
+```python
+FailedCast(self, value)
+```
+Wrap an original data field value that failed to be properly casted.
+
+FailedCast allows for further processing/yielding values but still be able
+to distinguish uncasted values on the consuming side.
+
+Delegates attribute access and the basic rich comparison methods to the
+underlying object. Supports default user-defined classes hashability i.e.
+is hashable based on object identity (not based on the wrapped value).
+
+__Arguments__
+- __value (any)__: value
+
+
+### `DataPackageException`
+```python
+DataPackageException(self, message, errors=[])
+```
+Base class for all DataPackage/TableSchema exceptions.
+
+If there are multiple errors, they can be read from the exception object:
 
 ```python
-from tableschema.plugins import <name>
+try:
+    # lib action
+except DataPackageException as exception:
+    if exception.multiple:
+        for error in exception.errors:
+            # handle error
 ```
 
-If a plugin is not installed, an `ImportError` will be raised with a message describing how to install the plugin.
 
-#### Official plugins
+#### `datapackageexception.errors`
+List of nested errors
 
-- [BigQuery Storage](https://github.com/frictionlessdata/tableschema-bigquery-py)
-- [Elasticsearch Storage](https://github.com/frictionlessdata/tableschema-elasticsearch-py)
-- [Pandas Storage](https://github.com/frictionlessdata/tableschema-pandas-py)
-- [SQL Storage](https://github.com/frictionlessdata/tableschema-sql-py)
-- [SPSS Storage](https://github.com/frictionlessdata/tableschema-spss-py)
+__Returns__
 
-### CLI
+`DataPackageException[]`: list of nested errors
 
-> It's a provisional API excluded from SemVer. If you use it as a part of another program please pin `tableschema`  to a concrete version in your requirements file.
 
-Table Schema features a CLI called `tableschema`. This CLI exposes the `infer` and `validate` functions for command line use.
+#### `datapackageexception.multiple`
+Whether it's a nested exception
 
-Example of `validate` usage:
+__Returns__
 
+`bool`: whether it's a nested exception
+
+
+### `TableSchemaException`
+```python
+TableSchemaException(self, message, errors=[])
 ```
-$ tableschema validate path/to-schema.json
-```
+Base class for all TableSchema exceptions.
 
-Example of `infer` usage:
-
+### `LoadError`
+```python
+LoadError(self, message, errors=[])
 ```
-$ tableschema infer path/to/data.csv
-```
+All loading errors.
 
-The response is a schema as JSON. The optional argument `--encoding` allows a character encoding to be specified for the data file. The default is utf-8.
+### `ValidationError`
+```python
+ValidationError(self, message, errors=[])
+```
+All validation errors.
+
+### `CastError`
+```python
+CastError(self, message, errors=[])
+```
+All value cast errors.
+
+### `IntegrityError`
+```python
+IntegrityError(self, message, errors=[])
+```
+All integrity errors.
+
+### `UniqueKeyError`
+```python
+UniqueKeyError(self, message, errors=[])
+```
+Unique key constraint violation (CastError subclass)
+
+### `RelationError`
+```python
+RelationError(self, message, errors=[])
+```
+All relations errors.
+
+### `UnresolvedFKError`
+```python
+UnresolvedFKError(self, message, errors=[])
+```
+Unresolved foreign key reference error (RelationError subclass).
+
+### `StorageError`
+```python
+StorageError(self, message, errors=[])
+```
+All storage errors.
 
 ## Contributing
 
@@ -1040,3 +1317,4 @@ Here described only breaking and the most important changes. The full changelog 
 #### v1.0
 
 - The library has been rebased on the Frictionless Data specs v1 - https://frictionlessdata.io/specs/table-schema/
+

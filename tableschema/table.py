@@ -17,13 +17,28 @@ from collections import defaultdict
 # Module API
 
 class Table(object):
+    """Table representation
+
+    # Arguments
+      source (str/list[]): data source one of:
+        - local file (path)
+        - remote file (url)
+        - array of arrays representing the rows
+      schema (any): data schema in all forms supported by `Schema` class
+      strict (bool): strictness option to pass to `Schema` constructor
+      post_cast (function[]): list of post cast processors
+      storage (None): storage name like `sql` or `bigquery`
+      options (dict): `tabulator` or storage's options
+
+    # Raises
+      TableSchemaException: raises on any error
+
+    """
 
     # Public
 
     def __init__(self, source, schema=None, strict=False,
                  post_cast=[], storage=None, **options):
-        """https://github.com/frictionlessdata/tableschema-py#table
-        """
 
         # Set attributes
         self.__source = source
@@ -56,26 +71,48 @@ class Table(object):
 
     @property
     def headers(self):
-        """https://github.com/frictionlessdata/tableschema-py#table
+        """Table's headers is available
+
+        # Returns
+            str[]: headers
+
         """
         return self.__headers
 
     @property
     def schema(self):
-        """https://github.com/frictionlessdata/tableschema-py#table
+        """Returns schema class instance if available
+
+        # Returns
+            Schema: schema
+
         """
         return self.__schema
 
     @property
     def size(self):
-        """https://github.com/frictionlessdata/tableschema-py#table
+        """Table's size in BYTES if it's available
+
+        If it's already read using e.g. `table.read`, otherwise returns `None`.
+        In the middle of an iteration it returns size of already read contents
+
+        # Returns
+            int/None: size in BYTES
+
         """
         if self.__stream:
             return self.__stream.size
 
     @property
     def hash(self):
-        """https://github.com/frictionlessdata/tableschema-py#table
+        """Table's SHA256 hash if it's available.
+
+        If it's already read using e.g. `table.read`, otherwise returns `None`.
+        In the middle of an iteration it returns hash of already read contents
+
+        # Returns
+            str/None: SHA256 hash
+
         """
         if self.__stream:
             return self.__stream.hash
@@ -83,7 +120,76 @@ class Table(object):
     def iter(self, keyed=False, extended=False, cast=True,
              integrity=False, relations=False,
              foreign_keys_values=False, exc_handler=None):
-        """https://github.com/frictionlessdata/tableschema-py#table
+        """Iterates through the table data and emits rows cast based on table schema.
+
+        # Arguments
+
+            keyed (bool):
+                yield keyed rows in a form of `{header1\\: value1, header2\\: value2}`
+                (default is false; the form of rows is `[value1, value2]`)
+
+            extended (bool):
+                yield extended rows in a for of `[rowNumber, [header1, header2], [value1, value2]]`
+                (default is false; the form of rows is `[value1, value2]`)
+
+            cast (bool):
+                disable data casting if false
+                (default is true)
+
+            integrity (dict):
+                dictionary in a form of `{'size'\\: <bytes>, 'hash'\\: '<sha256>'}`
+                to check integrity of the table when it's read completely.
+                Both keys are optional.
+
+            relations (dict):
+                dictionary of foreign key references in a form
+                of `{resource1\\: [{field1\\: value1, field2\\: value2}, ...], ...}`.
+                If provided, foreign key fields will checked and resolved
+                to one of their references (/!\\ one-to-many fk are not completely resolved).
+
+            foreign_keys_values (dict):
+                three-level dictionary of foreign key references optimized
+                to speed up validation process in a form of
+                `{resource1\\: {(fk_field1, fk_field2)\\: {(value1, value2)\\: {one_keyedrow}, ... }}}`.
+                If not provided but relations is true, it will be created
+                before the validation process by *index_foreign_keys_values* method
+
+            exc_handler (func):
+                optional custom exception handler callable.
+                Can be used to defer raising errors (i.e. "fail late"), e.g.
+                for data validation purposes. Must support the signature below
+
+        # Custom exception handler
+
+        ```python
+        def exc_handler(exc, row_number=None, row_data=None, error_data=None):
+            '''Custom exception handler (example)
+
+            # Arguments:
+                exc(Exception):
+                    Deferred exception instance
+                row_number(int):
+                    Data row number that triggers exception exc
+                row_data(OrderedDict):
+                    Invalid data row source data
+                error_data(OrderedDict):
+                    Data row source data field subset responsible for the error, if
+                    applicable (e.g. invalid primary or foreign key fields). May be
+                    identical to row_data.
+            '''
+            # ...
+        ```
+
+        # Raises
+            exceptions.TableSchemaException: base class of any error
+            exceptions.CastError: data cast error
+            exceptions.IntegrityError: integrity checking error
+            exceptions.UniqueKeyError: unique key constraint violation
+            exceptions.UnresolvedFKError: unresolved foreign key reference error
+
+        # Returns
+            Iterator[list]: yields rows
+
         """
         # TODO: Use helpers.default_exc_handler instead. Prerequisite: Use
         # stream context manager to make sure the stream gets properly closed
@@ -239,7 +345,16 @@ class Table(object):
     def read(self, keyed=False, extended=False, cast=True, limit=None,
              integrity=False, relations=False, foreign_keys_values=False,
              exc_handler=None):
-        """https://github.com/frictionlessdata/tableschema-py#table
+        """Read the whole table and return as array of rows
+
+        > It has the same API as `table.iter` except for
+
+        # Arguments
+            limit (int): limit count of rows to read and return
+
+        # Returns
+            list[]: returns rows
+
         """
         result = []
         rows = self.iter(
@@ -253,7 +368,19 @@ class Table(object):
         return result
 
     def infer(self, limit=100, confidence=0.75):
-        """https://github.com/frictionlessdata/tableschema-py#table
+        """Infer a schema for the table.
+
+        It will infer and set Table Schema to `table.schema` based on table data.
+
+        # Arguments
+            limit (int): limit rows sample size
+            confidence (float):
+                how many casting errors are allowed
+                (as a ratio, between 0 and 1)
+
+        # Returns
+            dict: Table Schema descriptor
+
         """
         if self.__schema is None or self.__headers is None:
 
@@ -279,7 +406,21 @@ class Table(object):
         return self.__schema.descriptor
 
     def save(self, target, storage=None, **options):
-        """https://github.com/frictionlessdata/tableschema-py#table
+        """Save data source to file locally in CSV format with `,` (comma) delimiter
+
+        > To save schema use `table.schema.save()`
+
+        # Arguments
+            target (str): saving target (e.g. file path)
+            storage (None/str): storage name like `sql` or `bigquery`
+            options (dict): `tabulator` or storage options
+
+        # Raises
+            TableSchemaException: raises an error if there is saving problem
+
+        # Returns
+            True/Storage: returns true or storage instance
+
         """
 
         # Save (tabulator)
@@ -297,6 +438,44 @@ class Table(object):
             return storage
 
     def index_foreign_keys_values(self, relations):
+        """Creates a three-level dictionary of foreign key references
+
+        We create them optimized to speed up validation process in a form of
+        `{resource1: {(fk_field1, fk_field2): {(value1, value2): {one_keyedrow}, ... }}}`.
+
+        For each foreign key of the schema it will iterate through the corresponding
+        `relations['resource']` to create an index (i.e. a dict) of existing values
+        for the foreign fields and store on keyed row for each value combination.
+
+        The optimization relies on the indexation of possible values for one foreign key
+        in a hashmap to later speed up resolution.
+
+        This method is public to allow creating the index once to apply it
+        on multiple tables charing the same schema
+        (typically [grouped resources in datapackage](https://github.com/frictionlessdata/datapackage-py#group))
+
+        # Notes
+
+        - the second key of the output is a tuple of the foreign fields,
+            a proxy identifier of the foreign key
+        - the same relation resource can be indexed multiple times
+            as a schema can contain more than one Foreign Keys
+            pointing to the same resource
+
+        # Arguments
+            relations (dict):
+                dict of foreign key references in a form of
+                `{resource1\\: [{field1\\: value1, field2\\: value2}, ...], ...}`.
+                It must contain all resources pointed in the foreign keys schema definition.
+
+        # Returns
+            dict:
+                returns a three-level dictionary of foreign key references
+                optimized to speed up validation process in a form of
+                `{resource1\\: {(fk_field1, fk_field2)\\: {(value1, value2)\\: {one_keyedrow}, ... }}})`
+
+        """
+
         # we dont need to load the complete reference table to test relations
         # we can lower payload AND optimize testing foreign keys
         # by preparing the right index based on the foreign key definition

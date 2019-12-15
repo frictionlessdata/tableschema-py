@@ -16,18 +16,33 @@ VERSION_FILE = os.path.join(os.path.dirname(__file__), 'VERSION')
 VERSION = io.open(VERSION_FILE, encoding='utf-8').read().strip()
 
 
-@click.group()
-def main():
-    """The entry point into the CLI."""
+@click.group(help='')
+def cli():
+    """Command-line interface
+
+    ```
+    Usage: tableschema [OPTIONS] COMMAND [ARGS]...
+
+    Options:
+      --help  Show this message and exit.
+
+    Commands:
+      infer     Infer a schema from data.
+      info      Return info on this version of Table Schema
+      validate  Validate that a supposed schema is in fact a Table Schema.
+    ```
+
+    """
+    pass
 
 
-@main.command()
+@cli.command()
 def info():
     """Return info on this version of Table Schema"""
     click.echo(json.dumps({'version': VERSION}, ensure_ascii=False, indent=4))
 
 
-@main.command()
+@cli.command()
 @click.argument('data')
 @click.option('--row_limit', default=100, type=int)
 @click.option('--confidence', default=0.75, type=float)
@@ -36,12 +51,13 @@ def info():
 def infer(data, row_limit, confidence, encoding, to_file):
     """Infer a schema from data.
 
-    * data must be a local filepath
-    * data must be CSV
-    * the file encoding is assumed to be UTF-8 unless an encoding is passed
+    - data must be a local filepath
+    - data must be CSV
+    - the file encoding is assumed to be UTF-8 unless an encoding is passed
       with --encoding
-    * the first line of data must be headers
-    * these constraints are just for the CLI
+    - the first line of data must be headers
+    - these constraints are just for the CLI
+
     """
     descriptor = tableschema.infer(data,
                                    encoding=encoding,
@@ -53,7 +69,7 @@ def infer(data, row_limit, confidence, encoding, to_file):
     click.echo(descriptor)
 
 
-@main.command()
+@cli.command()
 @click.argument('schema')
 def validate(schema):
     """Validate that a supposed schema is in fact a Table Schema."""
@@ -65,7 +81,3 @@ def validate(schema):
         click.echo("Schema is not valid")
         click.echo(exception.errors)
         sys.exit(1)
-
-
-if __name__ == '__main__':
-    main()

@@ -7,7 +7,8 @@ import os
 import ast
 import pytest
 from click.testing import CliRunner
-from tableschema import Schema, cli
+from tableschema import Schema
+from tableschema.cli import infer, validate
 os.environ['LC_ALL'] = 'en_US.UTF-8'
 
 
@@ -15,7 +16,7 @@ os.environ['LC_ALL'] = 'en_US.UTF-8'
 
 def test_infer_schema():
     runner = CliRunner()
-    result = runner.invoke(cli.infer, ['data/data_infer.csv'])
+    result = runner.invoke(infer, ['data/data_infer.csv'])
     # output is a string, evaluate to a dict
     schema = ast.literal_eval(result.output)
     schema_model = Schema(schema)
@@ -27,7 +28,7 @@ def test_infer_schema():
 def test_infer_schema_utf8():
     """UTF8 encoded data containing non-ascii characters."""
     runner = CliRunner()
-    result = runner.invoke(cli.infer, ['data/data_infer_utf8.csv'])
+    result = runner.invoke(infer, ['data/data_infer_utf8.csv'])
     # output is a string, evaluate to a dict
     schema = ast.literal_eval(result.output)
     schema_model = Schema(schema)
@@ -39,7 +40,7 @@ def test_infer_schema_utf8():
 def test_infer_schema_greek():
     """iso-8859-7 (greek) encoded data containing non-ascii characters."""
     runner = CliRunner()
-    result = runner.invoke(cli.infer,
+    result = runner.invoke(infer,
                            ['data/data_infer_iso-8859-7.csv',
                             '--encoding=iso-8859-7'])
     # output is a string, evaluate to a dict
@@ -51,10 +52,10 @@ def test_infer_schema_greek():
 
 def test_validate_schema():
     runner = CliRunner()
-    result = runner.invoke(cli.validate, ['data/schema_valid_simple.json'])
+    result = runner.invoke(validate, ['data/schema_valid_simple.json'])
     assert result.output.splitlines()[0] == 'Schema is valid'
     assert result.exit_code == 0
-    result = runner.invoke(cli.validate, ['data/schema_invalid_pk_no_fields.json'])
+    result = runner.invoke(validate, ['data/schema_invalid_pk_no_fields.json'])
     assert result.output.splitlines()[0] == 'Schema is not valid'
     assert result.exit_code == 1
 
