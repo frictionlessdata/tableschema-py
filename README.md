@@ -713,6 +713,8 @@ storage.connect(name, **options)
 ```
 Create tabular `storage` based on storage name.
 
+> This method is statis: `Storage.connect()`
+
 __Arguments__
 - __name (str)__: storage name like `sql`
 - __options (dict)__: concrete storage options

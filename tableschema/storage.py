@@ -55,6 +55,8 @@ class Storage(object):
     def connect(cls, name, **options):
         """Create tabular `storage` based on storage name.
 
+        > This method is statis: `Storage.connect()`
+
         # Arguments
             name (str): storage name like `sql`
             options (dict): concrete storage options
