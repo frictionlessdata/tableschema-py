@@ -394,6 +394,42 @@ class Table(object):
             return storage
 
     def index_foreign_keys_values(self, relations):
+        """Creates a three-level dictionary of foreign key references
+
+        We create them optimized to speed up validation process in a form of
+        `{resource1: { (foreign_key_field1, foreign_key_field2) : { (value1, value2) : {one_keyedrow}, ... }}}`.
+
+        For each foreign key of the schema it will iterate through the corresponding
+        `relations['resource']` to create an index (i.e. a dict) of existing values
+        for the foreign fields and store on keyed row for each value combination.
+
+        The optimization relies on the indexation of possible values for one foreign key
+        in a hashmap to later speed up resolution.
+
+        This method is public to allow creating the index once to apply it
+        on multiple tables charing the same schema
+        (typically [grouped resources in datapackage](https://github.com/frictionlessdata/datapackage-py#group))
+
+        Note 1: the second key of the output is a tuple of the foreign fields,
+        a proxy identifier of the foreign key
+
+        Note 2: the same relation resource can be indexed multiple times
+        as a schema can contain more than one Foreign Keys pointing to the same resource
+
+        # Arguments
+          relations (dict):
+            dict of foreign key references in a form of
+            `{resource1\\: [{field1\\: value1, field2\\: value2}, ...], ...}`.
+            It must contain all resources pointed in the foreign keys schema definition.
+
+        # Returns
+          dict:
+            returns a three-level dictionary of foreign key references
+            optimized to speed up validation process in a form of
+            `{resource1\\: {(foreign_key_field1, foreign_key_field2)\\: {(value1, value2)\\: {one_keyedrow}, ... }}})`
+
+        """
+
         # we dont need to load the complete reference table to test relations
         # we can lower payload AND optimize testing foreign keys
         # by preparing the right index based on the foreign key definition
