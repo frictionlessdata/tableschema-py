@@ -477,6 +477,10 @@ class FailedCast(object):
     Delegates attribute access and the basic rich comparison methods to the
     underlying object. Supports default user-defined classes hashability i.e.
     is hashable based on object identity (not based on the wrapped value).
+
+    # Arguments
+        value (any): value
+
     """
 
     # Make this "reasonably immutable": Don't support setting other attributes,

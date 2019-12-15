@@ -22,6 +22,38 @@ A Python implementation of the [Table Schema](http://specs.frictionlessdata.io/t
 
 <!--TOC-->
 
+- [tableschema-py](#tableschema-py)
+  - [Features](#features)
+  - [Contents](#contents)
+  - [Getting Started](#getting-started)
+    - [Installation](#installation)
+  - [Documentation](#documentation)
+    - [Introduction](#introduction)
+    - [Working with Table](#working-with-table)
+    - [Working with Schema](#working-with-schema)
+    - [Working with Field](#working-with-field)
+  - [API Reference](#api-reference)
+    - [`cli`](#cli)
+    - [`Table`](#table)
+    - [`Schema`](#schema)
+    - [`Field`](#field)
+    - [`Storage`](#storage)
+    - [`FailedCast`](#failedcast)
+    - [`DataPackageException`](#datapackageexception)
+    - [`TableSchemaException`](#tableschemaexception)
+    - [`LoadError`](#loaderror)
+    - [`ValidationError`](#validationerror)
+    - [`CastError`](#casterror)
+    - [`IntegrityError`](#integrityerror)
+    - [`UniqueKeyError`](#uniquekeyerror)
+    - [`RelationError`](#relationerror)
+    - [`UnresolvedFKError`](#unresolvedfkerror)
+    - [`StorageError`](#storageerror)
+  - [Contributing](#contributing)
+  - [Changelog](#changelog)
+
+<!--TOC-->
+
 ## Getting Started
 
 ### Installation
