@@ -150,7 +150,7 @@ class Table(object):
             foreign_keys_values (dict):
                 three-level dictionary of foreign key references optimized
                 to speed up validation process in a form of
-                `{resource1\\: {(foreign_key_field1, foreign_key_field2)\\: {(value1, value2)\\: {one_keyedrow}, ... }}}`.
+                `{resource1\\: {(fk_field1, fk_field2)\\: {(value1, value2)\\: {one_keyedrow}, ... }}}`.
                 If not provided but relations is true, it will be created
                 before the validation process by *index_foreign_keys_values* method
 
@@ -441,7 +441,7 @@ class Table(object):
         """Creates a three-level dictionary of foreign key references
 
         We create them optimized to speed up validation process in a form of
-        `{resource1: { (foreign_key_field1, foreign_key_field2) : { (value1, value2) : {one_keyedrow}, ... }}}`.
+        `{resource1: {(fk_field1, fk_field2): {(value1, value2): {one_keyedrow}, ... }}}`.
 
         For each foreign key of the schema it will iterate through the corresponding
         `relations['resource']` to create an index (i.e. a dict) of existing values
@@ -470,7 +470,7 @@ class Table(object):
           dict:
             returns a three-level dictionary of foreign key references
             optimized to speed up validation process in a form of
-            `{resource1\\: {(foreign_key_field1, foreign_key_field2)\\: {(value1, value2)\\: {one_keyedrow}, ... }}})`
+            `{resource1\\: {(fk_field1, fk_field2)\\: {(value1, value2)\\: {one_keyedrow}, ... }}})`
 
         """
 
