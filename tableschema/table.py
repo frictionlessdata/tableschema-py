@@ -454,23 +454,25 @@ class Table(object):
         on multiple tables charing the same schema
         (typically [grouped resources in datapackage](https://github.com/frictionlessdata/datapackage-py#group))
 
-        Note 1: the second key of the output is a tuple of the foreign fields,
-        a proxy identifier of the foreign key
+        # Notes
 
-        Note 2: the same relation resource can be indexed multiple times
-        as a schema can contain more than one Foreign Keys pointing to the same resource
+        - the second key of the output is a tuple of the foreign fields,
+            a proxy identifier of the foreign key
+        - the same relation resource can be indexed multiple times
+            as a schema can contain more than one Foreign Keys
+            pointing to the same resource
 
         # Arguments
-          relations (dict):
-            dict of foreign key references in a form of
-            `{resource1\\: [{field1\\: value1, field2\\: value2}, ...], ...}`.
-            It must contain all resources pointed in the foreign keys schema definition.
+            relations (dict):
+                dict of foreign key references in a form of
+                `{resource1\\: [{field1\\: value1, field2\\: value2}, ...], ...}`.
+                It must contain all resources pointed in the foreign keys schema definition.
 
         # Returns
-          dict:
-            returns a three-level dictionary of foreign key references
-            optimized to speed up validation process in a form of
-            `{resource1\\: {(fk_field1, fk_field2)\\: {(value1, value2)\\: {one_keyedrow}, ... }}})`
+            dict:
+                returns a three-level dictionary of foreign key references
+                optimized to speed up validation process in a form of
+                `{resource1\\: {(fk_field1, fk_field2)\\: {(value1, value2)\\: {one_keyedrow}, ... }}})`
 
         """
 
