@@ -21,12 +21,25 @@ from . import types
 # Module API
 
 class Schema(object):
+    """Schema representation
+
+    # Arguments
+        descriptor (str/dict): schema descriptor one of:
+            - local path
+            - remote url
+            - dictionary
+        strict (bool): flag to specify validation behaviour:
+            - if false, errors will not be raised but instead collected in `schema.errors`
+            - if true, validation errors are raised immediately
+
+    # Raises
+        exceptions.TableSchemaException: raise any error that occurs during the process
+
+    """
 
     # Public
 
     def __init__(self, descriptor={}, strict=False):
-        """https://github.com/frictionlessdata/tableschema-py#schema
-        """
 
         # Process descriptor
         descriptor = helpers.retrieve_descriptor(descriptor)
@@ -44,26 +57,46 @@ class Schema(object):
 
     @property
     def valid(self):
-        """https://github.com/frictionlessdata/tableschema-py#schema
+        """Validation status
+
+        Always true in strict mode.
+
+        # Returns:
+            - bool: validation status
+
         """
         return not bool(self.__errors)
 
     @property
     def errors(self):
-        """https://github.com/frictionlessdata/tableschema-py#schema
+        """Validation errors
+
+        Always empty in strict mode.
+
+        # Returns
+            Exception[]: validation errors
+
         """
         return self.__errors
 
     @property
     def descriptor(self):
-        """https://github.com/frictionlessdata/tableschema-py#schema
+        """Schema's descriptor
+
+        # Returns
+            dict: descriptor
+
         """
         # Never use this.descriptor inside this class (!!!)
         return self.__next_descriptor
 
     @property
     def primary_key(self):
-        """https://github.com/frictionlessdata/tableschema-py#schema
+        """Schema's primary keys
+
+        # Returns
+            str[]: primary keys
+
         """
         primary_key = self.__current_descriptor.get('primaryKey', [])
         if not isinstance(primary_key, list):
@@ -72,7 +105,11 @@ class Schema(object):
 
     @property
     def foreign_keys(self):
-        """https://github.com/frictionlessdata/tableschema-py#schema
+        """Schema's foreign keys
+
+        # Returns
+            dict[]: foreign keys
+
         """
         foreign_keys = self.__current_descriptor.get('foreignKeys', [])
         for key in foreign_keys:
@@ -88,18 +125,35 @@ class Schema(object):
 
     @property
     def fields(self):
-        """https://github.com/frictionlessdata/tableschema-py#schema
+        """Schema's fields
+
+        # Returns
+            Field[]: an array of field instances
+
         """
         return self.__fields
 
     @property
     def field_names(self):
-        """https://github.com/frictionlessdata/tableschema-py#schema
+        """Schema's field names
+
+        # Returns
+            str[]: an array of field names
+
         """
         return [field.name for field in self.fields]
 
     def get_field(self, name):
-        """https://github.com/frictionlessdata/tableschema-py#schema
+        """Get schema's field by name.
+
+        > `table.update_field` if you want to modify the field descriptor
+
+        # Arguments
+            name (str): schema field name
+
+        # Returns
+           Field/None: `Field` instance or `None` if not found
+
         """
         for field in self.fields:
             if field.name == name:
@@ -107,7 +161,19 @@ class Schema(object):
         return None
 
     def add_field(self, descriptor):
-        """https://github.com/frictionlessdata/tableschema-py#schema
+        """ Add new field to schema.
+
+        The schema descriptor will be validated with newly added field descriptor.
+
+        # Arguments
+            descriptor (dict): field descriptor
+
+        # Raises
+            TableSchemaException: raises any error that occurs during the process
+
+        # Returns
+            Field/None: added `Field` instance or `None` if not added
+
         """
         self.__current_descriptor.setdefault('fields', [])
         self.__current_descriptor['fields'].append(descriptor)
@@ -115,7 +181,15 @@ class Schema(object):
         return self.__fields[-1]
 
     def update_field(self, name, update):
-        """https://github.com/frictionlessdata/tableschema-py#schema
+        """Update existing descriptor field by name
+
+        # Arguments
+            name (str): schema field name
+            update (dict): update to apply to field's descriptor
+
+        # Returns
+            bool: true on success and false if no field is found to be modified
+
         """
         for field in self.__next_descriptor['fields']:
             if field['name'] == name:
@@ -124,7 +198,19 @@ class Schema(object):
         return False
 
     def remove_field(self, name):
-        """https://github.com/frictionlessdata/tableschema-py#schema
+        """Remove field resource by name.
+
+        The schema descriptor will be validated after field descriptor removal.
+
+        # Arguments
+            name (str): schema field name
+
+        # Raises
+            exceptions.TableSchemaException: raises any error that occurs during the process
+
+        # Returns
+            Field/None: removed `Field` instances or `None` if not found
+
         """
         field = self.get_field(name)
         if field:
@@ -134,9 +220,15 @@ class Schema(object):
             self.__build()
         return field
 
-    def cast_row(self, row, fail_fast=False, row_number=None,
-                 exc_handler=None):
-        """https://github.com/frictionlessdata/tableschema-py#schema
+    def cast_row(self, row, fail_fast=False, row_number=None, exc_handler=None):
+        """Cast row based on field types and formats.
+
+        # Arguments
+            row (any[]: data row as an array of values
+
+        # Returns
+            any[]: returns cast data row
+
         """
         exc_handler = helpers.default_exc_handler if exc_handler is None else \
             exc_handler
@@ -208,7 +300,22 @@ class Schema(object):
 
     def infer(self, rows, headers=1, confidence=0.75,
               guesser_cls=None, resolver_cls=None):
-        """https://github.com/frictionlessdata/tableschema-py#schema
+        """Infer and set `schema.descriptor` based on data sample.
+
+        # Arguments
+            rows (list[]): array of arrays representing rows.
+            headers (int/str[]): data sample headers (one of):
+              - row number containing headers (`rows` should contain headers rows)
+              - array of headers (`rows` should NOT contain headers rows)
+            confidence (float): how many casting errors are allowed (as a ratio, between 0 and 1)
+            guesser_cls (class): you can implement inferring strategies by
+                 providing type-guessing and type-resolving classes [experimental]
+            resolver_cls (class): you can implement inferring strategies by
+                 providing type-guessing and type-resolving classes [experimental]
+
+        # Returns
+            dict: Table Schema descriptor
+
         """
 
         # Get headers
@@ -258,7 +365,41 @@ class Schema(object):
         return descriptor
 
     def commit(self, strict=None):
-        """https://github.com/frictionlessdata/tableschema-py#schema
+        """Update schema instance if there are in-place changes in the descriptor.
+
+        # Example
+
+        ```python
+        from tableschema import Schema
+        descriptor = {'fields': [{'name': 'my_field', 'title': 'My Field', 'type': 'string'}]}
+        schema = Schema(descriptor)
+        print(schema.get_field('my_field').descriptor['type']) # string
+
+        # Update descriptor by field position
+        schema.descriptor['fields'][0]['type'] = 'number'
+        # Update descriptor by field name
+        schema.update_field('my_field', {'title': 'My Pretty Field'}) # True
+
+        # Change are not committed
+        print(schema.get_field('my_field').descriptor['type']) # string
+        print(schema.get_field('my_field').descriptor['title']) # My Field
+
+        # Commit change
+        schema.commit()
+        print(schema.get_field('my_field').descriptor['type']) # number
+        print(schema.get_field('my_field').descriptor['title']) # My Pretty Field
+
+        ```
+
+        # Arguments
+            strict (bool): alter `strict` mode for further work
+
+        # Raises
+            exceptions.TableSchemaException: raises any error that occurs during the process
+
+        # Returns
+            bool: true on success and false if not modified
+
         """
         if strict is not None:
             self.__strict = strict
@@ -269,7 +410,17 @@ class Schema(object):
         return True
 
     def save(self, target, ensure_ascii=True):
-        """https://github.com/frictionlessdata/tableschema-py#schema
+        """Save schema descriptor to target destination.
+
+        # Arguments
+            target (str): path where to save a descriptor
+
+        # Raises
+            TableSchemaException: raises any error that occurs during the process
+
+        # Returns
+            bool: true on success
+
         """
         mode = 'w'
         encoding = 'utf-8'
