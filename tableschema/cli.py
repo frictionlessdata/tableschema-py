@@ -51,12 +51,13 @@ def info():
 def infer(data, row_limit, confidence, encoding, to_file):
     """Infer a schema from data.
 
-    * data must be a local filepath
-    * data must be CSV
-    * the file encoding is assumed to be UTF-8 unless an encoding is passed
+    - data must be a local filepath
+    - data must be CSV
+    - the file encoding is assumed to be UTF-8 unless an encoding is passed
       with --encoding
-    * the first line of data must be headers
-    * these constraints are just for the CLI
+    - the first line of data must be headers
+    - these constraints are just for the CLI
+
     """
     descriptor = tableschema.infer(data,
                                    encoding=encoding,
@@ -80,7 +81,3 @@ def validate(schema):
         click.echo("Schema is not valid")
         click.echo(exception.errors)
         sys.exit(1)
-
-
-if __name__ == '__main__':
-    cli()
