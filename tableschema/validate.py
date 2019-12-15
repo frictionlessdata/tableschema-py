@@ -11,7 +11,17 @@ from .schema import Schema
 
 
 def validate(descriptor):
-    """https://github.com/frictionlessdata/tableschema-py#schema
+    """Validate descriptor
+
+    # Arguments
+        dict: descriptor
+
+    # Raises
+        ValidationError: on validation errors
+
+    # Returns
+        bool: True
+
     """
     Schema(descriptor, strict=True)
     return True

@@ -12,7 +12,19 @@ from .table import Table
 # Module API
 
 def infer(source, headers=1, limit=100, confidence=0.75, **options):
-    """https://github.com/frictionlessdata/tableschema-py#schema
+    """Infer source schema.
+
+    # Arguments
+        source (any): source as path, url or inline data
+        headers (int/str[]): headers rows number or headers list
+        confidence (float): how many casting errors are allowed (as a ratio, between 0 and 1)
+
+    # Raises
+        TableSchemaException: raises any error that occurs during the process
+
+    # Returns
+        dict: returns schema descriptor
+
     """
 
     # Deprecated arguments order

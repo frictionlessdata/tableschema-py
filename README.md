@@ -35,6 +35,8 @@ A Python implementation of the [Table Schema](http://specs.frictionlessdata.io/t
     - [`Schema`](#schema)
     - [`Field`](#field)
     - [`Storage`](#storage)
+    - [`validate`](#validate)
+    - [`infer`](#infer)
     - [`FailedCast`](#failedcast)
     - [`DataPackageException`](#datapackageexception)
     - [`TableSchemaException`](#tableschemaexception)
@@ -1115,6 +1117,42 @@ __Arguments__
 
 __Raises__
 - `exceptions.StorageError`: raises on any error
+
+
+### `validate`
+```python
+validate(descriptor)
+```
+Validate descriptor
+
+__Arguments__
+- __dict__: descriptor
+
+__Raises__
+- `ValidationError`: on validation errors
+
+__Returns__
+
+`bool`: True
+
+
+### `infer`
+```python
+infer(source, headers=1, limit=100, confidence=0.75, **options)
+```
+Infer source schema.
+
+__Arguments__
+- __source (any)__: source as path, url or inline data
+- __headers (int/str[])__: headers rows number or headers list
+- __confidence (float)__: how many casting errors are allowed (as a ratio, between 0 and 1)
+
+__Raises__
+- `TableSchemaException`: raises any error that occurs during the process
+
+__Returns__
+
+`dict`: returns schema descriptor
 
 
 ### `FailedCast`
