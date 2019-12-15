@@ -181,11 +181,11 @@ class Table(object):
         ```
 
         # Raises
-            exceptions.TableSchemaException: base class of any error
-            exceptions.CastError: data cast error
-            exceptions.IntegrityError: integrity checking error
-            exceptions.UniqueKeyError: unique key constraint violation
-            exceptions.UnresolvedFKError: unresolved foreign key reference error
+            TableSchemaException: base class of any error
+            CastError: data cast error
+            IntegrityError: integrity checking error
+            UniqueKeyError: unique key constraint violation
+            UnresolvedFKError: unresolved foreign key reference error
 
         # Returns
             Iterator[list]: yields rows

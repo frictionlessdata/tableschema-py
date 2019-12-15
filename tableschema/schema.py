@@ -33,7 +33,7 @@ class Schema(object):
             - if true, validation errors are raised immediately
 
     # Raises
-        exceptions.TableSchemaException: raise any error that occurs during the process
+        TableSchemaException: raise any error that occurs during the process
 
     """
 
@@ -206,7 +206,7 @@ class Schema(object):
             name (str): schema field name
 
         # Raises
-            exceptions.TableSchemaException: raises any error that occurs during the process
+            TableSchemaException: raises any error that occurs during the process
 
         # Returns
             Field/None: removed `Field` instances or `None` if not found
@@ -395,7 +395,7 @@ class Schema(object):
             strict (bool): alter `strict` mode for further work
 
         # Raises
-            exceptions.TableSchemaException: raises any error that occurs during the process
+            TableSchemaException: raises any error that occurs during the process
 
         # Returns
             bool: true on success and false if not modified

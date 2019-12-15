@@ -465,11 +465,11 @@ def exc_handler(exc, row_number=None, row_data=None, error_data=None):
 ```
 
 __Raises__
-- `exceptions.TableSchemaException`: base class of any error
-- `exceptions.CastError`: data cast error
-- `exceptions.IntegrityError`: integrity checking error
-- `exceptions.UniqueKeyError`: unique key constraint violation
-- `exceptions.UnresolvedFKError`: unresolved foreign key reference error
+- `TableSchemaException`: base class of any error
+- `CastError`: data cast error
+- `IntegrityError`: integrity checking error
+- `UniqueKeyError`: unique key constraint violation
+- `UnresolvedFKError`: unresolved foreign key reference error
 
 __Returns__
 
@@ -590,7 +590,7 @@ __Arguments__
         - if true, validation errors are raised immediately
 
 __Raises__
-- `exceptions.TableSchemaException`: raise any error that occurs during the process
+- `TableSchemaException`: raise any error that occurs during the process
 
 
 #### `schema.descriptor`
@@ -739,7 +739,7 @@ __Arguments__
 - __name (str)__: schema field name
 
 __Raises__
-- `exceptions.TableSchemaException`: raises any error that occurs during the process
+- `TableSchemaException`: raises any error that occurs during the process
 
 __Returns__
 
@@ -817,7 +817,7 @@ __Arguments__
 - __strict (bool)__: alter `strict` mode for further work
 
 __Raises__
-- `exceptions.TableSchemaException`: raises any error that occurs during the process
+- `TableSchemaException`: raises any error that occurs during the process
 
 __Returns__
 
