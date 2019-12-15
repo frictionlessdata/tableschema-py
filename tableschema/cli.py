@@ -9,12 +9,10 @@ import sys
 import json
 import click
 import tableschema
+from . import config
 
 
-DIR = os.path.abspath(os.path.dirname(__file__))
-VERSION_FILE = os.path.join(os.path.dirname(__file__), 'VERSION')
-VERSION = io.open(VERSION_FILE, encoding='utf-8').read().strip()
-
+# Module API
 
 @click.group(help='')
 def cli():
@@ -39,7 +37,7 @@ def cli():
 @cli.command()
 def info():
     """Return info on this version of Table Schema"""
-    click.echo(json.dumps({'version': VERSION}, ensure_ascii=False, indent=4))
+    click.echo(json.dumps({'version': config.VERSION}, ensure_ascii=False, indent=4))
 
 
 @cli.command()

@@ -3,6 +3,8 @@ from __future__ import absolute_import
 from __future__ import division
 from __future__ import print_function
 from __future__ import unicode_literals
+from . import config
+__version__ = config.VERSION
 
 
 # Module API
@@ -29,11 +31,3 @@ from .exceptions import StorageError
 # Deprecated
 
 from . import exceptions
-
-# Version
-
-import io
-import os
-__version__ = io.open(
-    os.path.join(os.path.dirname(__file__), 'VERSION'),
-    encoding='utf-8').read().strip()
