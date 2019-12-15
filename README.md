@@ -38,6 +38,25 @@ High-level documentation and tutorials:
 
 ## API Reference
 
+### `cli`
+```python
+cli()
+```
+Command-line interface
+
+```
+Usage: tableschema [OPTIONS] COMMAND [ARGS]...
+
+Options:
+  --help  Show this message and exit.
+
+Commands:
+  infer     Infer a schema from data.
+  info      Return info on this version of Table Schema
+  validate  Validate that a supposed schema is in fact a Table Schema.
+```
+
+
 ### `Table`
 ```python
 Table(self, source, schema=None, strict=False, post_cast=[], storage=None, **options)

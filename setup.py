@@ -54,7 +54,7 @@ setup(
     extras_require={'develop': TESTS_REQUIRE},
     entry_points={
         'console_scripts': [
-            'tableschema = tableschema.cli:main',
+            'tableschema = tableschema.__main__:cli',
         ]
     },
     zip_safe=False,
