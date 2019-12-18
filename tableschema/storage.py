@@ -51,6 +51,10 @@ class Storage(object):
 
     # Public
 
+    @abstractmethod
+    def __init__(self, **options):
+        pass
+
     @classmethod
     def connect(cls, name, **options):
         """Create tabular `storage` based on storage name.
@@ -184,10 +188,4 @@ class Storage(object):
             exceptions.StorageError: raises on any error
 
         """
-        pass
-
-    # Private
-
-    @abstractmethod
-    def __init__(self, **options):
         pass
