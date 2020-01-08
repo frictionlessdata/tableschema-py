@@ -11,6 +11,7 @@ from collections import OrderedDict
 from .storage import Storage
 from .schema import Schema
 from . import exceptions
+from . import helpers
 from collections import defaultdict
 
 
@@ -191,15 +192,8 @@ class Table(object):
             Iterator[list]: yields rows
 
         """
-        # TODO: Use helpers.default_exc_handler instead. Prerequisite: Use
-        # stream context manager to make sure the stream gets properly closed
-        # in all situations, see comment below.
-        if exc_handler is None:
-            stream = self.__stream
-
-            def exc_handler(exc, *args, **kwargs):
-                stream.close()
-                raise exc
+        exc_handler = helpers.default_exc_handler if exc_handler is None else \
+            exc_handler
 
         # Prepare unique checks
         if cast:
@@ -213,134 +207,128 @@ class Table(object):
             foreign_keys_values = self.index_foreign_keys_values(relations)
 
         # Open/iterate stream
-        # TODO: Use context manager instead to make sure stream gets closed in
-        # case of exceptions. Leaving that in for now for the sake of a smaller
-        # diff.
-        self.__stream.open()
-        iterator = self.__stream.iter(extended=True)
-        iterator = self.__apply_processors(
-            iterator, cast=cast, exc_handler=exc_handler)
-        for row_number, headers, row in iterator:
+        with self.__stream as stream:
+            iterator = stream.iter(extended=True)
+            iterator = self.__apply_processors(
+                iterator, cast=cast, exc_handler=exc_handler)
+            for row_number, headers, row in iterator:
 
-            # Get headers
-            if not self.__headers:
-                self.__headers = headers
+                # Get headers
+                if not self.__headers:
+                    self.__headers = headers
 
-            # Check headers
-            if cast:
-                if self.schema and self.headers:
-                    if self.headers != self.schema.field_names:
-                        message = (
-                            'Table headers (%r) don\'t match '
-                            'schema field names (%r) in row %s' % (
-                                self.headers, self.schema.field_names,
-                                row_number))
-                        keyed_row = OrderedDict(zip(headers, row))
-                        exc_handler(
-                            exceptions.CastError(message),
-                            row_number=row_number, row_data=keyed_row,
-                            error_data=keyed_row)
-                        continue
-
-            # Check unique
-            if cast:
-                for indexes, cache in unique_fields_cache.items():
-                    keyed_values = OrderedDict(
-                        (headers[i], value)
-                        for i, value in enumerate(row) if i in indexes)
-                    values = tuple(keyed_values.values())
-                    if not all(map(lambda value: value is None, values)):
-                        if values in cache['data']:
+                # Check headers
+                if cast:
+                    if self.schema and self.headers:
+                        if self.headers != self.schema.field_names:
                             message = (
-                                'Field(s) "%s" duplicates in row "%s" '
-                                'for values %r' % (
-                                    cache['name'], row_number, values))
-                            exc_handler(
-                                exceptions.UniqueKeyError(message),
-                                row_number=row_number,
-                                row_data=OrderedDict(zip(headers, row)),
-                                error_data=keyed_values)
-                        cache['data'].add(values)
-
-            # Resolve relations
-            if relations:
-                if self.schema:
-                    row_with_relations = dict(zip(headers, copy(row)))
-                    for foreign_key in self.schema.foreign_keys:
-                        refValue = _resolve_relations(row, headers, foreign_keys_values,
-                                                      foreign_key)
-                        if refValue is None:
+                                'Table headers (%r) don\'t match '
+                                'schema field names (%r) in row %s' % (
+                                    self.headers, self.schema.field_names,
+                                    row_number))
                             keyed_row = OrderedDict(zip(headers, row))
-                            # local values of the FK
-                            local_keyed_values = {
-                                key: keyed_row[key]
-                                for key in foreign_key['fields']
-                                }
-                            local_values = tuple(local_keyed_values.values())
-                            message = (
-                                'Foreign key "%s" violation in row "%s": '
-                                '%s not found in %s' % (
-                                    foreign_key['fields'],
-                                    row_number,
-                                    local_values,
-                                    foreign_key['reference']['resource']))
                             exc_handler(
-                                exceptions.UnresolvedFKError(message),
+                                exceptions.CastError(message),
                                 row_number=row_number, row_data=keyed_row,
-                                error_data=local_keyed_values)
-                            # If we reach this point we don't fail-early
-                            # i.e. no exception has been raised. As the
-                            # reference can't be resolved, use empty dict
-                            # as the "unresolved result".
-                            for field in foreign_key['fields']:
-                                if not isinstance(
-                                        row_with_relations[field], dict):
-                                    row_with_relations[field] = {}
-                        elif type(refValue) is dict:
-                            # Substitute resolved referenced object for
-                            # original referencing field value.
-                            # For a composite foreign key, this substitutes
-                            # each part of the composite key with the
-                            # referenced object.
-                            for field in foreign_key['fields']:
-                                if type(row_with_relations[field]) is not dict:
-                                    # no previous refValues injected on this field
-                                    row_with_relations[field] = refValue
-                                else:
-                                    # alreayd one ref, merging
-                                    row_with_relations[field].update(refValue)
-                        else:
-                            # case when all original value of the FK are empty
-                            # refValue == row, there is nothing to do
-                            # an empty dict might be a better returned value for this case ?
-                            pass
+                                error_data=keyed_row)
+                            continue
 
-                    #  mutate row now that we are done, in the right order
-                    row = [row_with_relations[f] for f in headers]
+                # Check unique
+                if cast:
+                    for indexes, cache in unique_fields_cache.items():
+                        keyed_values = OrderedDict(
+                            (headers[i], value)
+                            for i, value in enumerate(row) if i in indexes)
+                        values = tuple(keyed_values.values())
+                        if not all(map(lambda value: value is None, values)):
+                            if values in cache['data']:
+                                message = (
+                                    'Field(s) "%s" duplicates in row "%s" '
+                                    'for values %r' % (
+                                        cache['name'], row_number, values))
+                                exc_handler(
+                                    exceptions.UniqueKeyError(message),
+                                    row_number=row_number,
+                                    row_data=OrderedDict(zip(headers, row)),
+                                    error_data=keyed_values)
+                            cache['data'].add(values)
 
-            # Form row
-            if extended:
-                yield (row_number, headers, row)
-            elif keyed:
-                yield dict(zip(headers, row))
-            else:
-                yield row
+                # Resolve relations
+                if relations:
+                    if self.schema:
+                        row_with_relations = dict(zip(headers, copy(row)))
+                        for foreign_key in self.schema.foreign_keys:
+                            refValue = _resolve_relations(row, headers, foreign_keys_values,
+                                                          foreign_key)
+                            if refValue is None:
+                                keyed_row = OrderedDict(zip(headers, row))
+                                # local values of the FK
+                                local_keyed_values = {
+                                    key: keyed_row[key]
+                                    for key in foreign_key['fields']
+                                    }
+                                local_values = tuple(local_keyed_values.values())
+                                message = (
+                                    'Foreign key "%s" violation in row "%s": '
+                                    '%s not found in %s' % (
+                                        foreign_key['fields'],
+                                        row_number,
+                                        local_values,
+                                        foreign_key['reference']['resource']))
+                                exc_handler(
+                                    exceptions.UnresolvedFKError(message),
+                                    row_number=row_number, row_data=keyed_row,
+                                    error_data=local_keyed_values)
+                                # If we reach this point we don't fail-early
+                                # i.e. no exception has been raised. As the
+                                # reference can't be resolved, use empty dict
+                                # as the "unresolved result".
+                                for field in foreign_key['fields']:
+                                    if not isinstance(
+                                            row_with_relations[field], dict):
+                                        row_with_relations[field] = {}
+                            elif type(refValue) is dict:
+                                # Substitute resolved referenced object for
+                                # original referencing field value.
+                                # For a composite foreign key, this substitutes
+                                # each part of the composite key with the
+                                # referenced object.
+                                for field in foreign_key['fields']:
+                                    if type(row_with_relations[field]) is not dict:
+                                        # no previous refValues injected on this field
+                                        row_with_relations[field] = refValue
+                                    else:
+                                        # alreayd one ref, merging
+                                        row_with_relations[field].update(refValue)
+                            else:
+                                # case when all original value of the FK are empty
+                                # refValue == row, there is nothing to do
+                                # an empty dict might be a better returned value for this case ?
+                                pass
 
-        # Check integrity
-        if integrity:
-            violations = []
-            size = integrity.get('size')
-            hash = integrity.get('hash')
-            if size and size != self.__stream.size:
-                violations.append('size "%s"' % self.__stream.size)
-            if hash and hash != self.__stream.hash:
-                violations.append('hash "%s"' % self.__stream.hash)
-            if violations:
-                message = 'Calculated %s differ(s) from declared value(s)'
-                raise exceptions.IntegrityError(message % ' and '.join(violations))
+                        #  mutate row now that we are done, in the right order
+                        row = [row_with_relations[f] for f in headers]
 
-        # Close stream
-        self.__stream.close()
+                # Form row
+                if extended:
+                    yield (row_number, headers, row)
+                elif keyed:
+                    yield dict(zip(headers, row))
+                else:
+                    yield row
+
+            # Check integrity
+            if integrity:
+                violations = []
+                size = integrity.get('size')
+                hash = integrity.get('hash')
+                if size and size != self.__stream.size:
+                    violations.append('size "%s"' % self.__stream.size)
+                if hash and hash != self.__stream.hash:
+                    violations.append('hash "%s"' % self.__stream.hash)
+                if violations:
+                    message = 'Calculated %s differ(s) from declared value(s)'
+                    raise exceptions.IntegrityError(message % ' and '.join(violations))
 
     def read(self, keyed=False, extended=False, cast=True, limit=None,
              integrity=False, relations=False, foreign_keys_values=False,
