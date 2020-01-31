@@ -180,11 +180,6 @@
                     "type": "boolean",
                     "description": "When `true`, each value for the property `MUST` be unique."
                   },
-                  "pattern": {
-                    "type": "string",
-                    "description": "A regular expression pattern to test each value of the property against, where a truthy response indicates validity.",
-                    "context": "Regular expressions `SHOULD` conform to the [XML Schema regular expression syntax](http://www.w3.org/TR/xmlschema-2/#regexs)."
-                  },
                   "enum": {
                     "oneOf": [
                       {
@@ -300,11 +295,6 @@
                   "unique": {
                     "type": "boolean",
                     "description": "When `true`, each value for the property `MUST` be unique."
-                  },
-                  "pattern": {
-                    "type": "string",
-                    "description": "A regular expression pattern to test each value of the property against, where a truthy response indicates validity.",
-                    "context": "Regular expressions `SHOULD` conform to the [XML Schema regular expression syntax](http://www.w3.org/TR/xmlschema-2/#regexs)."
                   },
                   "enum": {
                     "oneOf": [
@@ -766,11 +756,6 @@
                   "unique": {
                     "type": "boolean",
                     "description": "When `true`, each value for the property `MUST` be unique."
-                  },
-                  "pattern": {
-                    "type": "string",
-                    "description": "A regular expression pattern to test each value of the property against, where a truthy response indicates validity.",
-                    "context": "Regular expressions `SHOULD` conform to the [XML Schema regular expression syntax](http://www.w3.org/TR/xmlschema-2/#regexs)."
                   },
                   "enum": {
                     "type": "array",
