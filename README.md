@@ -496,7 +496,7 @@ __Returns__
 
 #### `table.infer`
 ```python
-table.infer(self, limit=100, confidence=0.75)
+table.infer(self, limit=100, confidence=0.75, missing_values=[''])
 ```
 Infer a schema for the table.
 
@@ -504,9 +504,8 @@ It will infer and set Table Schema to `table.schema` based on table data.
 
 __Arguments__
 - __limit (int)__: limit rows sample size
-- __confidence (float)__:
-        how many casting errors are allowed
-        (as a ratio, between 0 and 1)
+- __confidence (float)__: how many casting errors are allowed (as a ratio, between 0 and 1)
+- __missing_values (str[])__: list of missing values (by default `['']`)
 
 __Returns__
 
@@ -1138,7 +1137,7 @@ __Returns__
 
 ### `infer`
 ```python
-infer(source, headers=1, limit=100, confidence=0.75, **options)
+infer(source, headers=1, limit=100, confidence=0.75, missing_values=[''], **options)
 ```
 Infer source schema.
 
@@ -1146,6 +1145,7 @@ __Arguments__
 - __source (any)__: source as path, url or inline data
 - __headers (int/str[])__: headers rows number or headers list
 - __confidence (float)__: how many casting errors are allowed (as a ratio, between 0 and 1)
+- __missing_values (str[])__: list of missing values (by default `['']`)
 
 __Raises__
 - `TableSchemaException`: raises any error that occurs during the process

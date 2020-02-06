@@ -330,7 +330,8 @@ class Schema(object):
             headers = []
 
         # Get descriptor
-        guesser = (guesser_cls or _TypeGuesser)()
+        missing_values = self.__current_descriptor.get('missingValues', config.DEFAULT_MISSING_VALUES)
+        guesser = guesser_cls() if guesser_cls else  _TypeGuesser(missing_values)
         resolver = (resolver_cls or _TypeResolver)()
         descriptor = {'fields': []}
         type_matches = {}
@@ -547,11 +548,14 @@ class _TypeGuesser(object):
 
     # Public
 
+    def __init__(self, missing_values):
+        self.missing_values = missing_values
+
     def cast(self, value):
         for priority, name in enumerate(_INFER_TYPE_ORDER):
             cast = getattr(types, 'cast_%s' % name)
             result = cast('default', value)
-            if result != config.ERROR:
+            if value in self.missing_values or result != config.ERROR:
                 yield (name, 'default', priority)
 
 

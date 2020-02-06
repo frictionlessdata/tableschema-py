@@ -12,6 +12,7 @@ from .storage import Storage
 from .schema import Schema
 from . import exceptions
 from . import helpers
+from . import config
 from collections import defaultdict
 
 
@@ -355,16 +356,16 @@ class Table(object):
                 break
         return result
 
-    def infer(self, limit=100, confidence=0.75):
+    def infer(self, limit=100, confidence=0.75,
+              missing_values=config.DEFAULT_MISSING_VALUES):
         """Infer a schema for the table.
 
         It will infer and set Table Schema to `table.schema` based on table data.
 
         # Arguments
             limit (int): limit rows sample size
-            confidence (float):
-                how many casting errors are allowed
-                (as a ratio, between 0 and 1)
+            confidence (float): how many casting errors are allowed (as a ratio, between 0 and 1)
+            missing_values (str[]): list of missing values (by default `['']`)
 
         # Returns
             dict: Table Schema descriptor
@@ -376,7 +377,7 @@ class Table(object):
             if not self.__storage:
                 with self.__stream as stream:
                     if self.__schema is None:
-                        self.__schema = Schema()
+                        self.__schema = Schema({'missingValues': missing_values})
                         self.__schema.infer(stream.sample[:limit],
                                             headers=stream.headers,
                                             confidence=confidence)

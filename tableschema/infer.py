@@ -6,18 +6,22 @@ from __future__ import unicode_literals
 
 import six
 import warnings
+from . import config
 from .table import Table
 
 
 # Module API
 
-def infer(source, headers=1, limit=100, confidence=0.75, **options):
+def infer(source, headers=1, limit=100, confidence=0.75,
+          missing_values=config.DEFAULT_MISSING_VALUES,
+          **options):
     """Infer source schema.
 
     # Arguments
         source (any): source as path, url or inline data
         headers (int/str[]): headers rows number or headers list
         confidence (float): how many casting errors are allowed (as a ratio, between 0 and 1)
+        missing_values (str[]): list of missing values (by default `['']`)
 
     # Raises
         TableSchemaException: raises any error that occurs during the process
@@ -34,5 +38,6 @@ def infer(source, headers=1, limit=100, confidence=0.75, **options):
         source, headers = headers, source
 
     table = Table(source, headers=headers, **options)
-    descriptor = table.infer(limit=limit, confidence=confidence)
+    descriptor = table.infer(limit=limit, confidence=confidence,
+        missing_values=missing_values)
     return descriptor
