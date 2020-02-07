@@ -331,7 +331,7 @@ class Schema(object):
 
         # Get descriptor
         missing_values = self.__current_descriptor.get('missingValues', config.DEFAULT_MISSING_VALUES)
-        guesser = guesser_cls() if guesser_cls else  _TypeGuesser(missing_values)
+        guesser = guesser_cls() if guesser_cls else _TypeGuesser(missing_values)
         resolver = (resolver_cls or _TypeResolver)()
         descriptor = {'fields': []}
         type_matches = {}
