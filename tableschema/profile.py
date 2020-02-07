@@ -126,7 +126,7 @@ class _TableSchemaValidator(validator_for(_PROFILES['table-schema'])):
                         if field_type not in _CONSTRAINT_ALLOWED_FIELD_TYPE[constraint_name]:
                             yield exceptions.ValidationError(
                                 "field {}: built-in {} constraint can't be applied to {} type field"
-                                .format(field_name, constraint_name, field_type))
+                                .format(field_name, constraint_name, field_type_str))
 
         # the hash MAY contain a key `primaryKey`
         if isinstance(instance, dict) and instance.get('primaryKey'):
