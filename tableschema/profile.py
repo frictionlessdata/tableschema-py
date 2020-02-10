@@ -79,6 +79,14 @@ _PROFILES = {
     'geojson': _load_profile('geojson.json'),
 }
 
+_CONSTRAINT_ALLOWED_FIELD_TYPE = {
+    'minLength': {None, 'string', 'array', 'object'},
+    'maxLength': {None, 'string', 'array', 'object'},
+    'minimum': {'integer', 'number', 'date', 'time', 'datetime', 'year', 'yearmonth'},
+    'maximum': {'integer', 'number', 'date', 'time', 'datetime', 'year', 'yearmonth'},
+    'pattern': {None, 'string'},
+}
+
 
 class _TableSchemaValidator(validator_for(_PROFILES['table-schema'])):
     @classmethod
@@ -103,6 +111,22 @@ class _TableSchemaValidator(validator_for(_PROFILES['table-schema'])):
             field_names = [f['name'] for f in instance['fields']]
         except (TypeError, KeyError):
             field_names = []
+
+        # ensure constraint and field type consistency
+        if isinstance(instance, dict) and instance.get('fields'):
+            for field in instance['fields']:
+                if not isinstance(field, dict):
+                    continue
+                field_type = field.get('type')
+                field_type_str = 'default' if field_type is None else field_type
+                field_name = field.get('name', '[noname]')
+                constraints = field.get('constraints', {})
+                for constraint_name in constraints:
+                    if constraint_name in _CONSTRAINT_ALLOWED_FIELD_TYPE:
+                        if field_type not in _CONSTRAINT_ALLOWED_FIELD_TYPE[constraint_name]:
+                            yield exceptions.ValidationError(
+                                "field {}: built-in {} constraint can't be applied to {} type field"
+                                .format(field_name, constraint_name, field_type_str))
 
         # the hash MAY contain a key `primaryKey`
         if isinstance(instance, dict) and instance.get('primaryKey'):
