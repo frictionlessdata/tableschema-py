@@ -44,6 +44,28 @@ def test_infer_schema_with_row_limit():
     }
 
 
+def test_infer_schema_with_missing_values_default():
+    descriptor = infer('data/data_infer_missing_values.csv')
+    assert descriptor == {
+        'fields': [
+            {'name': 'id', 'type': 'string', 'format': 'default'},
+            {'name': 'age', 'type': 'integer', 'format': 'default'},
+            {'name': 'name', 'type': 'string', 'format': 'default'}],
+        'missingValues': [''],
+    }
+
+
+def test_infer_schema_with_missing_values_using_the_argument():
+    descriptor = infer('data/data_infer_missing_values.csv', missing_values=['-'])
+    assert descriptor == {
+        'fields': [
+            {'name': 'id', 'type': 'integer', 'format': 'default'},
+            {'name': 'age', 'type': 'integer', 'format': 'default'},
+            {'name': 'name', 'type': 'string', 'format': 'default'}],
+        'missingValues': ['-'],
+    }
+
+
 def test_check_type_boolean_string_tie():
     descriptor = infer([['f'], ['stringish']], headers=['field'])
     assert descriptor['fields'][0]['type'] == 'string'
