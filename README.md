@@ -1281,6 +1281,10 @@ $ make test
 
 Here described only breaking and the most important changes. The full changelog and documentation for all released versions can be found in the nicely formatted [commit history](https://github.com/frictionlessdata/tableschema-py/commits/master).
 
+#### v1.13
+
+- Added `missing_values` argument to the `infer` function (#269)
+
 #### v1.12
 
 - Support optional custom exception handling for table.iter/read (#259)
