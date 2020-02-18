@@ -59,6 +59,23 @@ def test_schema_infer_storage(import_module, apply_defaults):
     assert table.schema.descriptor == apply_defaults(SCHEMA_MIN)
 
 
+def test_schema_infer_missing_values():
+    table = Table('data/data_infer_missing_values.csv')
+    table.infer(missing_values=['-'])
+    schema = deepcopy(SCHEMA_CSV)
+    schema['missingValues'] = ['-']
+    assert table.schema.descriptor == schema
+    assert table.read() == [
+        [1, 39, 'Paul'],
+        [None, 25, 'Test'],
+        [2, 23, 'Jimmy'],
+        [None, 25, 'Test'],
+        [3, 36, 'Jane'],
+        [None, 25, 'Test'],
+        [4, 28, 'Judy']
+    ]
+
+
 def test_infer_schema_empty_file():
     s = Table('data/empty.csv')
     d = s.infer()

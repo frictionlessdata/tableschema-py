@@ -62,7 +62,7 @@ def test_infer_schema_with_missing_values_using_the_argument():
             {'name': 'id', 'type': 'integer', 'format': 'default'},
             {'name': 'age', 'type': 'integer', 'format': 'default'},
             {'name': 'name', 'type': 'string', 'format': 'default'}],
-        'missingValues': [''],
+        'missingValues': ['-'],
     }
 
 

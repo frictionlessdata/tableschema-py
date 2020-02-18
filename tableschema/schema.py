@@ -333,7 +333,7 @@ class Schema(object):
         missing_values = self.__current_descriptor.get('missingValues', config.DEFAULT_MISSING_VALUES)
         guesser = guesser_cls() if guesser_cls else _TypeGuesser(missing_values)
         resolver = (resolver_cls or _TypeResolver)()
-        descriptor = {'fields': []}
+        descriptor = {'fields': [], 'missingValues': missing_values}
         type_matches = {}
         for header in headers:
             descriptor['fields'].append({'name': header})
