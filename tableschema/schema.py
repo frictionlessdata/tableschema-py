@@ -554,9 +554,10 @@ class _TypeGuesser(object):
     def cast(self, value):
         for priority, name in enumerate(_INFER_TYPE_ORDER):
             cast = getattr(types, 'cast_%s' % name)
-            result = cast('default', value)
-            if value in self.missing_values or result != config.ERROR:
-                yield (name, 'default', priority)
+            if value not in self.missing_values:
+                result = cast('default', value)
+                if result != config.ERROR:
+                    yield (name, 'default', priority)
 
 
 class _TypeResolver(object):
@@ -578,9 +579,9 @@ class _TypeResolver(object):
                 else:
                     counts[result] = 1
             # tuple representation of `counts` dict sorted by values
-            sorted_counts = sorted(counts.items(),
-                                   key=lambda item: item[1],
-                                   reverse=True)
+            sorted_counts = sorted(counts.items(), key=lambda item: item[1], reverse=True)
+            if not sorted_counts:
+                return {'type': 'string', 'format': 'default'}
             # Allow also counts that are not the max, based on the confidence
             max_count = sorted_counts[0][1]
             sorted_counts = filter(lambda item: item[1] >= max_count * confidence,
