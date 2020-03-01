@@ -14,6 +14,7 @@ from .table import Table
 
 def infer(source, headers=1, limit=100, confidence=0.75,
           missing_values=config.DEFAULT_MISSING_VALUES,
+          guesser_cls=None, resolver_cls=None,
           **options):
     """Infer source schema.
 
@@ -22,6 +23,10 @@ def infer(source, headers=1, limit=100, confidence=0.75,
         headers (int/str[]): headers rows number or headers list
         confidence (float): how many casting errors are allowed (as a ratio, between 0 and 1)
         missing_values (str[]): list of missing values (by default `['']`)
+        guesser_cls (class): you can implement inferring strategies by
+            providing type-guessing and type-resolving classes [experimental]
+        resolver_cls (class): you can implement inferring strategies by
+            providing type-guessing and type-resolving classes [experimental]
 
     # Raises
         TableSchemaException: raises any error that occurs during the process
@@ -39,5 +44,6 @@ def infer(source, headers=1, limit=100, confidence=0.75,
 
     table = Table(source, headers=headers, **options)
     descriptor = table.infer(limit=limit, confidence=confidence,
-        missing_values=missing_values)
+        missing_values=missing_values, guesser_cls=guesser_cls,
+        resolver_cls=resolver_cls)
     return descriptor

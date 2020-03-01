@@ -357,7 +357,8 @@ class Table(object):
         return result
 
     def infer(self, limit=100, confidence=0.75,
-              missing_values=config.DEFAULT_MISSING_VALUES):
+              missing_values=config.DEFAULT_MISSING_VALUES,
+              guesser_cls=None, resolver_cls=None):
         """Infer a schema for the table.
 
         It will infer and set Table Schema to `table.schema` based on table data.
@@ -366,6 +367,10 @@ class Table(object):
             limit (int): limit rows sample size
             confidence (float): how many casting errors are allowed (as a ratio, between 0 and 1)
             missing_values (str[]): list of missing values (by default `['']`)
+            guesser_cls (class): you can implement inferring strategies by
+                 providing type-guessing and type-resolving classes [experimental]
+            resolver_cls (class): you can implement inferring strategies by
+                 providing type-guessing and type-resolving classes [experimental]
 
         # Returns
             dict: Table Schema descriptor
@@ -380,7 +385,9 @@ class Table(object):
                         self.__schema = Schema({'missingValues': missing_values})
                         self.__schema.infer(stream.sample[:limit],
                                             headers=stream.headers,
-                                            confidence=confidence)
+                                            confidence=confidence,
+                                            guesser_cls=guesser_cls,
+                                            resolver_cls=resolver_cls)
                     if self.__headers is None:
                         self.__headers = stream.headers
 
