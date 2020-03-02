@@ -496,7 +496,7 @@ __Returns__
 
 #### `table.infer`
 ```python
-table.infer(self, limit=100, confidence=0.75, missing_values=[''])
+table.infer(self, limit=100, confidence=0.75, missing_values=[''], guesser_cls=None, resolver_cls=None)
 ```
 Infer a schema for the table.
 
@@ -506,6 +506,10 @@ __Arguments__
 - __limit (int)__: limit rows sample size
 - __confidence (float)__: how many casting errors are allowed (as a ratio, between 0 and 1)
 - __missing_values (str[])__: list of missing values (by default `['']`)
+- __guesser_cls (class)__: you can implement inferring strategies by
+         providing type-guessing and type-resolving classes [experimental]
+- __resolver_cls (class)__: you can implement inferring strategies by
+         providing type-guessing and type-resolving classes [experimental]
 
 __Returns__
 
@@ -1137,7 +1141,7 @@ __Returns__
 
 ### `infer`
 ```python
-infer(source, headers=1, limit=100, confidence=0.75, missing_values=[''], **options)
+infer(source, headers=1, limit=100, confidence=0.75, missing_values=[''], guesser_cls=None, resolver_cls=None, **options)
 ```
 Infer source schema.
 
@@ -1146,6 +1150,10 @@ __Arguments__
 - __headers (int/str[])__: headers rows number or headers list
 - __confidence (float)__: how many casting errors are allowed (as a ratio, between 0 and 1)
 - __missing_values (str[])__: list of missing values (by default `['']`)
+- __guesser_cls (class)__: you can implement inferring strategies by
+        providing type-guessing and type-resolving classes [experimental]
+- __resolver_cls (class)__: you can implement inferring strategies by
+        providing type-guessing and type-resolving classes [experimental]
 
 __Raises__
 - `TableSchemaException`: raises any error that occurs during the process
@@ -1280,6 +1288,10 @@ $ make test
 ## Changelog
 
 Here described only breaking and the most important changes. The full changelog and documentation for all released versions can be found in the nicely formatted [commit history](https://github.com/frictionlessdata/tableschema-py/commits/master).
+
+#### v1.14
+
+- Allow providing custom guesser and resolver to `table.infer` and `infer`
 
 #### v1.13
 
