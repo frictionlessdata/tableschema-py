@@ -1268,6 +1268,39 @@ StorageError(self, message, errors=[])
 ```
 All storage errors.
 
+## Experimental
+
+There is an experimental environment variable `TABLESCHEMA_PRESERVE_MISSING_VALUES` which, if it is set, affects how data casting works.
+
+By default, missing values are resolved to `None` values. When this flag is set, missing values are passed through as it is. For example:
+
+> missing_values.py
+
+```python
+from tableschema import Field
+
+field = Field({'type': 'number'}, missing_values=['-'])
+print(field.cast_value('3'))
+print(field.cast_value('-'))
+```
+
+Running this script in different modes:
+
+```bash
+$ python missing_values.py
+3
+None
+$ TABLESCHEMA_PRESERVE_MISSING_VALUES=1 python missing_values.py
+3
+-
+```
+
+The flags affects all the library's APIs and software built on top of `tableschema`. For example, Data Package Pipelines:
+
+```bash
+$ TABLESCHEMA_PRESERVE_MISSING_VALUES=1 dpp run ./my_pipeline
+```
+
 ## Contributing
 
 > The project follows the [Open Knowledge International coding standards](https://github.com/okfn/coding-standards).

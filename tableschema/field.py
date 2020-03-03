@@ -4,6 +4,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
+import os
 from functools import partial
 from .profile import Profile
 from . import constraints
@@ -113,7 +114,7 @@ class Field(object):
         """
         return self.__descriptor
 
-    def cast_value(self, value, constraints=True, preserve_missing_values=False):
+    def cast_value(self, value, constraints=True):
         """Cast given value according to the field type and format.
 
         # Arguments
@@ -132,8 +133,8 @@ class Field(object):
 
         # Null value
         if value in self.__missing_values:
-            # If missing_values should be preserved without being cast
-            if preserve_missing_values:
+            # Whether missing_values should be preserved without being cast
+            if os.environ.get('TABLESCHEMA_PRESERVE_MISSING_VALUES'):
                 return value
             value = None
 
