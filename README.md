@@ -1270,6 +1270,8 @@ All storage errors.
 
 ## Experimental
 
+> This API is experimental and can be changed/removed in the future
+
 There is an experimental environment variable `TABLESCHEMA_PRESERVE_MISSING_VALUES` which, if it is set, affects how data casting works.
 
 By default, missing values are resolved to `None` values. When this flag is set, missing values are passed through as it is. For example:
@@ -1321,6 +1323,10 @@ $ make test
 ## Changelog
 
 Here described only breaking and the most important changes. The full changelog and documentation for all released versions can be found in the nicely formatted [commit history](https://github.com/frictionlessdata/tableschema-py/commits/master).
+
+#### v1.15
+
+- Added an experimental `TABLESCHEMA_PRESERVE_MISSING_VALUES` environment variable flag
 
 #### v1.14
 
