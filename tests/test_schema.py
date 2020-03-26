@@ -420,3 +420,16 @@ def test_schema_field_time_format_issue_177():
     descriptor = {'fields':[{'name':'myfield', 'type':'time', 'format':'%H:%M:%S'}]}
     schema = Schema(descriptor)
     assert schema
+
+
+def test_schema_add_remove_field_issue_218():
+    descriptor = {
+        'fields':  [
+            {'name': 'test_1', 'type': 'string', 'format': 'default'},
+            {'name': 'test_2', 'type': 'string', 'format': 'default'},
+            {'name': 'test_3', 'type': 'string', 'format': 'default'},
+        ]
+    }
+    test_schema = Schema(descriptor)
+    test_schema.remove_field('test_1')
+    test_schema.add_field({'name': 'test_4', 'type': 'string', 'format': 'default'})
