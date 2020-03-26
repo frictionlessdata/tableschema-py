@@ -317,6 +317,7 @@ class Schema(object):
             dict: Table Schema descriptor
 
         """
+        print(rows)
 
         # Get headers
         if isinstance(headers, int):
