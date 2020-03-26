@@ -83,7 +83,7 @@ def test_infer_xlsx_file_with_boolean_column_issue_203():
 
 
 def test_infer_increase_limit_issue_212():
-    descriptor = infer('data/data_infer_increase_limit.csv', limit=105)
+    descriptor = infer('data/data_infer_increase_limit.csv', limit=200)
     assert descriptor == {
         'fields': [
             {'name': 'a', 'type': 'integer', 'format': 'default'},

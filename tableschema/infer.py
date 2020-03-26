@@ -42,7 +42,7 @@ def infer(source, headers=1, limit=100, confidence=0.75,
         warnings.warn('Correct arguments order infer(source, headers)', UserWarning)
         source, headers = headers, source
 
-    table = Table(source, headers=headers, **options)
+    table = Table(source, headers=headers, sample_size=limit, **options)
     descriptor = table.infer(limit=limit, confidence=confidence,
         missing_values=missing_values, guesser_cls=guesser_cls,
         resolver_cls=resolver_cls)
