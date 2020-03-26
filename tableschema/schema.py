@@ -215,8 +215,8 @@ class Schema(object):
         field = self.get_field(name)
         if field:
             predicat = lambda field: field.get('name') != name
-            self.__current_descriptor['fields'] = filter(
-                predicat, self.__current_descriptor['fields'])
+            self.__current_descriptor['fields'] = list(filter(
+                predicat, self.__current_descriptor['fields']))
             self.__build()
         return field
 
