@@ -75,7 +75,7 @@ def test_infer_xlsx_file_with_boolean_column_issue_203():
     descriptor = infer('data/data_infer_boolean.xlsx')
     assert descriptor == {
         'fields': [
-            {'name': 'integer', 'type': 'integer', 'format': 'default'},
+            {'name': 'number', 'type': 'integer', 'format': 'default'},
             {'name': 'string', 'type': 'string', 'format': 'default'},
             {'name': 'boolean', 'type': 'boolean', 'format': 'default'}],
         'missingValues': [''],

@@ -25,6 +25,8 @@ def cast_number(format, value, **options):
                 value = re.sub(r'((^\D*)|(\D*$))', '', value)
         elif not isinstance(value, six.integer_types + (float,)):
             return ERROR
+        elif value is True or value is False:
+            return ERROR
         try:
             if isinstance(value, float):
                 value = str(value)
