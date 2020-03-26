@@ -21,6 +21,8 @@ from tableschema.config import ERROR
     ('default', Decimal('1.0'), 1, {}),
     ('default', '1$', 1, {'bareNumber': False}),
     ('default', 'ab1$', 1, {'bareNumber': False}),
+    ('default', True, ERROR, {}),
+    ('default', False, ERROR, {}),
     ('default', 3.14, ERROR, {}),
     ('default', '3.14', ERROR, {}),
     ('default', Decimal('3.14'), ERROR, {}),

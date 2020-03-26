@@ -66,6 +66,17 @@ def test_infer_schema_with_missing_values_using_the_argument():
     }
 
 
-def test_check_type_boolean_string_tie():
+def test_infer_check_type_boolean_string_tie():
     descriptor = infer([['f'], ['stringish']], headers=['field'])
     assert descriptor['fields'][0]['type'] == 'string'
+
+
+def test_infer_xlsx_file_with_boolean_column_issue_203():
+    descriptor = infer('data/data_infer_boolean.xlsx')
+    assert descriptor == {
+        'fields': [
+            {'name': 'number', 'type': 'integer', 'format': 'default'},
+            {'name': 'string', 'type': 'string', 'format': 'default'},
+            {'name': 'boolean', 'type': 'boolean', 'format': 'default'}],
+        'missingValues': [''],
+    }

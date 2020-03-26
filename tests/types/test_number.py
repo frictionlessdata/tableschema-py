@@ -44,6 +44,8 @@ from tableschema.config import ERROR
     ('default', '10 000 000,00', Decimal(10000000), {'groupChar': ' ', 'decimalChar': ','}),
     ('default', '10000,00 ₪', Decimal(10000), {'groupChar': ' ', 'decimalChar': ',', 'bareNumber': False}),
     ('default', '  10 000,00 £', Decimal(10000), {'groupChar': ' ', 'decimalChar': ',', 'bareNumber': False}),
+    ('default', True, ERROR, {}),
+    ('default', False, ERROR, {}),
     ('default', '10,000a.00', ERROR, {}),
     ('default', '10+000.00', ERROR, {}),
     ('default', '$10:000.00', ERROR, {}),

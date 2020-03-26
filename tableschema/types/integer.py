@@ -15,6 +15,8 @@ from ..config import ERROR
 
 def cast_integer(format, value, **options):
     if isinstance(value, six.integer_types):
+        if value is True or value is False:
+            return ERROR
         pass
 
     elif isinstance(value, six.string_types):
