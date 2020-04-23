@@ -14,33 +14,38 @@ from ..config import ERROR
 # Module API
 
 def cast_geopoint(format, value, **options):
-    try:
-        if format == 'default':
-            if isinstance(value, six.string_types):
+
+    # Parse
+    if isinstance(value, six.string_types):
+        try:
+            if format == 'default':
                 lon, lat = value.split(',')
                 lon = lon.strip()
                 lat = lat.strip()
-            elif isinstance(value, (tuple, list)):
-                lon, lat = value
-        elif format == 'array':
-            if isinstance(value, six.string_types):
-                value = json.loads(value)
-            lon, lat = value
-        elif format == 'object':
-            if isinstance(value, six.string_types):
-                value = json.loads(value)
-            if len(value) != 2:
-                return ERROR
-            lon = value['lon']
-            lat = value['lat']
-        geopoint = _geopoint(Decimal(lon), Decimal(lat))
+            elif format == 'array':
+                lon, lat = json.loads(value)
+            elif format == 'object':
+                if isinstance(value, six.string_types):
+                    value = json.loads(value)
+                if len(value) != 2:
+                    return ERROR
+                lon = value['lon']
+                lat = value['lat']
+            value = _geopoint(Decimal(lon), Decimal(lat))
+        except Exception:
+            return ERROR
+
+    # Validate
+    try:
+        value = _geopoint(*value)
+        if value.lon > 180 or value.lon < -180:
+            return ERROR
+        if value.lat > 90 or value.lat < -90:
+            return ERROR
     except Exception:
         return ERROR
-    if geopoint.lon > 180 or geopoint.lon < -180:
-        return ERROR
-    if geopoint.lat > 90 or geopoint.lat < -90:
-        return ERROR
-    return geopoint
+
+    return value
 
 
 # Internal
