@@ -1324,6 +1324,12 @@ $ make test
 
 Here described only breaking and the most important changes. The full changelog and documentation for all released versions can be found in the nicely formatted [commit history](https://github.com/frictionlessdata/tableschema-py/commits/master).
 
+#### v1.16
+
+- Fixed the way we parse `geopoint`:
+    - as a string it can be in 3 forms ("default", "array", "object") BUT
+    - as native object it can only be a list/tuple
+
 #### v1.15
 
 - Added an experimental `TABLESCHEMA_PRESERVE_MISSING_VALUES` environment variable flag
