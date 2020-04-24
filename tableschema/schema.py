@@ -335,8 +335,8 @@ class Schema(object):
         resolver = (resolver_cls or _TypeResolver)()
         descriptor = {'fields': [], 'missingValues': missing_values}
         type_matches = {}
-        for header in headers:
-            descriptor['fields'].append({'name': header})
+        for number, header in enumerate(headers, start=1):
+            descriptor['fields'].append({'name': header or 'field%s' % number})
         for index, row in enumerate(rows):
             # Normalize rows with invalid dimensions for sanity
             row_length = len(row)
