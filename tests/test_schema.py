@@ -439,3 +439,9 @@ def test_schema_not_supported_type_issue_goodatbles_304():
     schema = Schema({'fields': [ {'name': 'name'}, {'name': 'age', 'type': 'bad'} ]})
     assert schema.valid is False
     assert schema.fields[1] is False
+
+
+def test_schema_infer_with_non_headers_issues_goodtables_258():
+    schema = Schema()
+    schema.infer([[1],[2],[3]], headers=[None])
+    assert schema.field_names == ['field1']
