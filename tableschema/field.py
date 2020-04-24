@@ -189,7 +189,11 @@ class Field(object):
             value = self.descriptor.get(key)
             if value is not None:
                 options[key] = value
-        cast = getattr(types, 'cast_%s' % self.type)
+        try:
+            cast = getattr(types, 'cast_%s' % self.type)
+        except AttributeError:
+            message = 'Not supported field type: %s' % self.type
+            raise exceptions.TableSchemaException(message)
         cast = partial(cast, self.format, **options)
         return cast
 

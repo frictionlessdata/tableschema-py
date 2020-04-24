@@ -433,3 +433,9 @@ def test_schema_add_remove_field_issue_218():
     test_schema = Schema(descriptor)
     test_schema.remove_field('test_1')
     test_schema.add_field({'name': 'test_4', 'type': 'string', 'format': 'default'})
+
+
+def test_schema_not_supported_type_issue_goodatbles_304():
+    schema = Schema({'fields': [ {'name': 'name'}, {'name': 'age', 'type': 'bad'} ]})
+    assert schema.valid is False
+    assert schema.fields[1] is False
