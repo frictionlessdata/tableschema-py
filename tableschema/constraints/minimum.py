@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 
 import decimal
 
+
 # Module API
 
 def check_minimum(constraint, value):
