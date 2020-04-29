@@ -85,6 +85,16 @@ class Field(object):
         return self.__descriptor.get('format')
 
     @property
+    def missing_values(self):
+        """Field's missing values
+
+        # Returns
+            str[]: missing values
+
+        """
+        return self.__missing_values
+
+    @property
     def required(self):
         """Whether field is required
 
