@@ -91,6 +91,16 @@ class Schema(object):
         return self.__next_descriptor
 
     @property
+    def missing_values(self):
+        """Schema's missing values
+
+        # Returns
+            str[]: missing values
+
+        """
+        return self.__current_descriptor.get('missingValues', [])
+
+    @property
     def primary_key(self):
         """Schema's primary keys
 

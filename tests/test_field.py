@@ -81,6 +81,11 @@ def test_test_value_constraints_false():
     assert Field(DESCRIPTOR_MIN).test_value('', constraints=False) == True
 
 
+def test_missing_values():
+    assert Field(DESCRIPTOR_MIN).missing_values == ['']
+    assert Field(DESCRIPTOR_MIN, missing_values=['-']).missing_values == ['-']
+
+
 # Tests [missingValues]
 
 def test_string_missingValues():

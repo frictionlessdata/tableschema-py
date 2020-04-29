@@ -48,6 +48,7 @@ A Python implementation of the [Table Schema](http://specs.frictionlessdata.io/t
     - [`RelationError`](#relationerror)
     - [`UnresolvedFKError`](#unresolvedfkerror)
     - [`StorageError`](#storageerror)
+  - [Experimental](#experimental)
   - [Contributing](#contributing)
   - [Changelog](#changelog)
 
@@ -350,7 +351,13 @@ Commands:
 
 ### `Table`
 ```python
-Table(self, source, schema=None, strict=False, post_cast=[], storage=None, **options)
+Table(self,
+      source,
+      schema=None,
+      strict=False,
+      post_cast=[],
+      storage=None,
+      **options)
 ```
 Table representation
 
@@ -369,6 +376,7 @@ __Raises__
 - `TableSchemaException`: raises on any error
 
 
+
 #### `table.hash`
 Table's SHA256 hash if it's available.
 
@@ -380,6 +388,7 @@ __Returns__
 `str/None`: SHA256 hash
 
 
+
 #### `table.headers`
 Table's headers is available
 
@@ -388,12 +397,14 @@ __Returns__
 `str[]`: headers
 
 
+
 #### `table.schema`
 Returns schema class instance if available
 
 __Returns__
 
 `Schema`: schema
+
 
 
 #### `table.size`
@@ -407,39 +418,53 @@ __Returns__
 `int/None`: size in BYTES
 
 
+
 #### `table.iter`
 ```python
-table.iter(self, keyed=False, extended=False, cast=True, integrity=False, relations=False, foreign_keys_values=False, exc_handler=None)
+table.iter(keyed=False,
+           extended=False,
+           cast=True,
+           integrity=False,
+           relations=False,
+           foreign_keys_values=False,
+           exc_handler=None)
 ```
 Iterates through the table data and emits rows cast based on table schema.
 
 __Arguments__
 
-- __keyed (bool)__:
+
+    keyed (bool):
         yield keyed rows in a form of `{header1: value1, header2: value2}`
         (default is false; the form of rows is `[value1, value2]`)
-- __extended (bool)__:
+
+    extended (bool):
         yield extended rows in a for of `[rowNumber, [header1, header2], [value1, value2]]`
         (default is false; the form of rows is `[value1, value2]`)
-- __cast (bool)__:
+
+    cast (bool):
         disable data casting if false
         (default is true)
-- __integrity (dict)__:
+
+    integrity (dict):
         dictionary in a form of `{'size': <bytes>, 'hash': '<sha256>'}`
         to check integrity of the table when it's read completely.
         Both keys are optional.
-- __relations (dict)__:
+
+    relations (dict):
         dictionary of foreign key references in a form
         of `{resource1: [{field1: value1, field2: value2}, ...], ...}`.
         If provided, foreign key fields will checked and resolved
         to one of their references (/!\ one-to-many fk are not completely resolved).
-- __foreign_keys_values (dict)__:
+
+    foreign_keys_values (dict):
         three-level dictionary of foreign key references optimized
         to speed up validation process in a form of
         `{resource1: {(fk_field1, fk_field2): {(value1, value2): {one_keyedrow}, ... }}}`.
         If not provided but relations is true, it will be created
         before the validation process by *index_foreign_keys_values* method
-- __exc_handler (func)__:
+
+    exc_handler (func):
         optional custom exception handler callable.
         Can be used to defer raising errors (i.e. "fail late"), e.g.
         for data validation purposes. Must support the signature below
@@ -478,9 +503,17 @@ __Returns__
 `Iterator[list]`: yields rows
 
 
+
 #### `table.read`
 ```python
-table.read(self, keyed=False, extended=False, cast=True, limit=None, integrity=False, relations=False, foreign_keys_values=False, exc_handler=None)
+table.read(keyed=False,
+           extended=False,
+           cast=True,
+           limit=None,
+           integrity=False,
+           relations=False,
+           foreign_keys_values=False,
+           exc_handler=None)
 ```
 Read the whole table and return as array of rows
 
@@ -494,9 +527,14 @@ __Returns__
 `list[]`: returns rows
 
 
+
 #### `table.infer`
 ```python
-table.infer(self, limit=100, confidence=0.75, missing_values=[''], guesser_cls=None, resolver_cls=None)
+table.infer(limit=100,
+            confidence=0.75,
+            missing_values=[''],
+            guesser_cls=None,
+            resolver_cls=None)
 ```
 Infer a schema for the table.
 
@@ -516,9 +554,10 @@ __Returns__
 `dict`: Table Schema descriptor
 
 
+
 #### `table.save`
 ```python
-table.save(self, target, storage=None, **options)
+table.save(target, storage=None, **options)
 ```
 Save data source to file locally in CSV format with `,` (comma) delimiter
 
@@ -537,9 +576,10 @@ __Returns__
 `True/Storage`: returns true or storage instance
 
 
+
 #### `table.index_foreign_keys_values`
 ```python
-table.index_foreign_keys_values(self, relations)
+table.index_foreign_keys_values(relations)
 ```
 Creates a three-level dictionary of foreign key references
 
@@ -598,12 +638,14 @@ __Raises__
 - `TableSchemaException`: raise any error that occurs during the process
 
 
+
 #### `schema.descriptor`
 Schema's descriptor
 
 __Returns__
 
 `dict`: descriptor
+
 
 
 #### `schema.errors`
@@ -616,12 +658,14 @@ __Returns__
 `Exception[]`: validation errors
 
 
+
 #### `schema.field_names`
 Schema's field names
 
 __Returns__
 
 `str[]`: an array of field names
+
 
 
 #### `schema.fields`
@@ -632,12 +676,14 @@ __Returns__
 `Field[]`: an array of field instances
 
 
+
 #### `schema.foreign_keys`
 Schema's foreign keys
 
 __Returns__
 
 `dict[]`: foreign keys
+
 
 
 #### `schema.headers`
@@ -648,12 +694,23 @@ __Returns__
 `str[]`: an array of field names
 
 
+
+#### `schema.missing_values`
+Schema's missing values
+
+__Returns__
+
+`str[]`: missing values
+
+
+
 #### `schema.primary_key`
 Schema's primary keys
 
 __Returns__
 
 `str[]`: primary keys
+
 
 
 #### `schema.valid`
@@ -666,9 +723,10 @@ __Returns__
 `bool`: validation status
 
 
+
 #### `schema.get_field`
 ```python
-schema.get_field(self, name)
+schema.get_field(name)
 ```
 Get schema's field by name.
 
@@ -682,9 +740,10 @@ __Returns__
 `Field/None`: `Field` instance or `None` if not found
 
 
+
 #### `schema.get_field`
 ```python
-schema.get_field(self, name)
+schema.get_field(name)
 ```
 Get schema's field by name.
 
@@ -696,11 +755,12 @@ __Arguments__
 __Returns__
 
 `Field/None`: `Field` instance or `None` if not found
+
 
 
 #### `schema.add_field`
 ```python
-schema.add_field(self, descriptor)
+schema.add_field(descriptor)
 ```
 Add new field to schema.
 
@@ -717,9 +777,10 @@ __Returns__
 `Field/None`: added `Field` instance or `None` if not added
 
 
+
 #### `schema.update_field`
 ```python
-schema.update_field(self, name, update)
+schema.update_field(name, update)
 ```
 Update existing descriptor field by name
 
@@ -732,9 +793,10 @@ __Returns__
 `bool`: true on success and false if no field is found to be modified
 
 
+
 #### `schema.remove_field`
 ```python
-schema.remove_field(self, name)
+schema.remove_field(name)
 ```
 Remove field resource by name.
 
@@ -751,9 +813,10 @@ __Returns__
 `Field/None`: removed `Field` instances or `None` if not found
 
 
+
 #### `schema.cast_row`
 ```python
-schema.cast_row(self, row, fail_fast=False, row_number=None, exc_handler=None)
+schema.cast_row(row, fail_fast=False, row_number=None, exc_handler=None)
 ```
 Cast row based on field types and formats.
 
@@ -765,9 +828,14 @@ __Returns__
 `any[]`: returns cast data row
 
 
+
 #### `schema.infer`
 ```python
-schema.infer(self, rows, headers=1, confidence=0.75, guesser_cls=None, resolver_cls=None)
+schema.infer(rows,
+             headers=1,
+             confidence=0.75,
+             guesser_cls=None,
+             resolver_cls=None)
 ```
 Infer and set `schema.descriptor` based on data sample.
 
@@ -787,9 +855,10 @@ __Returns__
 `dict`: Table Schema descriptor
 
 
+
 #### `schema.commit`
 ```python
-schema.commit(self, strict=None)
+schema.commit(strict=None)
 ```
 Update schema instance if there are in-place changes in the descriptor.
 
@@ -829,9 +898,10 @@ __Returns__
 `bool`: true on success and false if not modified
 
 
+
 #### `schema.save`
 ```python
-schema.save(self, target, ensure_ascii=True)
+schema.save(target, ensure_ascii=True)
 ```
 Save schema descriptor to target destination.
 
@@ -844,6 +914,7 @@ __Raises__
 __Returns__
 
 `bool`: true on success
+
 
 
 ### `Field`
@@ -860,12 +931,14 @@ __Raises__
 - `TableSchemaException`: raises any error that occurs during the process
 
 
+
 #### `field.constraints`
 Field constraints
 
 __Returns__
 
 `dict`: dict of field constraints
+
 
 
 #### `field.descriptor`
@@ -876,12 +949,23 @@ __Returns__
 `dict`: descriptor
 
 
+
 #### `field.format`
 Field format
 
 __Returns__
 
 `str`: field format
+
+
+
+#### `field.missing_values`
+Field's missing values
+
+__Returns__
+
+`str[]`: missing values
+
 
 
 #### `field.name`
@@ -892,12 +976,14 @@ __Returns__
 `str`: field name
 
 
+
 #### `field.required`
 Whether field is required
 
 __Returns__
 
 `bool`: true if required
+
 
 
 #### `field.schema`
@@ -908,6 +994,7 @@ __Returns__
 `Schema`: field's schema
 
 
+
 #### `field.type`
 Field type
 
@@ -916,9 +1003,10 @@ __Returns__
 `str`: field type
 
 
+
 #### `field.cast_value`
 ```python
-field.cast_value(self, value, constraints=True, preserve_missing_values=False)
+field.cast_value(value, constraints=True)
 ```
 Cast given value according to the field type and format.
 
@@ -936,9 +1024,10 @@ __Returns__
 `any`: returns cast value
 
 
+
 #### `field.test_value`
 ```python
-field.test_value(self, value, constraints=True)
+field.test_value(value, constraints=True)
 ```
 Test whether value is compliant to the field.
 
@@ -991,6 +1080,7 @@ could include additional functionality specific to conrete storage system.
 See `plugins` below to know how to integrate custom storage plugin into your workflow.
 
 
+
 #### `storage.buckets`
 Return list of storage bucket names.
 
@@ -1003,6 +1093,7 @@ __Raises__
 __Returns__
 
 `str[]`: return list of bucket names
+
 
 
 #### `storage.connect`
@@ -1025,9 +1116,10 @@ __Returns__
 `Storage`: returns `Storage` instance
 
 
+
 #### `storage.create`
 ```python
-storage.create(self, bucket, descriptor, force=False)
+storage.create(bucket, descriptor, force=False)
 ```
 Create one/multiple buckets.
 
@@ -1040,9 +1132,10 @@ __Raises__
 - `exceptions.StorageError`: raises on any error
 
 
+
 #### `storage.delete`
 ```python
-storage.delete(self, bucket=None, ignore=False)
+storage.delete(bucket=None, ignore=False)
 ```
 Delete one/multiple/all buckets.
 
@@ -1056,9 +1149,10 @@ __Raises__
 - `exceptions.StorageError`: raises on any error
 
 
+
 #### `storage.describe`
 ```python
-storage.describe(self, bucket, descriptor=None)
+storage.describe(bucket, descriptor=None)
 ```
 Get/set bucket's Table Schema descriptor
 
@@ -1074,9 +1168,10 @@ __Returns__
 `dict`: returns Table Schema descriptor
 
 
+
 #### `storage.iter`
 ```python
-storage.iter(self, bucket)
+storage.iter(bucket)
 ```
 Return an iterator of typed values based on the schema of this bucket.
 
@@ -1091,9 +1186,10 @@ __Returns__
 `list[]`: yields data rows
 
 
+
 #### `storage.read`
 ```python
-storage.read(self, bucket)
+storage.read(bucket)
 ```
 Read typed values based on the schema of this bucket.
 
@@ -1106,9 +1202,10 @@ __Returns__
 `list[]`: returns data rows
 
 
+
 #### `storage.write`
 ```python
-storage.write(self, bucket, rows)
+storage.write(bucket, rows)
 ```
 This method writes data rows into `storage`.
 
@@ -1141,7 +1238,14 @@ __Returns__
 
 ### `infer`
 ```python
-infer(source, headers=1, limit=100, confidence=0.75, missing_values=[''], guesser_cls=None, resolver_cls=None, **options)
+infer(source,
+      headers=1,
+      limit=100,
+      confidence=0.75,
+      missing_values=[''],
+      guesser_cls=None,
+      resolver_cls=None,
+      **options)
 ```
 Infer source schema.
 
@@ -1198,12 +1302,14 @@ except DataPackageException as exception:
 ```
 
 
+
 #### `datapackageexception.errors`
 List of nested errors
 
 __Returns__
 
 `DataPackageException[]`: list of nested errors
+
 
 
 #### `datapackageexception.multiple`
@@ -1214,11 +1320,13 @@ __Returns__
 `bool`: whether it's a nested exception
 
 
+
 ### `TableSchemaException`
 ```python
 TableSchemaException(self, message, errors=[])
 ```
 Base class for all TableSchema exceptions.
+
 
 ### `LoadError`
 ```python
@@ -1226,11 +1334,13 @@ LoadError(self, message, errors=[])
 ```
 All loading errors.
 
+
 ### `ValidationError`
 ```python
 ValidationError(self, message, errors=[])
 ```
 All validation errors.
+
 
 ### `CastError`
 ```python
@@ -1238,11 +1348,13 @@ CastError(self, message, errors=[])
 ```
 All value cast errors.
 
+
 ### `IntegrityError`
 ```python
 IntegrityError(self, message, errors=[])
 ```
 All integrity errors.
+
 
 ### `UniqueKeyError`
 ```python
@@ -1250,17 +1362,20 @@ UniqueKeyError(self, message, errors=[])
 ```
 Unique key constraint violation (CastError subclass)
 
+
 ### `RelationError`
 ```python
 RelationError(self, message, errors=[])
 ```
 All relations errors.
 
+
 ### `UnresolvedFKError`
 ```python
 UnresolvedFKError(self, message, errors=[])
 ```
 Unresolved foreign key reference error (RelationError subclass).
+
 
 ### `StorageError`
 ```python

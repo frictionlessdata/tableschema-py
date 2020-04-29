@@ -120,6 +120,10 @@ def test_cast_row_wrong_type_multiple_errors():
     assert len(excinfo.value.errors) == 2
 
 
+def test_missing_values():
+    assert Schema(DESCRIPTOR_MIN).missing_values == ['']
+    assert Schema(DESCRIPTOR_MAX).missing_values == ['', '-', 'null']
+
 
 # Test row casting with exception handler i.e. don't fail immediately
 
