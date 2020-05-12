@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 
 import os
 from functools import partial
+from cached_property import cached_property
 from .profile import Profile
 from . import constraints
 from . import exceptions
@@ -44,7 +45,7 @@ class Field(object):
         self.__cast_function = self.__get_cast_function()
         self.__check_functions = self.__get_check_functions()
 
-    @property
+    @cached_property
     def schema(self):
         """Returns a schema instance if the field belongs to some schema
 
@@ -54,7 +55,7 @@ class Field(object):
         """
         return self.__schema
 
-    @property
+    @cached_property
     def name(self):
         """Field name
 
@@ -64,7 +65,7 @@ class Field(object):
         """
         return self.__descriptor.get('name')
 
-    @property
+    @cached_property
     def type(self):
         """Field type
 
@@ -74,7 +75,7 @@ class Field(object):
         """
         return self.__descriptor.get('type')
 
-    @property
+    @cached_property
     def format(self):
         """Field format
 
@@ -84,7 +85,7 @@ class Field(object):
         """
         return self.__descriptor.get('format')
 
-    @property
+    @cached_property
     def missing_values(self):
         """Field's missing values
 
@@ -94,7 +95,7 @@ class Field(object):
         """
         return self.__missing_values
 
-    @property
+    @cached_property
     def required(self):
         """Whether field is required
 
@@ -104,7 +105,7 @@ class Field(object):
         """
         return self.constraints.get('required', False)
 
-    @property
+    @cached_property
     def constraints(self):
         """Field constraints
 
@@ -114,7 +115,7 @@ class Field(object):
         """
         return self.__descriptor.get('constraints', {})
 
-    @property
+    @cached_property
     def descriptor(self):
         """Fields's descriptor
 

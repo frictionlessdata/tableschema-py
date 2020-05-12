@@ -24,6 +24,7 @@ INSTALL_REQUIRES = [
     'six>=1.9',
     'click>=3.3',
     'requests>=2.5',
+    'cached-property>=1.5',
     'python-dateutil>=2.4',
     'jsonschema>=2.5',
     'unicodecsv>=0.14',
