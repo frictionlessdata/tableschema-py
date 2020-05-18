@@ -25,8 +25,8 @@ class DataPackageException(Exception):
 
     # Public
 
-    def __init__(self, message, errors=[]):
-        self.__errors = errors
+    def __init__(self, message, errors=None):
+        self.__errors = errors or []
         super(Exception, self).__init__(message)
 
     @property
