@@ -1439,6 +1439,10 @@ $ make test
 
 Here described only breaking and the most important changes. The full changelog and documentation for all released versions can be found in the nicely formatted [commit history](https://github.com/frictionlessdata/tableschema-py/commits/master).
 
+#### v1.18
+
+Publish `field.ERROR/cast_function/check_functions`
+
 #### v1.17
 
 - Added `schema.missing_values` and `field.missing_values`
