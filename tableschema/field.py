@@ -31,6 +31,8 @@ class Field(object):
 
     # Public
 
+    ERROR = config.ERROR
+
     def __init__(self, descriptor, missing_values=config.DEFAULT_MISSING_VALUES,
                  # Internal
                  schema=None):
@@ -124,6 +126,14 @@ class Field(object):
 
         """
         return self.__descriptor
+
+    @cached_property
+    def cast_function(self):
+        return self.__cast_function
+
+    @cached_property
+    def check_functions(self):
+        return self.__check_functions
 
     def cast_value(self, value, constraints=True):
         """Cast given value according to the field type and format.
