@@ -336,6 +336,13 @@ class Schema(object):
                 headers = rows.pop(0)
                 if not headers_row:
                     break
+        elif isinstance(headers, list):
+            seen_cells = []
+            headers = headers.copy()
+            for index, cell in enumerate(headers):
+                count = seen_cells.count(cell) + 1
+                headers[index] = '%s%s' % (cell, count) if count > 1 else cell
+                seen_cells.append(cell)
         elif not isinstance(headers, list):
             headers = []
 
