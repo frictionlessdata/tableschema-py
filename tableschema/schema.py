@@ -338,7 +338,7 @@ class Schema(object):
                     break
         elif isinstance(headers, list):
             seen_cells = []
-            headers = headers.copy()
+            headers = list(headers)
             for index, cell in enumerate(headers):
                 count = seen_cells.count(cell) + 1
                 headers[index] = '%s%s' % (cell, count) if count > 1 else cell
