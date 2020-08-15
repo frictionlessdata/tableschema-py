@@ -547,7 +547,7 @@ def _resolve_relations(row, headers, foreign_keys_values, foreign_key):
     keyed_row = OrderedDict(zip(headers, row))
     # local values of the FK
     local_values = tuple(keyed_row[f] for f in foreign_key['fields'])
-    if any(local_values):
+    if set(local_values) != {None}:
         # test existence into the foreign
         relation = foreign_key['reference']['resource']
         keys = tuple(foreign_key['reference']['fields'])
