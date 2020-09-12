@@ -26,6 +26,8 @@ INSTALL_REQUIRES = [
     'requests>=2.5',
     'cached-property>=1.5',
     'python-dateutil>=2.4',
+    # https://github.com/tobgu/pyrsistent/issues/208
+    'pyrsistent<0.17',
     'jsonschema>=2.5',
     'unicodecsv>=0.14',
     'isodate>=0.5.4',
