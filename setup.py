@@ -28,7 +28,7 @@ INSTALL_REQUIRES = [
     'python-dateutil>=2.4',
     # NOTE: Can be removed after a fix:
     # https://github.com/tobgu/pyrsistent/issues/208
-    'pyrsistent>=0.17.3',
+    'pyrsistent<0.17',
     'jsonschema>=2.5',
     'unicodecsv>=0.14',
     'isodate>=0.5.4',
