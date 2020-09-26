@@ -5,9 +5,9 @@ from __future__ import print_function
 
 import io
 import sys
-import json
 import click
 import tableschema
+import json as json_module
 from . import config
 
 
@@ -36,7 +36,7 @@ def cli():
 @cli.command()
 def info():
     """Return info on this version of Table Schema"""
-    click.echo(json.dumps({'version': config.VERSION}, ensure_ascii=False, indent=4))
+    click.echo(json_module.dumps({'version': config.VERSION}, ensure_ascii=False, indent=4))
 
 
 @cli.command()
@@ -45,7 +45,8 @@ def info():
 @click.option('--confidence', default=0.75, type=float)
 @click.option('--encoding', default='utf-8')
 @click.option('--to_file')
-def infer(data, row_limit, confidence, encoding, to_file):
+@click.option('--json', is_flag=True)
+def infer(data, row_limit, confidence, encoding, to_file, json):
     """Infer a schema from data.
 
     - data must be a local filepath
@@ -60,9 +61,12 @@ def infer(data, row_limit, confidence, encoding, to_file):
                                    encoding=encoding,
                                    limit=row_limit,
                                    confidence=confidence)
+
+    if json:
+        return click.secho(json_module.dumps(descriptor, ensure_ascii=False, indent=4))
     if to_file:
         with io.open(to_file, mode='w+t', encoding='utf-8') as dest:
-            dest.write(json.dumps(descriptor, ensure_ascii=False, indent=4))
+            dest.write(json_module.dumps(descriptor, ensure_ascii=False, indent=4))
     click.echo(descriptor)
 
 
