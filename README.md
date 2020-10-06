@@ -1444,6 +1444,10 @@ $ make test
 
 Here described only breaking and the most important changes. The full changelog and documentation for all released versions can be found in the nicely formatted [commit history](https://github.com/frictionlessdata/tableschema-py/commits/master).
 
+#### v1.20
+
+- Added --json flag to the CLI (#287)
+
 #### v1.19
 
 - Deduplicate field names if guessing in infer
