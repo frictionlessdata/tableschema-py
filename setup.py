@@ -37,7 +37,6 @@ TESTS_REQUIRE = [
     'pylama',
     'pytest',
     'pytest-cov',
-    'tox',
 ]
 README = read('README.md')
 VERSION = read(PACKAGE, 'VERSION')
