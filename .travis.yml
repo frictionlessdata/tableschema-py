@@ -18,6 +18,8 @@ env:
     - TOXENV="py${PYTHON_VERSION//./}"
 
 install:
+  # https://github.com/tobgu/pyrsistent/issues/208
+  - pip install --upgrade pip
   - make install
   - pip install coveralls
 
