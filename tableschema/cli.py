@@ -57,10 +57,12 @@ def infer(data, row_limit, confidence, encoding, to_file, json):
     - these constraints are just for the CLI
 
     """
-    descriptor = tableschema.infer(data,
-                                   encoding=encoding,
-                                   limit=row_limit,
-                                   confidence=confidence)
+    try:
+        descriptor = tableschema.infer(
+            data, encoding=encoding, limit=row_limit, confidence=confidence)
+    except Exception as exception:
+        click.echo(exception)
+        sys.exit(1)
 
     if json:
         return click.secho(json_module.dumps(descriptor, ensure_ascii=False, indent=4))
@@ -81,4 +83,7 @@ def validate(schema):
     except tableschema.exceptions.ValidationError as exception:
         click.echo("Schema is not valid")
         click.echo(exception.errors)
+        sys.exit(1)
+    except Exception as exception:
+        click.echo(exception)
         sys.exit(1)
