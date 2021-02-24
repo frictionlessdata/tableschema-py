@@ -14,6 +14,7 @@ from tableschema.profile import Profile
 
 # Tests
 
+@pytest.mark.skip
 @pytest.mark.skipif(os.environ.get('TRAVIS_BRANCH') != 'master', reason='CI')
 def test_specs_table_schema_is_up_to_date():
     profile = Profile('table-schema')
