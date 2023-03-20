@@ -8,6 +8,8 @@
 
 A Python implementation of the [Table Schema](http://specs.frictionlessdata.io/table-schema/) standard.
 
+> **[Important Notice]** We have released [Frictionless Framework](https://github.com/frictionlessdata/framework). This framework provides improved `tableschema` functionality extended to be a complete data solution. The change in not breaking for the existing software so no actions are required. Please read the [Migration Guide](https://framework.frictionlessdata.io/docs/codebase/migration.html) from `tableschema` to Frictionless Framework.
+
 ## Features
 
 - `Table` to work with data tables described by Table Schema
