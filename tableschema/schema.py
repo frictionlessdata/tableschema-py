@@ -550,7 +550,7 @@ _INFER_TYPE_ORDER = [
     'array',
     'datetime',
     'time',
-    'date',
+    ('date', ('%Y-%m-%d', '%Y/%m/%d', '%d/%m/%Y', '%m/%d/%Y', '%Y%m%d', '%Y.%m.%d')),
     'integer',
     'number',
     'boolean',
@@ -569,12 +569,17 @@ class _TypeGuesser(object):
         self.missing_values = missing_values
 
     def cast(self, value):
-        for priority, name in enumerate(_INFER_TYPE_ORDER):
+        for priority, type_rec in enumerate(_INFER_TYPE_ORDER):
+            if isinstance(type_rec, tuple):
+                name, formats = type_rec
+            else:
+                name, formats = type_rec, ['default']
             cast = getattr(types, 'cast_%s' % name)
             if value not in self.missing_values:
-                result = cast('default', value)
-                if result != config.ERROR:
-                    yield (name, 'default', priority)
+                for format in formats:
+                    result = cast(format, value)
+                    if result != config.ERROR:
+                        yield (name, format, priority)
 
 
 class _TypeResolver(object):

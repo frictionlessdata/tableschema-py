@@ -309,11 +309,11 @@ def test_save(tmpdir, apply_defaults):
 
 def test_infer():
     data = [
-      ['id', 'age', 'name'],
-      ['1','39','Paul'],
-      ['2','23','Jimmy'],
-      ['3','36','Jane'],
-      ['4','N/A','Judy'],
+      ['id', 'age', 'name', 'dob'],
+      ['1','39','Paul','28/1/1979'],
+      ['2','23','Jimmy','13/6/1995'],
+      ['3','36','Jane','17/9/1980'],
+      ['4','N/A','Judy','19/4/1983'],
     ]
     schema = Schema()
     schema.infer(data)
@@ -321,7 +321,9 @@ def test_infer():
         'fields': [
             {'format': 'default', 'name': 'id', 'type': 'integer'},
             {'format': 'default', 'name': 'age', 'type': 'integer'},
-            {'format': 'default', 'name': 'name', 'type': 'string'}],
+            {'format': 'default', 'name': 'name', 'type': 'string'},
+            {'format': '%d/%m/%Y', 'name': 'dob', 'type': 'date'},
+        ],
         'missingValues': ['']}
     data = [
       ['id', 'age', 'name'],
