@@ -11,7 +11,7 @@ import six
 import json
 import requests
 from copy import deepcopy
-from importlib import import_module
+from importlib.util import find_spec
 from . import exceptions
 from . import config
 
@@ -128,27 +128,10 @@ class PluginImporter(object):
         if self not in sys.meta_path:
             sys.meta_path.append(self)
 
-    def find_module(self, fullname, path=None):
+    def find_spec(self, fullname, path=None, target=None):
         if fullname.startswith(self.virtual):
-            return self
+            # Transform the module name
+            transformed_name = fullname.replace(self.virtual, self.actual)
+            return find_spec(transformed_name)
         return None
 
-    def find_spec(self, fullname, path=None, target=None):
-        return self.find_module(fullname, path)
-
-    def load_module(self, fullname):
-        if fullname in sys.modules:
-            return sys.modules[fullname]
-        if not fullname.startswith(self.virtual):
-            raise ImportError(fullname)
-        realname = fullname.replace(self.virtual, self.actual)
-        try:
-            module = import_module(realname)
-        except ImportError:
-            message = 'Plugin "%s" is not installed. '
-            message += 'Run "pip install %s" to install.'
-            message = message % (fullname, realname.replace('_', '-'))
-            raise ImportError(message)
-        sys.modules[realname] = module
-        sys.modules[fullname] = module
-        return module
