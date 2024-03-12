@@ -4,6 +4,7 @@ from __future__ import print_function
 from __future__ import absolute_import
 from __future__ import unicode_literals
 
+import warnings
 import pytest
 from datetime import date, datetime
 from tableschema import types
@@ -44,7 +45,6 @@ from tableschema.config import ERROR
     ('fmt:%d/%m/%y', '', ERROR),
 ])
 def test_cast_date(format, value, result):
-    with pytest.warns(None) as recorded:
+    with warnings.catch_warnings():
+        warnings.simplefilter("error" if not format.startswith('fmt:') else "ignore")
         assert types.cast_date(format, value) == result
-    if not format.startswith('fmt:'):
-        assert recorded.list == []
