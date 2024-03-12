@@ -550,7 +550,7 @@ _INFER_TYPE_ORDER = [
     'array',
     'datetime',
     'time',
-    ('date', ('%Y-%m-%d', '%Y/%m/%d', '%d/%m/%Y', '%m/%d/%Y', '%Y%m%d', '%Y.%m.%d')),
+    ('date', ('%Y-%m-%d', '%Y/%m/%d', '%d/%m/%Y', '%m/%d/%Y', '%Y%m%d', '%Y.%m.%d', '%y-%m-%d', '%y/%m/%d', '%d/%m/%y', '%m/%d/%y', '%y%m%d', '%y.%m.%d')),
     'integer',
     'number',
     'boolean',

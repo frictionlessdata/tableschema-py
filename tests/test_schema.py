@@ -310,10 +310,10 @@ def test_save(tmpdir, apply_defaults):
 def test_infer():
     data = [
       ['id', 'age', 'name', 'dob'],
-      ['1','39','Paul','28/1/1979'],
-      ['2','23','Jimmy','13/6/1995'],
-      ['3','36','Jane','17/9/1980'],
-      ['4','N/A','Judy','19/4/1983'],
+      ['1','39','Paul','28/1/79'],
+      ['2','23','Jimmy','13/6/95'],
+      ['3','36','Jane','17/9/80'],
+      ['4','N/A','Judy','19/4/83'],
     ]
     schema = Schema()
     schema.infer(data)
@@ -322,7 +322,7 @@ def test_infer():
             {'format': 'default', 'name': 'id', 'type': 'integer'},
             {'format': 'default', 'name': 'age', 'type': 'integer'},
             {'format': 'default', 'name': 'name', 'type': 'string'},
-            {'format': '%d/%m/%Y', 'name': 'dob', 'type': 'date'},
+            {'format': '%d/%m/%y', 'name': 'dob', 'type': 'date'},
         ],
         'missingValues': ['']}
     data = [
