@@ -133,6 +133,9 @@ class PluginImporter(object):
             return self
         return None
 
+    def find_spec(self, fullname, path=None, target=None):
+        return self.find_module(fullname, path)
+
     def load_module(self, fullname):
         if fullname in sys.modules:
             return sys.modules[fullname]
