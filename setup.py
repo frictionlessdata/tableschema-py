@@ -30,7 +30,7 @@ INSTALL_REQUIRES = [
     'unicodecsv>=0.14',
     'isodate>=0.5.4',
     'rfc3986>=1.1.0',
-    'dataflows-tabulator>=1.54.0',
+    'dataflows-tabulator>=1.54.1',
 ]
 TESTS_REQUIRE = [
     'mock',
