@@ -6,7 +6,7 @@ from __future__ import unicode_literals
 
 import six
 import json
-from collections import namedtuple
+from typing import NamedTuple
 from decimal import Decimal
 from ..config import ERROR
 
@@ -50,5 +50,9 @@ def cast_geopoint(format, value, **options):
 
 # Internal
 
-_geopoint = namedtuple('geopoint', ['lon', 'lat'])
-_geopoint.__repr__ = lambda self: str([float(self[0]), float(self[1])])
+class _geopoint(NamedTuple):
+    lon: Decimal
+    lat: Decimal
+
+    def __repr__(self):
+        return '[%s, %s]' % (self.lon, self.lat)

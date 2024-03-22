@@ -5,7 +5,7 @@ from __future__ import print_function
 from __future__ import unicode_literals
 
 import six
-from collections import namedtuple
+from typing import NamedTuple
 from ..config import ERROR
 
 
@@ -32,5 +32,6 @@ def cast_yearmonth(format, value, **options):
 
 
 # Internal
-
-_yearmonth = namedtuple('yearmonth', ['year', 'month'])
+class _yearmonth(NamedTuple):
+    year: int
+    month: int
