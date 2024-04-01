@@ -21,7 +21,7 @@ def cast_integer(format, value, **options):
 
     elif isinstance(value, six.string_types):
         if not options.get('bareNumber', _DEFAULT_BARE_NUMBER):
-            value = re.sub(r'((^\D*)|(\D*$))', '', value)
+            value = _RE_BARE_NUMBER.sub('', value)
 
         try:
             value = int(value)
@@ -41,5 +41,5 @@ def cast_integer(format, value, **options):
 
 
 # Internal
-
+_RE_BARE_NUMBER = re.compile(r'((^\D*)|(\D*$))')
 _DEFAULT_BARE_NUMBER = True

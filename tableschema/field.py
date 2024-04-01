@@ -46,6 +46,7 @@ class Field(object):
         self.__schema = schema
         self.__cast_function = self.__get_cast_function()
         self.__check_functions = self.__get_check_functions()
+        self.__preserve_missing_values = os.environ.get('TABLESCHEMA_PRESERVE_MISSING_VALUES')
 
     @cached_property
     def schema(self):
@@ -155,7 +156,7 @@ class Field(object):
         # Null value
         if value in self.__missing_values:
             # Whether missing_values should be preserved without being cast
-            if os.environ.get('TABLESCHEMA_PRESERVE_MISSING_VALUES'):
+            if self.__preserve_missing_values:
                 return value
             value = None
 

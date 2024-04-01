@@ -19,6 +19,8 @@ from ..config import ERROR
 def cast_string(format, value, **options):
     if not isinstance(value, six.string_types):
         return ERROR
+    if format in _SIMPLE_FORMATS:
+        return value
     if format == 'uri':
         uri = _uri_from_string(value)
         try:
@@ -43,6 +45,7 @@ def cast_string(format, value, **options):
 
 # Internal
 
+_SIMPLE_FORMATS = {'default', None}
 _EMAIL_PATTERN = re.compile(r'[^@]+@[^@]+\.[^@]+')
 _uri_from_string = rfc3986.uri.URIReference.from_string
 _uri_validator = rfc3986.validators.Validator().require_presence_of('scheme')
