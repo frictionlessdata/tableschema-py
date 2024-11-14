@@ -551,7 +551,6 @@ _INFER_DATE_FORMATS = [
     '%d-%m-%y',
     '%Y/%m/%d',
     '%d.%m.%Y',
-    '%d%m%y',
     '%d.%m.%y',
 ]
 
